@@ -72,6 +72,7 @@ every page) groups pages into five menus. Each page below lives at
 
 ### ⚖️ Evaluate (updates every version/iteration — re-run these each time you revise the content)
 - **Confidence Check** (`confidence_check.html`) — one live score for the whole project, computed from Pre Production Plan task completion via `Nav.getGamifiedStats()`. Check this every time you're working on the project. With changes, open this page after updating it.
+- **Value Recognition** (`value-recognition.html`) — walks the Value Recognition Framework (Value → Recognition → Transformation → Proof) to show what the audience gets from this video and why it matters, pulled live from Arguments' core message, premise, and audience-transformation content. With changes, open this page after updating it.
 - **Sanity Check Report** (`sanity-check.html`) — project health/logic/data-integrity checks, plus the script length & version audit (word count and estimated runtime per beat vs. the 3:00 hard cap — formerly a separate "Script v2 Sanity Check" page, now merged in here). With changes, open this page after updating it.
 - **Plain English Review** (`plain-english.html`) — before/after: script jargon vs. layman's terms, for the script — mention issues and fixes.
 - **Script Review** (`script-review.html`) — full-argument rewrite pass, all arguments cherry-picked. *(Referenced in nav; page not yet created.)* Make sure the objectives and results are reached and there is value for the audience.

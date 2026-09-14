@@ -405,11 +405,15 @@
               '</div>' +
             '</div>' +
             '<div class="menu-wrap" id="nav-evaluate-wrap">' +
-              '<button type="button" class="menu-toggle' + ((currentId === 'confidence_check' || currentId === 'plain-english' || currentId === 'script-review' || currentId === 'sanity-check') ? ' active' : '') + '" id="nav-evaluate-toggle" style="--nav-color:' + MENU_COLORS.evaluate + ';">⚖️ Evaluate <span class="menu-caret">▾</span></button>' +
+              '<button type="button" class="menu-toggle' + ((currentId === 'confidence_check' || currentId === 'plain-english' || currentId === 'script-review' || currentId === 'sanity-check' || currentId === 'value-recognition') ? ' active' : '') + '" id="nav-evaluate-toggle" style="--nav-color:' + MENU_COLORS.evaluate + ';">⚖️ Evaluate <span class="menu-caret">▾</span></button>' +
               '<div class="menu-panel tools-menu" id="nav-evaluate-menu" hidden>' +
                 '<a class="tools-item' + (currentId === 'confidence_check' ? ' active' : '') + '" href="confidence_check.html">' +
                   '<span class="ti-label">📈 Confidence Check</span>' +
                   '<span class="ti-desc">Live confidence score for the project — updates as you work</span>' +
+                '</a>' +
+                '<a class="tools-item' + (currentId === 'value-recognition' ? ' active' : '') + '" href="value-recognition.html">' +
+                  '<span class="ti-label">💎 Value Recognition</span>' +
+                  '<span class="ti-desc">What the audience gets from this video, and why it matters</span>' +
                 '</a>' +
                 '<a class="tools-item' + (currentId === 'sanity-check' ? ' active' : '') + '" href="sanity-check.html">' +
                   '<span class="ti-label">🩺 Sanity Check Report</span>' +
