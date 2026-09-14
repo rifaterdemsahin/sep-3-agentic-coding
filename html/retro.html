@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  if(location.hostname.endsWith('github.io')){
+    var cleanPath = location.pathname.replace(/^\/sep-3-agentic-coding/, '').replace(/^\/[^/]+(?=\/html\/)/, '');
+    if(!cleanPath.startsWith('/')) cleanPath = '/' + cleanPath;
+    location.replace('https://sep-3-agentic-coding.polished-boat-17b2.workers.dev' + cleanPath + location.search + location.hash);
+  }
+</script>
+<title>🔁 Retro — Task Decomposition</title>
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+  header{padding:48px 24px 32px;max-width:1000px;margin:0 auto;text-align:center;}
+  header .eyebrow{color:var(--accent);letter-spacing:.14em;text-transform:uppercase;font-size:12px;font-weight:600;}
+  header h1{font-size:clamp(24px,4vw,38px);margin:10px 0 12px;font-weight:700;}
+  header p.sub{color:var(--text-dim);max-width:640px;margin:0 auto;font-size:15px;}
+  #viewer-takeaway-banner .vt-banner{background:var(--panel);border:1px solid var(--accent);border-radius:10px;padding:12px 16px;font-size:13.5px;color:var(--text);margin-bottom:20px;}
+  main{max-width:1000px;margin:0 auto;padding:0 24px 90px;}
+  section.block{margin-bottom:32px;}
+  section.block h2{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent-2);font-weight:700;margin:0 0 16px;}
+  .retro-form{background:var(--panel);border:1px solid var(--panel-border);border-radius:10px;padding:20px 22px;}
+  .retro-form label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin:14px 0 5px;}
+  .retro-form label:first-child{margin-top:0;}
+  .retro-form input[type="text"], .retro-form textarea{width:100%;box-sizing:border-box;background:var(--bg);
+    border:1px solid var(--panel-border);border-radius:8px;color:var(--text);font-family:inherit;font-size:13.5px;padding:9px 11px;}
+  .verdict-radios{display:flex;gap:16px;}
+  .verdict-radios label{display:flex;align-items:center;gap:6px;font-size:13px;text-transform:none;letter-spacing:0;color:var(--text);margin:0;}
+  .question-list{display:flex;flex-direction:column;gap:8px;}
+  .question-list .qrow{display:flex;gap:8px;}
+  .question-list .qrow input{flex:1;}
+  .question-list .qrow button{flex-shrink:0;border:1px solid var(--panel-border);background:transparent;color:var(--text-dim);border-radius:8px;padding:0 10px;cursor:pointer;}
+  .save-btn{margin-top:18px;border:1px solid var(--accent);background:transparent;color:var(--accent);border-radius:20px;padding:8px 18px;font-size:13px;cursor:pointer;}
+  .save-btn:hover{background:var(--accent);color:var(--bg);}
+  .save-note{font-size:11.5px;color:var(--text-dim);margin-left:10px;}
+</style>
+<script src="../js/video-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="../js/nav.js"></script>
+<script src="../js/content-db.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/notes.js"></script>
+</head>
+<body>
+
+<div id="nav-mount"></div>
+<script>Nav.render('retro');</script>
+
+<header>
+  <div class="eyebrow">🔁 Stage 9 · Retro</div>
+  <h1>Retro</h1>
+  <p class="sub">Post-publish: was the hypothesis right? Saving a verdict here shows on Unknowns and Journal too, closing the loop.</p>
+</header>
+
+<div id="viewer-takeaway-banner"></div>
+
+<div class="pipeline-wrap" id="pipeline-stepper"></div>
+
+<main>
+  <section class="block">
+    <h2>🔁 Retro Form</h2>
+    <div class="retro-form">
+      <label>Hypothesis verdict</label>
+      <div class="verdict-radios">
+        <label><input type="radio" name="verdict" value="held"> ✅ Held</label>
+        <label><input type="radio" name="verdict" value="partly"> ⚠️ Partly</label>
+        <label><input type="radio" name="verdict" value="failed"> ❌ Failed</label>
+      </div>
+
+      <label for="r-retention">Retention note</label>
+      <textarea id="r-retention" rows="2" placeholder="TODO: retention note"></textarea>
+
+      <label for="r-ctr">CTR</label>
+      <input id="r-ctr" type="text" placeholder="TODO: e.g. 4.2%">
+
+      <label for="r-duration">Avg view duration (seconds)</label>
+      <input id="r-duration" type="text" placeholder="TODO: e.g. 95">
+
+      <label>Top comment questions</label>
+      <div class="question-list" id="r-questions"></div>
+      <button type="button" class="save-btn" id="r-add-question" style="margin-top:8px;">➕ Add question</button>
+
+      <label for="r-change">What I'd change</label>
+      <textarea id="r-change" rows="2" placeholder="TODO: what I'd change"></textarea>
+
+      <div id="r-source-comparison-wrap" hidden>
+        <label for="r-source">Source comparison (weekly-video only) — did the borrowed hook/pacing hold?</label>
+        <textarea id="r-source" rows="2" placeholder="TODO: source comparison"></textarea>
+      </div>
+
+      <div>
+        <button type="button" class="save-btn" id="r-save">💾 Save Retro</button>
+        <span class="save-note" id="r-status"></span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer style="max-width:1000px;margin:0 auto;padding:24px;text-align:center;color:var(--text-dim);font-size:12.5px;border-top:1px solid var(--panel-border);">
+  🔁 Stage 9 for <a href="https://github.com/rifaterdemsahin/sep-3-agentic-coding" target="_blank" rel="noopener" style="color:var(--accent-2);text-decoration:none;">rifaterdemsahin/sep-3-agentic-coding</a> — closes the loop back to <a href="unknowns.html" style="color:var(--accent-2);text-decoration:none;">Unknowns</a>.
+</footer>
+
+<script src="../js/pipeline.js"></script>
+<script src="../js/retro.js"></script>
+<script>
+  Pipeline.render('retro');
+  Retro.init();
+</script>
+</body>
+</html>
