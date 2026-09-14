@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  // Canonical host is Cloudflare Workers; GitHub Pages forwards visitors with repo subpath cleaned.
+  if(location.hostname.endsWith('github.io')){
+    var cleanPath = location.pathname.replace(/^\/sep-3-agentic-coding/, '').replace(/^\/[^/]+(?=\/html\/)/, '');
+    if(!cleanPath.startsWith('/')) cleanPath = '/' + cleanPath;
+    location.replace('https://sep-3-agentic-coding.polished-boat-17b2.workers.dev' + cleanPath + location.search + location.hash);
+  }
+</script>
+<title>🔍 Research — Task Decomposition</title>
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+  header{
+    padding:48px 24px 32px;
+    max-width:1000px;
+    margin:0 auto;
+    text-align:center;
+  }
+  header .eyebrow{
+    color:var(--accent);
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    font-size:12px;
+    font-weight:600;
+  }
+  header h1{
+    font-size:clamp(24px,4vw,38px);
+    margin:10px 0 12px;
+    font-weight:700;
+  }
+  header p.sub{
+    color:var(--text-dim);
+    max-width:640px;
+    margin:0 auto;
+    font-size:15px;
+  }
+
+  main{
+    max-width:1000px;
+    margin:0 auto;
+    padding:0 24px 90px;
+  }
+
+  section.block{margin-bottom:44px;}
+  section.block h2{
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    color:var(--accent-2);
+    font-weight:700;
+    margin:0 0 16px;
+  }
+  section.block p.intro{
+    color:var(--text-dim);
+    font-size:14px;
+    margin:-8px 0 18px;
+  }
+
+  .link-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    gap:14px;
+  }
+  .link-card{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:10px;
+    padding:16px 18px;
+    color:var(--text);
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    transition:border-color .15s ease, transform .15s ease;
+  }
+  .link-card:hover{border-color:var(--accent-2);transform:translateY(-2px);}
+  .link-card .tag{
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--accent);
+    font-weight:700;
+  }
+  .link-card .title{font-size:14px;font-weight:600;color:var(--text);text-decoration:none;}
+  .link-card .title:hover{text-decoration:underline;}
+  .link-card .url{font-size:11.5px;color:var(--text-dim);word-break:break-all;}
+
+  .add-asset-btn{
+    align-self:flex-start;
+    margin-top:6px;
+    font-size:11px;
+    padding:4px 10px;
+    border-radius:20px;
+    border:1px solid var(--panel-border);
+    background:transparent;
+    color:var(--text-dim);
+    cursor:pointer;
+    transition:border-color .15s ease,color .15s ease,background .15s ease;
+    white-space:nowrap;
+  }
+  .add-asset-btn:hover{border-color:var(--accent-2);color:var(--text);}
+  .add-asset-btn.added{border-color:var(--warm);color:var(--warm);background:rgba(232,185,74,.08);}
+
+  .star-rating{display:flex;gap:2px;}
+  .star-rating .star{
+    font-size:15px;
+    line-height:1;
+    color:var(--panel-border);
+    cursor:pointer;
+    user-select:none;
+    transition:color .1s ease;
+  }
+  .star-rating .star:hover{color:var(--accent);}
+  .star-rating .star.filled{color:var(--accent);}
+
+  .sort-bar{
+    display:flex;
+    justify-content:flex-end;
+    margin:-8px 0 14px;
+  }
+  .reset-order-btn{
+    align-self:flex-start;
+    font-size:11px;
+    padding:4px 10px;
+    border-radius:20px;
+    border:1px solid var(--panel-border);
+    background:transparent;
+    color:var(--text-dim);
+    cursor:pointer;
+    transition:border-color .15s ease,color .15s ease;
+    white-space:nowrap;
+  }
+  .reset-order-btn:hover{border-color:var(--accent-2);color:var(--text);}
+
+  table.cmp{
+    width:100%;
+    border-collapse:collapse;
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:10px;
+    overflow:hidden;
+    font-size:13px;
+  }
+  table.cmp th, table.cmp td{
+    text-align:left;
+    padding:12px 14px;
+    border-bottom:1px solid var(--panel-border);
+    vertical-align:top;
+  }
+  table.cmp th{
+    color:var(--accent-2);
+    text-transform:uppercase;
+    font-size:10.5px;
+    letter-spacing:.05em;
+  }
+  table.cmp tr:last-child td{border-bottom:none;}
+  table.cmp td.dim{color:var(--text-dim);}
+  table.cmp td.star-cell{white-space:nowrap;}
+  table.cmp td.star-cell .item-note-wrap{white-space:normal;width:220px;max-width:220px;}
+  .wrap-scroll{overflow-x:auto;}
+
+  .shotlist{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .shot-row{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-left:3px solid var(--cold);
+    border-radius:8px;
+    padding:14px 18px;
+  }
+  .shot-row.warm{border-left-color:var(--warm);}
+  .shot-row .row-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:4px;
+  }
+  .shot-row .sec{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--text-dim);
+    font-weight:700;
+  }
+  .shot-row .items{font-size:13.5px;color:var(--text-dim);}
+  .shot-row .items b{color:var(--text);font-weight:600;}
+
+  footer{
+    max-width:1000px;
+    margin:0 auto;
+    padding:24px;
+    text-align:center;
+    color:var(--text-dim);
+    font-size:12.5px;
+    border-top:1px solid var(--panel-border);
+  }
+  footer a{color:var(--accent-2);text-decoration:none;}
+  footer a:hover{text-decoration:underline;}
+</style>
+<script src="../js/video-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="../js/nav.js"></script>
+<script src="../js/content-db.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/notes.js"></script>
+</head>
+<body>
+
+<div id="nav-mount"></div>
+<script>Nav.render('research');</script>
+
+<header>
+  <div class="eyebrow">🔍 Pre-production · Research v1</div>
+  <h1>Research</h1>
+  <p class="sub">Source material, counter-arguments, and footage leads gathered for "Task Decomposition" — a course module opening from understand Task Decomposition and learn Multi-Step Reasoning Strategies.</p>
+</header>
+
+<div class="pipeline-wrap" id="pipeline-stepper"></div>
+
+<main>
+
+  <section class="block">
+    <h2>🔗 Source Links</h2>
+    <p class="intro">Primary references used to build the argument and counter-argument. Rate each source and it re-sorts by stars automatically — your ratings are saved in a cookie on this browser.</p>
+    <div class="sort-bar">
+      <button class="reset-order-btn" data-reset-for="source-link-grid">↕ Reset order</button>
+    </div>
+    <div class="link-grid" id="source-link-grid"></div>
+  </section>
+
+  <section class="block">
+    <h2>📺 Support / Pro / Con Videos</h2>
+    <p class="intro">Where each video sits on the apocalypse-vs-growth spectrum, with the argument it's useful for.</p>
+    <div class="sort-bar">
+      <button class="reset-order-btn" data-reset-for="pro-con-table">↕ Reset order</button>
+    </div>
+    <div class="wrap-scroll">
+      <table class="cmp" id="pro-con-table">
+        <tr>
+          <th>Video</th>
+          <th>Angle</th>
+          <th>Use it for (pro)</th>
+          <th>Watch out for (con)</th>
+          <th>⭐ Rating</th>
+        </tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2>⚖️ Perspective Comparison</h2>
+    <p class="intro">The three main framings found while researching, weighed against the video's own thesis.</p>
+    <div class="sort-bar">
+      <button class="reset-order-btn" data-reset-for="perspective-table">↕ Reset order</button>
+    </div>
+    <div class="wrap-scroll">
+      <table class="cmp" id="perspective-table">
+        <tr>
+          <th>View</th>
+          <th>Core Argument</th>
+          <th>Pros</th>
+          <th>Cons</th>
+          <th>⭐ Rating</th>
+        </tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="block" id="economist-report"></section>
+
+  <section class="block" id="culture-series-report"></section>
+
+  <section class="block">
+    <h2>🎥 Footage Shot List</h2>
+    <p class="intro">B-roll and archival categories mapped to script sections, with YouTube search terms to source them.</p>
+    <div class="sort-bar">
+      <button class="reset-order-btn" data-reset-for="shotlist-container">↕ Reset order</button>
+    </div>
+    <div class="shotlist" id="shotlist-container"></div>
+  </section>
+
+</main>
+
+<footer>
+  🔍 Research notes for <a href="https://github.com/rifaterdemsahin/sep-3-agentic-coding" target="_blank" rel="noopener">rifaterdemsahin/sep-3-agentic-coding</a> — continues into the <a href="script.html">script</a>. See everything you've saved in 🗂️ <a href="assets.html">Assets</a>.
+</footer>
+
+<script src="../js/pipeline.js"></script>
+<script src="../js/assets.js"></script>
+<script src="../js/ratings.js"></script>
+<script src="../js/links.js"></script>
+<script>
+  Pipeline.render('research');
+  PipelineLinks.init({ file: 'index.html', sourceFile: 'unknowns.html', sourceLabel: 'Unknowns' });
+
+  var byId = function(el){ return el.querySelector('[data-id]').getAttribute('data-id'); };
+  var beforeIdEl = function(item, starEl){ item.insertBefore(starEl, item.querySelector('[data-id]')); };
+
+  function esc(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;'); }
+
+  function renderContent(){
+    var linkCards = ContentDB.getBlocks('index.html', 'source-links');
+    document.getElementById('source-link-grid').innerHTML = linkCards.map(function(b){
+      var d = b.data;
+      return '<div class="link-card">' +
+        '<span class="tag">' + d.tag + '</span>' +
+        '<a class="title" href="' + esc(d.url) + '" target="_blank" rel="noopener">' + d.title + '</a>' +
+        '<span class="url">' + d.urlDisplay + '</span>' +
+        '<button class="add-asset-btn" data-id="' + b.id + '" data-type="link" data-source="Research" data-title="' + esc(d.title) + '" data-desc="' + esc(d.desc) + '" data-url="' + esc(d.url) + '">➕ Add to Assets</button>' +
+      '</div>';
+    }).join('');
+
+    var videoRows = ContentDB.getBlocks('index.html', 'pro-con-videos');
+    document.getElementById('pro-con-table').tBodies[0].innerHTML = videoRows.map(function(b){
+      var d = b.data;
+      var titleCell = '<a href="' + esc(d.href) + '" target="_blank" rel="noopener">' + d.title + '</a>' +
+        (d.sub ? '<br><span class="dim">' + d.sub + '</span>' : '') +
+        (d.transcript ? '<br><span class="dim">Full <a href="' + esc(d.transcript) + '" target="_blank" rel="noopener">transcript</a></span>' : '');
+      return '<tr data-id="' + b.id + '">' +
+        '<td>' + titleCell + '</td>' +
+        '<td class="dim">' + d.angle + '</td>' +
+        '<td class="dim">' + d.pro + '</td>' +
+        '<td class="dim">' + d.con + '</td>' +
+        '<td class="star-cell"></td>' +
+      '</tr>';
+    }).join('');
+
+    var perspRows = ContentDB.getBlocks('index.html', 'perspective-comparison');
+    document.getElementById('perspective-table').tBodies[0].innerHTML = perspRows.map(function(b){
+      var d = b.data;
+      return '<tr data-id="' + b.id + '">' +
+        '<td><b>' + d.emojiLabel + '</b><br><span class="dim">' + d.sub + '</span></td>' +
+        '<td class="dim">' + d.argument + '</td>' +
+        '<td class="dim">' + d.pros + '</td>' +
+        '<td class="dim">' + d.cons + '</td>' +
+        '<td class="star-cell"></td>' +
+      '</tr>';
+    }).join('');
+
+    var econ = ContentDB.getBlocks('index.html', 'economist-report')[0];
+    if(econ){
+      var d = econ.data;
+      document.getElementById('economist-report').innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">' +
+          '<h2 style="margin:0;">📊 The Economist — Net AI Jobs Impact (2023–2026)</h2>' +
+          '<span style="font-size:11.5px;color:var(--text-dim);background:var(--panel);border:1px solid var(--panel-border);padding:3px 10px;border-radius:20px;">' + d.addedLabel + '</span>' +
+        '</div>' +
+        '<p class="intro">' + d.intro + '</p>' +
+        '<div style="background:var(--panel);border:1px solid var(--panel-border);border-radius:10px;padding:20px 22px;margin-bottom:18px;">' + d.html + '</div>' +
+        '<button class="add-asset-btn" data-id="link-economist-jobs-charts" data-type="link" data-source="Research" data-title="The Economist — Hard-hat labour &amp; STEM with the flow charts" data-desc="Net AI jobs impact 2023-2026" data-url="https://www.economist.com/">➕ Add to Assets</button>';
+    }
+
+    var culture = ContentDB.getBlocks('index.html', 'culture-series-report')[0];
+    if(culture){
+      var dc = culture.data;
+      document.getElementById('culture-series-report').innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">' +
+          '<h2 style="margin:0;">📚 What Elon Means by "The Culture"</h2>' +
+          '<span style="font-size:11.5px;color:var(--text-dim);background:var(--panel);border:1px solid var(--panel-border);padding:3px 10px;border-radius:20px;">' + dc.addedLabel + '</span>' +
+        '</div>' +
+        '<p class="intro">' + dc.intro + '</p>' +
+        '<div style="background:var(--panel);border:1px solid var(--panel-border);border-radius:10px;padding:20px 22px;margin-bottom:18px;">' + dc.html + '</div>' +
+        '<button class="add-asset-btn" data-id="link-culture-series" data-type="link" data-source="Research" data-title="Iain M. Banks — The Culture series (Musk\'s AI inspiration)" data-desc="Background on the Minds, neural lace, and autonomous ships Musk references" data-url="https://en.wikipedia.org/wiki/Culture_series">➕ Add to Assets</button>';
+    }
+
+    var shotRows = ContentDB.getBlocks('index.html', 'footage-shot-list');
+    document.getElementById('shotlist-container').innerHTML = shotRows.map(function(b){
+      var d = b.data;
+      return '<div class="shot-row' + (d.warm ? ' warm' : '') + '">' +
+        '<div class="row-head">' +
+          '<div class="sec">' + d.sec + '</div>' +
+          '<button class="add-asset-btn" data-id="' + b.id + '" data-type="footage" data-source="Research" data-title="' + esc(d.title) + '" data-desc="' + esc(d.desc) + '">➕ Add to Assets</button>' +
+        '</div>' +
+        '<div class="items">' + d.items + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  Promise.all([ContentDB.ready, AssetDB.ready]).then(function(){
+    renderContent();
+    AssetDB.initAddButtons();
+  }).then(function(){ return Ratings.ready; }).then(function(){
+
+  var sortables = {
+    'source-link-grid': Ratings.makeSortable({
+      container: document.getElementById('source-link-grid'),
+      itemSelector: '.link-card',
+      getId: byId,
+      mountStars: beforeIdEl
+    }),
+    'pro-con-table': Ratings.makeSortable({
+      container: document.getElementById('pro-con-table').tBodies[0] || document.getElementById('pro-con-table'),
+      itemSelector: 'tr[data-id]',
+      getId: function(row){ return row.getAttribute('data-id'); },
+      mountStars: function(row, starEl){ row.querySelector('.star-cell').appendChild(starEl); }
+    }),
+    'perspective-table': Ratings.makeSortable({
+      container: document.getElementById('perspective-table').tBodies[0] || document.getElementById('perspective-table'),
+      itemSelector: 'tr[data-id]',
+      getId: function(row){ return row.getAttribute('data-id'); },
+      mountStars: function(row, starEl){ row.querySelector('.star-cell').appendChild(starEl); }
+    }),
+    'shotlist-container': Ratings.makeSortable({
+      container: document.getElementById('shotlist-container'),
+      itemSelector: '.shot-row',
+      getId: byId,
+      mountStars: function(row, starEl){ row.querySelector('.row-head').insertBefore(starEl, row.querySelector('[data-id]')); }
+    })
+  };
+
+  Array.prototype.forEach.call(document.querySelectorAll('.reset-order-btn'), function(btn){
+    btn.addEventListener('click', function(){
+      var target = sortables[btn.getAttribute('data-reset-for')];
+      if(target) target.reset();
+    });
+  });
+
+  ItemNotes.attach({
+    container: document.getElementById('source-link-grid'),
+    itemSelector: '.link-card',
+    getId: byId,
+    mount: function(item, wrap){ item.appendChild(wrap); }
+  });
+  ItemNotes.attach({
+    container: document.getElementById('pro-con-table'),
+    itemSelector: 'tr[data-id]',
+    getId: function(row){ return row.getAttribute('data-id'); },
+    mount: function(row, wrap){ row.querySelector('.star-cell').appendChild(wrap); }
+  });
+  ItemNotes.attach({
+    container: document.getElementById('perspective-table'),
+    itemSelector: 'tr[data-id]',
+    getId: function(row){ return row.getAttribute('data-id'); },
+    mount: function(row, wrap){ row.querySelector('.star-cell').appendChild(wrap); }
+  });
+  ItemNotes.attach({
+    container: document.getElementById('shotlist-container'),
+    itemSelector: '.shot-row',
+    getId: byId,
+    mount: function(row, wrap){ row.appendChild(wrap); }
+  });
+
+  }); // Ratings.ready
+</script>
+</body>
+</html>

@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  // Canonical host is Cloudflare Workers; GitHub Pages forwards visitors with repo subpath cleaned.
+  if(location.hostname.endsWith('github.io')){
+    var cleanPath = location.pathname.replace(/^\/sep-3-agentic-coding/, '').replace(/^\/[^/]+(?=\/html\/)/, '');
+    if(!cleanPath.startsWith('/')) cleanPath = '/' + cleanPath;
+    location.replace('https://sep-3-agentic-coding.polished-boat-17b2.workers.dev' + cleanPath + location.search + location.hash);
+  }
+</script>
+<title>📝 Script — Task Decomposition</title>
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+  header{
+    padding:48px 24px 24px;
+    max-width:840px;
+    margin:0 auto;
+    text-align:center;
+  }
+  header .eyebrow{
+    color:var(--accent);
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    font-size:12px;
+    font-weight:600;
+  }
+  header h1{
+    font-size:clamp(24px,4vw,38px);
+    margin:10px 0 12px;
+    font-weight:700;
+  }
+  header p.sub{
+    color:var(--text-dim);
+    max-width:640px;
+    margin:0 auto;
+    font-size:15px;
+  }
+  main{
+    max-width:840px;
+    margin:0 auto;
+    padding:16px 24px 100px;
+  }
+
+  .toc{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:12px;
+    padding:20px 22px;
+    margin-bottom:36px;
+  }
+  .toc h2{
+    margin:0 0 10px;
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--accent-2);
+  }
+  .toc ol{
+    margin:0;
+    padding-left:20px;
+    columns:2;
+    font-size:13.5px;
+    color:var(--text-dim);
+  }
+  .toc a{color:inherit;text-decoration:none;}
+  .toc a:hover{color:var(--text);text-decoration:underline;}
+
+  .beat{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-left:3px solid var(--cold);
+    border-radius:10px;
+    padding:22px 26px;
+    margin-bottom:22px;
+    scroll-margin-top:24px;
+  }
+  .beat.warm{border-left-color:var(--warm);}
+
+  .beat-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:12px;
+  }
+  .beat-head h2{
+    margin:0;
+    font-size:18px;
+    font-weight:700;
+  }
+  .beat-head .tc{
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:12px;
+    color:var(--text-dim);
+    background:rgba(255,255,255,.04);
+    padding:3px 10px;
+    border-radius:20px;
+    border:1px solid var(--panel-border);
+  }
+  .beat-head .head-actions{display:flex;align-items:center;gap:8px;}
+
+  .add-asset-btn{
+    font-size:11px;
+    padding:4px 10px;
+    border-radius:20px;
+    border:1px solid var(--panel-border);
+    background:transparent;
+    color:var(--text-dim);
+    cursor:pointer;
+    transition:border-color .15s ease,color .15s ease,background .15s ease;
+    white-space:nowrap;
+  }
+  .add-asset-btn:hover{border-color:var(--accent-2);color:var(--text);}
+  .add-asset-btn.added{border-color:var(--warm);color:var(--warm);background:rgba(232,185,74,.08);}
+
+  .visual-note{
+    font-size:12.5px;
+    color:var(--accent-2);
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    font-weight:700;
+    margin:0 0 6px;
+  }
+  .visual-desc{
+    font-size:13.5px;
+    color:var(--text-dim);
+    margin:0 0 16px;
+    font-style:italic;
+  }
+
+  .vo-label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--text-dim);
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  .vo p{
+    margin:0 0 12px;
+    font-size:15.5px;
+  }
+  .vo p:last-child{margin-bottom:0;}
+  .vo strong{color:var(--accent);}
+
+  /* Kokoro Voice Over & Azure Controls */
+  .voice-bar{
+    background:linear-gradient(135deg, rgba(90,176,255,.08), rgba(232,185,74,.06));
+    border:1px solid rgba(90,176,255,.3);
+    border-radius:12px;
+    padding:14px 18px;
+    margin-bottom:22px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .voice-bar-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .voice-bar-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .voice-bar-title{
+    font-size:13px;
+    font-weight:700;
+    color:var(--accent-2);
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .voice-select-wrap, .voice-speed-wrap{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    color:var(--text-dim);
+  }
+  .voice-select{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    color:var(--text);
+    padding:5px 8px;
+    border-radius:6px;
+    font-size:12px;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .voice-select:focus{
+    outline:none;
+    border-color:var(--accent-2);
+  }
+  .voice-bar-right{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .voice-action-btn{
+    background:rgba(90,176,255,.15);
+    border:1px solid var(--accent-2);
+    color:var(--accent-2);
+    padding:6px 14px;
+    border-radius:8px;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    transition:all .18s ease;
+    font-family:inherit;
+  }
+  .voice-action-btn:hover{
+    background:var(--accent-2);
+    color:var(--bg);
+    transform:translateY(-1px);
+  }
+  .voice-stop-btn{
+    background:rgba(255,100,100,.15);
+    border:1px solid rgba(255,100,100,.4);
+    color:#ff8585;
+    padding:6px 12px;
+    border-radius:8px;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    transition:all .18s ease;
+    font-family:inherit;
+  }
+  .voice-stop-btn:hover{
+    background:#ff8585;
+    color:#0b0d12;
+  }
+  .voice-status{
+    font-size:12px;
+    color:var(--text-dim);
+    font-weight:500;
+  }
+  .voice-storage-info{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:11.5px;
+    color:var(--text-dim);
+    padding-top:8px;
+    border-top:1px solid rgba(255,255,255,.06);
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .voice-storage-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    background:rgba(52,211,153,.12);
+    color:#34d399;
+    border:1px solid rgba(52,211,153,.3);
+    padding:2px 8px;
+    border-radius:12px;
+    font-weight:600;
+    font-size:11px;
+  }
+  .voice-sub-btn{
+    background:transparent;
+    border:1px solid var(--panel-border);
+    color:var(--text-dim);
+    padding:3px 9px;
+    border-radius:6px;
+    font-size:11.5px;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .voice-sub-btn:hover{
+    color:var(--text);
+    border-color:var(--accent-2);
+  }
+  .voice-sub-btn.azure-btn{
+    border-color:rgba(90,176,255,.4);
+    color:var(--accent-2);
+  }
+
+  /* Per-Beat Audio Buttons */
+  .listen-beat-btn{
+    font-size:11.5px;
+    padding:4px 10px;
+    border-radius:20px;
+    border:1px solid rgba(90,176,255,.35);
+    background:rgba(90,176,255,.12);
+    color:var(--accent-2);
+    cursor:pointer;
+    transition:all .15s ease;
+    white-space:nowrap;
+    font-weight:600;
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+  }
+  .listen-beat-btn:hover{
+    background:var(--accent-2);
+    color:var(--bg);
+  }
+  .listen-beat-btn.has-local{
+    border-color:rgba(52,211,153,.5);
+    color:#34d399;
+    background:rgba(52,211,153,.1);
+  }
+  .listen-beat-btn.has-local:hover{
+    background:#34d399;
+    color:#0b0d12;
+  }
+  .listen-beat-btn.playing{
+    background:#34d399 !important;
+    border-color:#34d399 !important;
+    color:#0b0d12 !important;
+  }
+  .listen-beat-btn.loading{
+    background:rgba(232,185,74,.18);
+    border-color:var(--accent);
+    color:var(--accent);
+    animation:pulse-btn 1.2s infinite;
+  }
+  .azure-save-btn{
+    font-size:11px;
+    padding:4px 9px;
+    border-radius:20px;
+    border:1px solid rgba(232,185,74,.4);
+    background:rgba(232,185,74,.08);
+    color:var(--accent);
+    cursor:pointer;
+    transition:all .15s ease;
+    white-space:nowrap;
+    font-weight:600;
+  }
+  .azure-save-btn:hover{
+    background:var(--accent);
+    color:var(--bg);
+  }
+  .azure-save-btn.saved{
+    border-color:#34d399;
+    color:#34d399;
+    background:rgba(52,211,153,.1);
+  }
+  .audio-delete-btn{
+    font-size:11px;
+    padding:4px 8px;
+    border-radius:20px;
+    border:1px solid rgba(255,100,100,.3);
+    background:transparent;
+    color:#ff8585;
+    cursor:pointer;
+    transition:all .15s ease;
+    white-space:nowrap;
+  }
+  .audio-delete-btn:hover{
+    background:rgba(255,100,100,.2);
+    border-color:#ff8585;
+  }
+  .copy-beat-btn{
+    font-size:11px;
+    padding:4px 9px;
+    border-radius:20px;
+    border:1px solid rgba(154,161,176,.4);
+    background:transparent;
+    color:var(--text-dim);
+    cursor:pointer;
+    transition:all .15s ease;
+    white-space:nowrap;
+    font-weight:600;
+  }
+  .copy-beat-btn:hover{
+    background:var(--text-dim);
+    color:var(--bg);
+  }
+  .copy-beat-btn.copied{
+    border-color:#34d399;
+    color:#34d399;
+    background:rgba(52,211,153,.1);
+  }
+  .audio-download-btn{
+    font-size:11px;
+    padding:4px 9px;
+    border-radius:20px;
+    border:1px solid rgba(90,176,255,.35);
+    background:transparent;
+    color:var(--accent-2);
+    cursor:pointer;
+    transition:all .15s ease;
+    white-space:nowrap;
+    font-weight:600;
+  }
+  .audio-download-btn:hover{
+    background:var(--accent-2);
+    color:var(--bg);
+  }
+
+  .beat-reading-active {
+    outline: 2px solid var(--accent-2) !important;
+    box-shadow: 0 0 24px rgba(90,176,255,0.25) !important;
+    transition: all 0.25s ease;
+  }
+
+  @keyframes pulse-btn {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+
+  .toast-notice{
+    position:fixed;
+    bottom:24px;
+    right:24px;
+    background:#161b26;
+    border:1px solid var(--accent);
+    color:var(--text);
+    padding:10px 18px;
+    border-radius:8px;
+    font-size:13px;
+    font-weight:600;
+    box-shadow:0 8px 24px rgba(0,0,0,.5);
+    z-index:9999;
+    opacity:0;
+    transform:translateY(12px);
+    transition:all .25s ease;
+    pointer-events:none;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .toast-notice.show{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  /* ElevenLabs Bar */
+  .elevenlabs-bar{
+    background:linear-gradient(135deg, rgba(232,185,74,.08), rgba(90,176,255,.06));
+    border:1px solid rgba(232,185,74,.3);
+    border-radius:12px;
+    padding:12px 18px;
+    margin-bottom:22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .elevenlabs-info{
+    font-size:13px;
+    color:var(--text);
+  }
+  .copy-elevenlabs-btn{
+    background:var(--accent);
+    color:var(--bg);
+    border:1px solid var(--accent);
+    padding:7px 16px;
+    border-radius:8px;
+    font-size:12.5px;
+    font-weight:700;
+    cursor:pointer;
+    font-family:inherit;
+    transition:all .18s ease;
+  }
+  .copy-elevenlabs-btn:hover{
+    background:transparent;
+    color:var(--accent);
+  }
+
+  /* Script Review Checklist & Layman's Terms Bar */
+  .review-checklist-bar{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-left:4px solid var(--warm);
+    border-radius:12px;
+    padding:18px 22px;
+    margin-bottom:24px;
+  }
+  .review-checklist-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  .review-checklist-title{
+    font-size:14px;
+    font-weight:700;
+    color:var(--text);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .review-checklist-title .ref-link{
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--accent-2);
+    text-decoration:none;
+    background:rgba(90,176,255,.1);
+    border:1px solid rgba(90,176,255,.3);
+    padding:3px 9px;
+    border-radius:14px;
+    transition:all .15s ease;
+  }
+  .review-checklist-title .ref-link:hover{
+    background:var(--accent-2);
+    color:var(--bg);
+  }
+  .checklist-progress-badge{
+    font-size:11.5px;
+    font-weight:700;
+    padding:3px 10px;
+    border-radius:999px;
+    background:rgba(123,224,138,.12);
+    color:#7be08a;
+    border:1px solid rgba(123,224,138,.3);
+  }
+  .checklist-progress-badge.incomplete{
+    background:rgba(232,185,74,.12);
+    color:var(--accent);
+    border-color:rgba(232,185,74,.3);
+  }
+  .review-checklist-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));
+    gap:10px;
+  }
+  .check-item{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    background:rgba(255,255,255,.02);
+    border:1px solid var(--panel-border);
+    padding:10px 12px;
+    border-radius:8px;
+    font-size:13px;
+    line-height:1.45;
+    cursor:pointer;
+    transition:background .15s ease, border-color .15s ease;
+  }
+  .check-item:hover{
+    background:rgba(255,255,255,.04);
+    border-color:rgba(255,255,255,.15);
+  }
+  .check-item input[type="checkbox"]{
+    margin-top:2px;
+    accent-color:var(--accent);
+    cursor:pointer;
+    flex-shrink:0;
+    width:15px;
+    height:15px;
+  }
+  .check-item.checked span{
+    color:var(--text);
+  }
+  .check-item span{
+    color:var(--text-dim);
+  }
+  .check-item strong{
+    color:var(--text);
+  }
+
+  /* Argument Usage Summary */
+  .argument-usage{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-left:4px solid var(--accent-2);
+    border-radius:12px;
+    padding:16px 22px;
+    margin-top:32px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .argument-usage[hidden]{display:none;}
+  .argument-usage-title{
+    font-size:14px;
+    font-weight:700;
+    color:var(--text);
+    white-space:nowrap;
+  }
+  .argument-usage-stats{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    font-size:12.5px;
+    color:var(--text-dim);
+  }
+  .usage-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:4px 12px;
+    border-radius:999px;
+    font-weight:700;
+    font-size:12.5px;
+    border:1px solid;
+  }
+  .usage-pill.used{
+    background:rgba(52,211,153,.1);
+    border-color:rgba(52,211,153,.35);
+    color:#34d399;
+  }
+  .usage-pill.pending{
+    background:rgba(232,185,74,.1);
+    border-color:rgba(232,185,74,.35);
+    color:var(--accent);
+  }
+  .argument-usage-link{
+    font-size:12px;
+    font-weight:600;
+    color:var(--accent-2);
+    text-decoration:none;
+    background:rgba(90,176,255,.1);
+    border:1px solid rgba(90,176,255,.3);
+    padding:5px 12px;
+    border-radius:16px;
+    white-space:nowrap;
+    transition:all .15s ease;
+  }
+  .argument-usage-link:hover{
+    background:var(--accent-2);
+    color:var(--bg);
+  }
+
+  footer{
+    max-width:840px;
+    margin:0 auto;
+    padding:24px;
+    text-align:center;
+    color:var(--text-dim);
+    font-size:12.5px;
+    border-top:1px solid var(--panel-border);
+  }
+  footer a{color:var(--accent-2);text-decoration:none;}
+  footer a:hover{text-decoration:underline;}
+</style>
+<script src="../js/video-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="../js/nav.js"></script>
+<script src="../js/content-db.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/notes.js"></script>
+</head>
+<body>
+
+<div id="nav-mount"></div>
+<script>Nav.render('script');</script>
+
+<header>
+  <div class="eyebrow">📝 Full Script · v1 · course-module (3:00 hard cap)</div>
+  <h1>Task Decomposition</h1>
+  <p class="sub">Voiceover script with visual direction notes, timed for a ~3:00 course module (~450 words @150wpm hard cap).</p>
+</header>
+
+<div id="viewer-takeaway-banner" style="max-width:1000px;margin:0 auto 8px;padding:0 24px;"></div>
+
+<div class="pipeline-wrap" id="pipeline-stepper"></div>
+
+<main>
+  <!-- Kokoro Voice-Over & Azure Storage Bar -->
+  <div class="voice-bar" id="kokoro-voice-bar">
+    <div class="voice-bar-row">
+      <div class="voice-bar-left">
+        <div class="voice-bar-title">🎙️ Script Voice Over:</div>
+        <div class="voice-select-wrap">
+          <label for="voice-select">Voice:</label>
+          <select id="voice-select" class="voice-select" onchange="ScriptVoicePlayer.onVoiceOrSpeedChange()">
+            <option value="af_heart" selected>❤️ af_heart (US Female - Heart)</option>
+            <option value="af_bella">🌸 af_bella (US Female - Bella)</option>
+            <option value="af_nicole">✨ af_nicole (US Female - Nicole)</option>
+            <option value="am_adam">🎯 am_adam (US Male - Adam)</option>
+            <option value="am_michael">💼 am_michael (US Male - Michael)</option>
+            <option value="bf_emma">👑 bf_emma (UK Female - Emma)</option>
+            <option value="bm_george">🎩 bm_george (UK Male - George)</option>
+            <option value="tr-TR-AhmetNeural">🇹🇷 Ahmet (TR Male)</option>
+            <option value="tr-TR-EmelNeural">🇹🇷 Emel (TR Female)</option>
+          </select>
+        </div>
+        <div class="voice-speed-wrap">
+          <label for="speed-select">Speed:</label>
+          <select id="speed-select" class="voice-select" onchange="ScriptVoicePlayer.onVoiceOrSpeedChange()">
+            <option value="0.85">0.85x</option>
+            <option value="1.0" selected>1.0x</option>
+            <option value="1.15">1.15x</option>
+            <option value="1.25">1.25x</option>
+          </select>
+        </div>
+      </div>
+      <div class="voice-bar-right">
+        <button class="voice-action-btn" id="play-all-btn" onclick="togglePlayAll(this)">▶️ Listen to Entire Script</button>
+        <button class="voice-stop-btn" id="stop-all-btn" onclick="stopAudio()" style="display:none;">⏹️ Stop</button>
+        <span class="voice-status" id="voice-status">⚡ Kokoro Ready</span>
+      </div>
+    </div>
+    <div class="voice-storage-info">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span class="voice-storage-badge" id="storage-badge">💾 Local &amp; ☁️ Azure: 0/5 Saved</span>
+        <span id="storage-note" style="color:var(--text-dim);">Generated audio is saved to Azure Blob Storage and local cache to avoid re-triggering API.</span>
+      </div>
+      <div class="voice-storage-actions">
+        <button class="voice-sub-btn azure-btn" id="azureSyncBtn" onclick="ScriptVoicePlayer.configureAzureSas()">☁️ Azure Sync</button>
+        <button class="voice-sub-btn" onclick="ScriptVoicePlayer.saveAllToAzure(this)" title="Generate and save all 5 script beats to Azure Blob Storage">⬇️ Save All to Azure</button>
+        <button class="voice-sub-btn" onclick="ScriptVoicePlayer.deleteAllAudio()" title="Delete all generated audio clips from Azure Blob Storage and local cache">🗑️ Delete All Audio</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="elevenlabs-bar">
+    <div class="elevenlabs-info">
+      <strong>🎙️ ElevenLabs Voiceover Ready:</strong> Clean, natural-reading script without visual notes or timestamps.
+    </div>
+    <button type="button" class="copy-elevenlabs-btn" id="copy-elevenlabs-btn">
+      📋 Copy Clean Script for ElevenLabs
+    </button>
+  </div>
+
+  <div class="review-checklist-bar" id="review-checklist-bar">
+    <div class="review-checklist-head">
+      <div class="review-checklist-title">
+        <span>🔎 Script Review Checklist · Layman's Terms &amp; Clarity</span>
+        <a class="ref-link" href="https://www.youtube.com/watch?v=zU_H8mcFqpQ" target="_blank" rel="noopener">📺 Ref: "What Does 'Layman's Terms' Mean?" (YouTube)</a>
+      </div>
+      <span class="checklist-progress-badge" id="checklist-progress-badge">4/4 Checks Passed</span>
+    </div>
+    <div class="review-checklist-grid">
+      <label class="check-item checked" id="label-check-layman">
+        <input type="checkbox" checked id="check-layman" onchange="ScriptReviewChecklist.onChange()">
+        <span><strong>Convert into Layman's Terms:</strong> Translate technical jargon (e.g., J-curve, permutations, positronic divergence) into everyday plain English that any viewer can immediately grasp.</span>
+      </label>
+      <label class="check-item checked" id="label-check-analogies">
+        <input type="checkbox" checked id="check-analogies" onchange="ScriptReviewChecklist.onChange()">
+        <span><strong>Grounded Everyday Analogies:</strong> Anchor abstract claims with familiar real-world comparisons (calculators, bicycles, traffic lights, fatherhood).</span>
+      </label>
+      <label class="check-item checked" id="label-check-pacing">
+        <input type="checkbox" checked id="check-pacing" onchange="ScriptReviewChecklist.onChange()">
+        <span><strong>Conversational Rhythm &amp; Flow:</strong> Maintain natural cadence, punchy line lengths, and engaging spoken audio delivery.</span>
+      </label>
+      <label class="check-item checked" id="label-check-clarity">
+        <input type="checkbox" checked id="check-clarity" onchange="ScriptReviewChecklist.onChange()">
+        <span><strong>Core Thesis Clarity:</strong> Ensure every beat reinforces the central message: AI multiplies human potential and expands job opportunities rather than destroying them.</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="toc">
+    <h2>Beats &amp; Pacing</h2>
+    <ol>
+      <li><a href="#hook">🪝 Hook (Sharp 30s Open, 0:00–0:30)</a></li>
+      <li><a href="#section1">🪨 Section 1 — Historical Proof (Smooth Transition, 0:30–1:45)</a></li>
+      <li><a href="#section2">🌳 Section 2 — Infinite Permutations &amp; Multi-Disciplinary Jobs (1:45–2:45)</a></li>
+      <li><a href="#section3">🧮 Section 3 — Education Democratization, Math &amp; Human Insight (2:45–3:45)</a></li>
+      <li><a href="#outro">🎬 Conclusion &amp; Outro (3:45–4:30)</a></li>
+    </ol>
+  </div>
+
+  <div id="beats-container"></div>
+
+  <div class="argument-usage" id="argument-usage" hidden>
+    <div class="argument-usage-title">🧩 Argument Usage</div>
+    <div class="argument-usage-stats" id="argument-usage-stats"></div>
+    <a class="argument-usage-link" href="arguments.html">View Arguments →</a>
+  </div>
+</main>
+
+<footer>
+  📝 Script for <a href="https://github.com/rifaterdemsahin/sep-3-agentic-coding" target="_blank" rel="noopener">rifaterdemsahin/sep-3-agentic-coding</a> — see the <a href="design.html">design</a>. See everything you've saved in 🗂️ <a href="assets.html">Assets</a>.
+</footer>
+
+<script src="../js/pipeline.js"></script>
+<script src="../js/assets.js"></script>
+<script src="../js/links.js"></script>
+<script>
+  Pipeline.render('script');
+  PipelineLinks.init({ file: 'script.html', sourceFile: 'index.html', sourceLabel: 'Research' });
+
+  window.sb.from('videos').select('viewer_takeaway').eq('id', window.VIDEO_ID).maybeSingle().then(function(res){
+    if(res.error || !res.data || !res.data.viewer_takeaway) return;
+    document.getElementById('viewer-takeaway-banner').innerHTML =
+      '<div style="background:var(--panel);border:1px solid var(--accent);border-radius:10px;padding:12px 16px;font-size:13.5px;color:var(--text);">' +
+      '🧠 <b>Viewer takeaway:</b> After this video the viewer can ' + res.data.viewer_takeaway + '</div>';
+  });
+
+  function escAttr(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;'); }
+
+  function renderBeats(){
+    var beats = ContentDB.getBlocks('script.html', 'beats');
+    document.getElementById('beats-container').innerHTML = beats.map(function(b){
+      var d = b.data;
+      var vo = d.vo.map(function(p){ return '<p>' + p + '</p>'; }).join('');
+      return '<section id="' + d.sectionId + '" class="beat' + (d.warm ? ' warm' : '') + '">' +
+        '<div class="beat-head">' +
+          '<h2>' + d.title + '</h2>' +
+          '<div class="head-actions">' +
+            '<span class="tc">' + d.tc + '</span>' +
+            '<button class="listen-beat-btn" onclick="togglePlayBeat(\'' + d.sectionId + '\', \'' + escAttr(d.title.replace(/<[^>]+>/g,'')) + '\', this)">🔊 Listen</button>' +
+            '<button class="azure-save-btn" onclick="saveBeatToAzure(\'' + d.sectionId + '\', \'' + escAttr(d.title.replace(/<[^>]+>/g,'')) + '\', this)" title="Save audio to Azure Blob Storage">☁️ Save</button>' +
+            '<button class="audio-delete-btn" onclick="deleteBeatAudio(\'' + d.sectionId + '\', \'' + escAttr(d.title.replace(/<[^>]+>/g,'')) + '\', this)" title="Delete audio from Azure &amp; local storage">🗑️</button>' +
+            '<button class="copy-beat-btn" onclick="copyBeatScript(\'' + d.sectionId + '\', this)" title="Copy this section\'s script to clipboard">📋 Copy</button>' +
+            '<button class="audio-download-btn" onclick="downloadBeatAudio(\'' + d.sectionId + '\', \'' + escAttr(d.title.replace(/<[^>]+>/g,'')) + '\', this)" title="Download this section\'s audio as MP3">⬇️ Audio</button>' +
+            '<button class="add-asset-btn" data-id="' + b.id + '" data-type="beat" data-source="Script" data-title="' + escAttr(d.addTitle) + '" data-desc="' + escAttr(d.addDesc) + '" data-url="script.html#' + d.sectionId + '">➕ Add to Assets</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="visual-note">🎥 Visual</div>' +
+        '<p class="visual-desc">' + d.visualDesc + '</p>' +
+        '<div class="vo"><div class="vo-label">🎙️ Host VO</div>' + vo + '</div>' +
+      '</section>';
+    }).join('');
+  }
+
+  // Bottom summary: which of the arguments.html cards are wired into this
+  // script via the per-beat 🔗 links (links table: "script.html|beat-<id>"),
+  // and how many are still pending as analysis.
+  function renderArgumentUsage(){
+    var usageEl = document.getElementById('argument-usage');
+    if(!usageEl) return;
+
+    var argCards = ContentDB.getBlocks('arguments.html', 'arguments');
+    if(!argCards.length) return;
+
+    var argIds = {};
+    argCards.forEach(function(a){ argIds[a.id] = true; });
+
+    var usedIds = {};
+    var perBeat = [];
+    ContentDB.getBlocks('script.html', 'beats').forEach(function(beat){
+      var linked = PipelineLinks.getSelected('script.html|' + beat.id).filter(function(id){
+        return argIds[id];
+      });
+      linked.forEach(function(id){ usedIds[id] = true; });
+      if(linked.length){
+        perBeat.push(beat.data.sectionId + ': ' + linked.map(function(id){
+          return '#' + id.replace('argument-', '');
+        }).join(', '));
+      }
+    });
+
+    var total = argCards.length;
+    var used = Object.keys(usedIds).length;
+    var pending = total - used;
+
+    document.getElementById('argument-usage-stats').innerHTML =
+      '<span class="usage-pill used">✅ ' + used + ' used in this script</span>' +
+      '<span class="usage-pill pending">⏳ ' + pending + ' pending as analysis</span>' +
+      '<span>of ' + total + ' argument cards</span>';
+
+    usageEl.title = perBeat.length
+      ? 'Linked to beats — ' + perBeat.join(' · ')
+      : 'No arguments are linked to script beats yet';
+    usageEl.hidden = false;
+  }
+
+  // Script Review Checklist Controller
+  var ScriptReviewChecklist = {
+    key: 'taskDecomposition_scriptReviewChecks',
+    defaults: {
+      'check-layman': true,
+      'check-analogies': true,
+      'check-pacing': true,
+      'check-clarity': true
+    },
+    init: function(){
+      var saved = {};
+      try{ saved = JSON.parse(localStorage.getItem(this.key) || '{}'); }catch(e){ saved = {}; }
+      var keys = Object.keys(this.defaults);
+      keys.forEach(function(k){
+        var el = document.getElementById(k);
+        if(!el) return;
+        var val = (saved[k] !== undefined) ? saved[k] : ScriptReviewChecklist.defaults[k];
+        el.checked = !!val;
+        var lbl = el.closest('.check-item');
+        if(lbl) lbl.classList.toggle('checked', el.checked);
+      });
+      this.updateBadge();
+    },
+    onChange: function(){
+      var data = {};
+      var keys = Object.keys(this.defaults);
+      keys.forEach(function(k){
+        var el = document.getElementById(k);
+        if(!el) return;
+        data[k] = el.checked;
+        var lbl = el.closest('.check-item');
+        if(lbl) lbl.classList.toggle('checked', el.checked);
+      });
+      try{ localStorage.setItem(this.key, JSON.stringify(data)); }catch(e){}
+      this.updateBadge();
+    },
+    updateBadge: function(){
+      var keys = Object.keys(this.defaults);
+      var total = keys.length;
+      var count = 0;
+      keys.forEach(function(k){
+        var el = document.getElementById(k);
+        if(el && el.checked) count++;
+      });
+      var badge = document.getElementById('checklist-progress-badge');
+      if(!badge) return;
+      if(count === total){
+        badge.textContent = '✅ ' + count + '/' + total + ' Checks Passed';
+        badge.className = 'checklist-progress-badge';
+      }else{
+        badge.textContent = '🟡 ' + count + '/' + total + ' Checks Complete';
+        badge.className = 'checklist-progress-badge incomplete';
+      }
+    }
+  };
+
+  Promise.all([ContentDB.ready, AssetDB.ready]).then(function(){
+    renderBeats();
+    AssetDB.initAddButtons();
+    ScriptReviewChecklist.init();
+  });
+
+  Promise.all([ContentDB.ready, PipelineLinks.ready]).then(renderArgumentUsage);
+
+  // Shared clipboard helper
+  function copyTextToClipboard(text, onDone){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ onDone(true); }, function(){ onDone(false); });
+    } else {
+      var tmp = document.createElement('textarea');
+      tmp.value = text;
+      tmp.style.position = 'fixed';
+      tmp.style.opacity = '0';
+      document.body.appendChild(tmp);
+      tmp.select();
+      try{ document.execCommand('copy'); onDone(true); }
+      catch(err){ onDone(false); }
+      document.body.removeChild(tmp);
+    }
+  }
+
+  function getCleanVoText(scope){
+    var paras = [];
+    (scope || document).querySelectorAll('.vo p').forEach(function(p){
+      var txt = p.textContent.trim();
+      txt = txt.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
+      if(txt) paras.push(txt);
+    });
+    return paras.join('\n\n');
+  }
+
+  // ElevenLabs copy button (copies the full clean script)
+  (function(){
+    var copyBtn = document.getElementById('copy-elevenlabs-btn');
+    if(!copyBtn) return;
+
+    copyBtn.addEventListener('click', function(){
+      var cleanScript = getCleanVoText(document);
+      copyTextToClipboard(cleanScript, function(ok){
+        copyBtn.textContent = ok ? '✅ Copied for ElevenLabs!' : '⚠️ Copy failed';
+        copyBtn.style.background = ok ? 'var(--warm)' : 'transparent';
+        setTimeout(function(){
+          copyBtn.textContent = '📋 Copy Clean Script for ElevenLabs';
+          copyBtn.style.background = 'var(--accent)';
+        }, 2200);
+      });
+    });
+  })();
+
+  // Per-beat copy button
+  function copyBeatScript(beatId, btn){
+    var section = document.getElementById(beatId);
+    if(!section) return;
+    var text = getCleanVoText(section);
+    var origLabel = btn.textContent;
+    copyTextToClipboard(text, function(ok){
+      btn.textContent = ok ? '✅ Copied!' : '⚠️ Failed';
+      btn.classList.toggle('copied', ok);
+      setTimeout(function(){
+        btn.textContent = origLabel;
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  // Toast notification helper
+  function showToast(msg){
+    var toast = document.getElementById('toast-notice');
+    if(!toast){
+      toast = document.createElement('div');
+      toast.id = 'toast-notice';
+      toast.className = 'toast-notice';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(function(){
+      toast.classList.remove('show');
+    }, 2400);
+  }
+
+  // ==========================================
+  // IndexedDB Persistent Storage for Script Audio
+  // ==========================================
+  var ScriptStorage = {
+    dbName: 'ScriptVoiceStorage',
+    storeName: 'script_audio_clips',
+    db: null,
+
+    open: function(){
+      var self = this;
+      return new Promise(function(resolve){
+        if(self.db) return resolve(self.db);
+        if(!window.indexedDB){ resolve(null); return; }
+        try{
+          var req = indexedDB.open(self.dbName, 1);
+          req.onupgradeneeded = function(e){
+            var db = e.target.result;
+            if(!db.objectStoreNames.contains(self.storeName)){
+              db.createObjectStore(self.storeName, { keyPath: 'key' });
+            }
+          };
+          req.onsuccess = function(e){ self.db = e.target.result; resolve(self.db); };
+          req.onerror = function(){ resolve(null); };
+        } catch(e){ resolve(null); }
+      });
+    },
+
+    getAudio: function(key){
+      var self = this;
+      return this.open().then(function(db){
+        if(!db) return null;
+        return new Promise(function(resolve){
+          try{
+            var tx = db.transaction(self.storeName, 'readonly');
+            var store = tx.objectStore(self.storeName);
+            var req = store.get(key);
+            req.onsuccess = function(){ resolve(req.result ? req.result.blob : null); };
+            req.onerror = function(){ resolve(null); };
+          } catch(e){ resolve(null); }
+        });
+      });
+    },
+
+    saveAudio: function(key, blob, meta){
+      var self = this;
+      return this.open().then(function(db){
+        if(!db) return false;
+        return new Promise(function(resolve){
+          try{
+            var tx = db.transaction(self.storeName, 'readwrite');
+            var store = tx.objectStore(self.storeName);
+            var record = {
+              key: key,
+              blob: blob,
+              voice: meta.voice,
+              speed: meta.speed,
+              beatId: meta.beatId,
+              timestamp: Date.now(),
+              size: blob.size
+            };
+            var req = store.put(record);
+            req.onsuccess = function(){ resolve(true); };
+            req.onerror = function(){ resolve(false); };
+          } catch(e){ resolve(false); }
+        });
+      });
+    },
+
+    deleteAudio: function(key){
+      var self = this;
+      return this.open().then(function(db){
+        if(!db) return false;
+        return new Promise(function(resolve){
+          try{
+            var tx = db.transaction(self.storeName, 'readwrite');
+            var store = tx.objectStore(self.storeName);
+            var req = store.delete(key);
+            req.onsuccess = function(){ resolve(true); };
+            req.onerror = function(){ resolve(false); };
+          } catch(e){ resolve(false); }
+        });
+      });
+    },
+
+    getAllKeys: function(){
+      var self = this;
+      return this.open().then(function(db){
+        if(!db) return [];
+        return new Promise(function(resolve){
+          try{
+            var tx = db.transaction(self.storeName, 'readonly');
+            var store = tx.objectStore(self.storeName);
+            var req = store.getAllKeys();
+            req.onsuccess = function(){ resolve(req.result || []); };
+            req.onerror = function(){ resolve([]); };
+          } catch(e){ resolve([]); }
+        });
+      });
+    },
+
+    clearAll: function(){
+      var self = this;
+      return this.open().then(function(db){
+        if(!db) return;
+        try{
+          var tx = db.transaction(self.storeName, 'readwrite');
+          tx.objectStore(self.storeName).clear();
+        } catch(e){}
+      });
+    }
+  };
+
+  // ==========================================
+  // Azure Blob Storage Audio Engine
+  // ==========================================
+  var AzureStorageAudio = (function(){
+    var SAS_KEY = 'taskDecomposition_azureContainerSasUrl';
+    var DEFAULT_SAS = 'https://dpprojects.blob.core.windows.net/sep-3-agentic-coding?sp=r&st=2026-09-09T11:36:59Z&se=2026-09-09T19:51:59Z&spr=https&sv=2026-02-06&sr=c&sig=gfBDDSiEm%2Bztd7Gw8KT%2FibMf7uM9edEOZ%2F5Z4QaRjno%3D';
+
+    function getSasUrl(){
+      return localStorage.getItem(SAS_KEY) || DEFAULT_SAS;
+    }
+
+    function parseSasUrl(sasUrl){
+      if(!sasUrl) return null;
+      var qIdx = sasUrl.indexOf('?');
+      if(qIdx === -1) return null;
+      return {
+        containerUrl: sasUrl.slice(0, qIdx).replace(/\/$/, ''),
+        sasQuery: sasUrl.slice(qIdx + 1)
+      };
+    }
+
+    function getBlobName(beatId, voice, speed){
+      return 'audio/script-' + beatId + '-' + voice + '-' + speed + '.mp3';
+    }
+
+    function getBlobPutUrl(beatId, voice, speed){
+      var parsed = parseSasUrl(getSasUrl());
+      if(!parsed) return null;
+      var blobName = getBlobName(beatId, voice, speed);
+      return parsed.containerUrl + '/' + blobName + '?' + parsed.sasQuery;
+    }
+
+    function getBlobGetUrl(beatId, voice, speed){
+      var parsed = parseSasUrl(getSasUrl());
+      if(!parsed) return null;
+      var blobName = getBlobName(beatId, voice, speed);
+      return parsed.containerUrl + '/' + blobName + '?' + parsed.sasQuery;
+    }
+
+    function saveBlobToAzure(beatId, voice, speed, blob){
+      var putUrl = getBlobPutUrl(beatId, voice, speed);
+      if(!putUrl) return Promise.reject(new Error('Azure SAS URL is not configured'));
+
+      return fetch(putUrl, {
+        method: 'PUT',
+        headers: {
+          'x-ms-blob-type': 'BlockBlob',
+          'x-ms-blob-content-type': 'audio/mpeg',
+          'Content-Type': 'audio/mpeg'
+        },
+        body: blob
+      }).then(function(res){
+        if(!res.ok) throw new Error('Azure PUT failed status ' + res.status);
+        return true;
+      });
+    }
+
+    function deleteBlobFromAzure(beatId, voice, speed){
+      var deleteUrl = getBlobPutUrl(beatId, voice, speed);
+      if(!deleteUrl) return Promise.reject(new Error('Azure SAS URL is not configured'));
+
+      return fetch(deleteUrl, {
+        method: 'DELETE'
+      }).then(function(res){
+        if(!res.ok && res.status !== 404) throw new Error('Azure DELETE failed status ' + res.status);
+        return true;
+      });
+    }
+
+    return {
+      getSasUrl: getSasUrl,
+      saveBlobToAzure: saveBlobToAzure,
+      deleteBlobFromAzure: deleteBlobFromAzure,
+      getBlobName: getBlobName,
+      getBlobGetUrl: getBlobGetUrl
+    };
+  })();
+
+  // ==========================================
+  // Script Voice Player & Audio Coordinator
+  // ==========================================
+  var ScriptVoicePlayer = (function(){
+    var KOKORO_BASE = 'https://secondbrain-kokoro.fly.dev';
+    var inMemoryUrlCache = {};
+    var currentAudio = null;
+    var currentBtn = null;
+    var currentBeatId = null;
+    var isSequencePlaying = false;
+    var sequenceQueue = [];
+    var sequenceIndex = 0;
+
+    var ALL_BEATS = [
+      { id: 'hook', label: 'Hook' },
+      { id: 'section1', label: 'Section 1' },
+      { id: 'section2', label: 'Section 2' },
+      { id: 'section3', label: 'Section 3' },
+      { id: 'outro', label: 'Conclusion & Outro' }
+    ];
+
+    function getCurrentVoice(){
+      var voiceSelect = document.getElementById('voice-select');
+      return voiceSelect ? voiceSelect.value : 'af_heart';
+    }
+
+    function getCurrentSpeed(){
+      var speedSelect = document.getElementById('speed-select');
+      return speedSelect ? (parseFloat(speedSelect.value) || 1.0) : 1.0;
+    }
+
+    function getCacheKey(beatId){
+      return getCurrentVoice() + '_' + getCurrentSpeed() + '_' + beatId;
+    }
+
+    function updateStorageStatus(){
+      var voice = getCurrentVoice();
+      var speed = getCurrentSpeed();
+
+      ScriptStorage.getAllKeys().then(function(keys){
+        var cachedCount = 0;
+        var prefix = voice + '_' + speed + '_';
+
+        ALL_BEATS.forEach(function(item){
+          var key = prefix + item.id;
+          var beatEl = document.getElementById(item.id);
+          var btn = beatEl ? beatEl.querySelector('.listen-beat-btn') : null;
+          var saveBtn = beatEl ? beatEl.querySelector('.azure-save-btn') : null;
+          var isCached = keys.indexOf(key) !== -1 || inMemoryUrlCache[key];
+
+          if(isCached){
+            cachedCount++;
+            if(btn && !btn.classList.contains('playing') && !btn.classList.contains('loading')){
+              btn.innerHTML = '🔊 Listen (💾 Local)';
+              btn.classList.add('has-local');
+              btn.title = 'Audio backed up locally & on Azure — plays instantly';
+            }
+            if(saveBtn){
+              saveBtn.classList.add('saved');
+              saveBtn.innerHTML = '☁️ Saved';
+            }
+          } else {
+            if(btn && !btn.classList.contains('playing') && !btn.classList.contains('loading')){
+              btn.innerHTML = '🔊 Listen';
+              btn.classList.remove('has-local');
+              btn.title = 'Click to generate audio and back up to local & Azure';
+            }
+            if(saveBtn){
+              saveBtn.classList.remove('saved');
+              saveBtn.innerHTML = '☁️ Save';
+            }
+          }
+        });
+
+        var badge = document.getElementById('storage-badge');
+        if(badge){
+          badge.textContent = '💾 Local & ☁️ Azure: ' + cachedCount + '/' + ALL_BEATS.length + ' Saved';
+          badge.style.color = cachedCount === ALL_BEATS.length ? '#34d399' : 'var(--accent)';
+          badge.style.borderColor = cachedCount === ALL_BEATS.length ? 'rgba(52,211,153,.4)' : 'rgba(232,185,74,.3)';
+        }
+
+        var azureBtn = document.getElementById('azureSyncBtn');
+        if(azureBtn){
+          var hasSas = localStorage.getItem('taskDecomposition_azureContainerSasUrl');
+          azureBtn.textContent = hasSas ? '☁️ Azure: Connected' : '☁️ Azure Sync';
+        }
+      });
+    }
+
+    function loadVoices(){
+      var select = document.getElementById('voice-select');
+      if(!select) return;
+
+      fetch(KOKORO_BASE + '/voices')
+        .then(function(res){ return res.json(); })
+        .then(function(data){
+          if(data && data.voices){
+            var currentVal = select.value;
+            select.innerHTML = '';
+            Object.keys(data.voices).forEach(function(vKey){
+              var vObj = data.voices[vKey];
+              var opt = document.createElement('option');
+              opt.value = vKey;
+              opt.textContent = (vObj.lang === 'tr-TR' ? '🇹🇷 ' : (vObj.lang === 'en-GB' ? '🇬🇧 ' : '🇺🇸 ')) + vKey + ' (' + vObj.name + ')';
+              if(vKey === currentVal || (!currentVal && vKey === 'af_heart')) {
+                opt.selected = true;
+              }
+              select.appendChild(opt);
+            });
+            updateStatus('⚡ Kokoro Voices Ready (' + Object.keys(data.voices).length + ' loaded)');
+            updateStorageStatus();
+          }
+        })
+        .catch(function(){
+          updateStorageStatus();
+        });
+    }
+
+    function updateStatus(text){
+      var statusEl = document.getElementById('voice-status');
+      if(statusEl) statusEl.textContent = text;
+    }
+
+    function cleanTextForSpeech(rawText){
+      if(!rawText) return '';
+      var text = rawText.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '');
+      text = text.replace(/https?:\/\/\S+/g, '');
+      text = text.replace(/[→✓✔✅🛡️🧩🎯🌱🎬⚙️🌌🎓🌍🧮🌳🪨✨🚀💾☁️➕]/g, '');
+      text = text.replace(/[*_#`~]/g, '');
+      return text.trim();
+    }
+
+    function getBeatSpeech(beatId){
+      var beat = document.getElementById(beatId);
+      if(!beat) return '';
+
+      var paras = [];
+      beat.querySelectorAll('.vo p').forEach(function(p){
+        var t = cleanTextForSpeech(p.textContent);
+        if(t) paras.push(t);
+      });
+      return paras.join('. ');
+    }
+
+    function highlightBeat(beatId, active){
+      document.querySelectorAll('.beat-reading-active').forEach(function(el){
+        el.classList.remove('beat-reading-active');
+      });
+      if(active && beatId){
+        var el = document.getElementById(beatId);
+        if(el){
+          el.classList.add('beat-reading-active');
+          el.scrollIntoView({ behavior:'smooth', block:'center' });
+        }
+      }
+    }
+
+    function stop(){
+      if(currentAudio){
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        currentAudio = null;
+      }
+      if(window.speechSynthesis && window.speechSynthesis.speaking){
+        window.speechSynthesis.cancel();
+      }
+      if(currentBtn){
+        currentBtn.innerHTML = currentBtn.getAttribute('data-orig') || (currentBtn.classList.contains('has-local') ? '🔊 Listen (💾 Local)' : '🔊 Listen');
+        currentBtn.classList.remove('playing', 'loading');
+        currentBtn = null;
+      }
+      highlightBeat(null, false);
+      currentBeatId = null;
+      isSequencePlaying = false;
+      sequenceQueue = [];
+
+      var playAllBtn = document.getElementById('play-all-btn');
+      if(playAllBtn){
+        playAllBtn.innerHTML = '▶️ Listen to Entire Script';
+        playAllBtn.classList.remove('playing');
+      }
+      var stopBtn = document.getElementById('stop-all-btn');
+      if(stopBtn) stopBtn.style.display = 'none';
+
+      updateStatus('⚡ Kokoro Ready');
+      updateStorageStatus();
+    }
+
+    function playAudioUrl(audioUrl, btn, beatId, isLocal, onFinished){
+      if(currentAudio){
+        currentAudio.pause();
+      }
+
+      var audio = new Audio(audioUrl);
+      var speed = getCurrentSpeed();
+      audio.playbackRate = speed;
+
+      currentAudio = audio;
+      currentBtn = btn;
+      currentBeatId = beatId;
+
+      if(btn){
+        if(!btn.getAttribute('data-orig')) btn.setAttribute('data-orig', btn.innerHTML);
+        btn.innerHTML = '⏸️ Pause';
+        btn.classList.remove('loading');
+        btn.classList.add('playing');
+      }
+
+      var stopBtn = document.getElementById('stop-all-btn');
+      if(stopBtn) stopBtn.style.display = 'inline-flex';
+
+      highlightBeat(beatId, true);
+
+      var sourceTag = isLocal ? '💾 [Local & Azure]' : '⚡ [Live API]';
+      updateStatus('🔊 Playing ' + sourceTag + ': ' + beatId.toUpperCase());
+
+      if(isLocal){
+        showToast('💾 Playing from local backup (0 API calls used)');
+      }
+
+      audio.onended = function(){
+        if(btn){
+          btn.innerHTML = btn.getAttribute('data-orig') || '🔊 Listen (💾 Local)';
+          btn.classList.remove('playing');
+        }
+        highlightBeat(null, false);
+        currentAudio = null;
+        if(typeof onFinished === 'function'){
+          onFinished();
+        } else {
+          stop();
+        }
+      };
+
+      audio.onerror = function(){
+        updateStatus('⚠️ Playback error, trying fallback speech...');
+        fallbackBrowserSpeech(getBeatSpeech(beatId), btn, beatId, onFinished);
+      };
+
+      audio.play().catch(function(e){
+        console.warn('Audio play error:', e);
+        fallbackBrowserSpeech(getBeatSpeech(beatId), btn, beatId, onFinished);
+      });
+    }
+
+    function fallbackBrowserSpeech(text, btn, beatId, onFinished){
+      if(!('speechSynthesis' in window)){
+        showToast('Speech audio unavailable in this browser');
+        stop();
+        return;
+      }
+      window.speechSynthesis.cancel();
+      var utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = getCurrentSpeed();
+
+      if(btn){
+        if(!btn.getAttribute('data-orig')) btn.setAttribute('data-orig', btn.innerHTML);
+        btn.innerHTML = '⏸️ Pause';
+        btn.classList.add('playing');
+      }
+      var stopBtn = document.getElementById('stop-all-btn');
+      if(stopBtn) stopBtn.style.display = 'inline-flex';
+      highlightBeat(beatId, true);
+      updateStatus('🔊 Browser Voice Playing...');
+
+      utterance.onend = function(){
+        if(btn){
+          btn.innerHTML = btn.getAttribute('data-orig') || '🔊 Listen';
+          btn.classList.remove('playing');
+        }
+        highlightBeat(null, false);
+        if(typeof onFinished === 'function'){
+          onFinished();
+        } else {
+          stop();
+        }
+      };
+      utterance.onerror = function(){ stop(); };
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function fetchAndGenerateAudio(beatId, label, btn){
+      var speechText = getBeatSpeech(beatId);
+      if(!speechText) return Promise.reject(new Error('No speech text found'));
+
+      var voice = getCurrentVoice();
+      var speed = getCurrentSpeed();
+      var cacheKey = getCacheKey(beatId);
+
+      if(btn){
+        if(!btn.getAttribute('data-orig')) btn.setAttribute('data-orig', btn.innerHTML);
+        btn.innerHTML = '⏳ Generating...';
+        btn.classList.add('loading');
+      }
+      updateStatus('⏳ Kokoro generating audio for ' + (label || beatId) + '...');
+
+      return fetch(KOKORO_BASE + '/api/speak', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: speechText,
+          voice: voice,
+          speed: speed
+        })
+      })
+      .then(function(res){
+        if(!res.ok) throw new Error('TTS server error status ' + res.status);
+        return res.blob();
+      })
+      .then(function(blob){
+        // Save to IndexedDB
+        ScriptStorage.saveAudio(cacheKey, blob, {
+          voice: voice,
+          speed: speed,
+          beatId: beatId
+        });
+
+        // Sync to Azure in background
+        AzureStorageAudio.saveBlobToAzure(beatId, voice, speed, blob)
+          .then(function(){
+            showToast('☁️ Saved & synced to Azure Blob Storage!');
+          })
+          .catch(function(err){
+            console.log('Azure background save note:', err);
+          });
+
+        var blobUrl = URL.createObjectURL(blob);
+        inMemoryUrlCache[cacheKey] = blobUrl;
+        updateStorageStatus();
+        return blobUrl;
+      });
+    }
+
+    function loadAndPlay(beatId, label, btn, onFinished){
+      var cacheKey = getCacheKey(beatId);
+
+      // 1. In-memory cache
+      if(inMemoryUrlCache[cacheKey]){
+        playAudioUrl(inMemoryUrlCache[cacheKey], btn, beatId, true, onFinished);
+        return;
+      }
+
+      // 2. IndexedDB local storage
+      ScriptStorage.getAudio(cacheKey).then(function(storedBlob){
+        if(storedBlob){
+          var blobUrl = URL.createObjectURL(storedBlob);
+          inMemoryUrlCache[cacheKey] = blobUrl;
+          playAudioUrl(blobUrl, btn, beatId, true, onFinished);
+          updateStorageStatus();
+          return;
+        }
+
+        // 3. Generate from API & save to Azure/Local
+        fetchAndGenerateAudio(beatId, label, btn)
+          .then(function(blobUrl){
+            playAudioUrl(blobUrl, btn, beatId, false, onFinished);
+          })
+          .catch(function(err){
+            console.warn('TTS error, falling back to browser speech:', err);
+            updateStatus('⚠️ Kokoro unreachable — Using Web Speech fallback');
+            fallbackBrowserSpeech(getBeatSpeech(beatId), btn, beatId, onFinished);
+          });
+      });
+    }
+
+    function toggleBeat(beatId, label, btn){
+      if(currentBeatId === beatId && currentAudio && !currentAudio.paused){
+        stop();
+        return;
+      }
+      stop();
+      loadAndPlay(beatId, label, btn);
+    }
+
+    function saveBeatToAzure(beatId, label, saveBtn){
+      var voice = getCurrentVoice();
+      var speed = getCurrentSpeed();
+      var cacheKey = getCacheKey(beatId);
+
+      if(saveBtn) saveBtn.innerHTML = '⏳ Saving…';
+
+      ScriptStorage.getAudio(cacheKey).then(function(blob){
+        if(blob){
+          return AzureStorageAudio.saveBlobToAzure(beatId, voice, speed, blob);
+        } else {
+          return fetchAndGenerateAudio(beatId, label, null).then(function(){
+            return ScriptStorage.getAudio(cacheKey).then(function(newBlob){
+              if(newBlob) return AzureStorageAudio.saveBlobToAzure(beatId, voice, speed, newBlob);
+            });
+          });
+        }
+      }).then(function(){
+        if(saveBtn){
+          saveBtn.classList.add('saved');
+          saveBtn.innerHTML = '☁️ Saved';
+        }
+        showToast('☁️ Saved ' + (label || beatId) + ' to Azure Storage container!');
+        updateStorageStatus();
+      }).catch(function(err){
+        console.warn('Azure save error:', err);
+        if(saveBtn) saveBtn.innerHTML = '☁️ Save';
+        showToast('☁️ Audio backed up locally! (Check Azure SAS permissions to sync cloud)');
+        updateStorageStatus();
+      });
+    }
+
+    function downloadBeatAudio(beatId, label, downloadBtn){
+      var voice = getCurrentVoice();
+      var speed = getCurrentSpeed();
+      var cacheKey = getCacheKey(beatId);
+
+      function saveBlob(blob){
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = (beatId || 'beat') + '-' + voice + '-' + speed + 'x.mp3';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+      }
+
+      if(downloadBtn) downloadBtn.innerHTML = '⏳ Preparing…';
+
+      ScriptStorage.getAudio(cacheKey).then(function(blob){
+        if(blob) return blob;
+        return fetchAndGenerateAudio(beatId, label, null).then(function(){
+          return ScriptStorage.getAudio(cacheKey);
+        });
+      }).then(function(blob){
+        if(!blob) throw new Error('No audio available to download');
+        saveBlob(blob);
+        showToast('⬇️ Downloaded audio for ' + (label || beatId));
+      }).catch(function(err){
+        console.warn('Audio download error:', err);
+        showToast('⚠️ Could not download audio for ' + (label || beatId));
+      }).finally(function(){
+        if(downloadBtn) downloadBtn.innerHTML = '⬇️ Audio';
+      });
+    }
+
+    function deleteBeatAudio(beatId, label, deleteBtn){
+      var voice = getCurrentVoice();
+      var speed = getCurrentSpeed();
+      var cacheKey = getCacheKey(beatId);
+
+      if(!confirm('Delete audio for ' + (label || beatId) + ' from Azure Storage and local cache?')) return;
+
+      if(currentBeatId === beatId) stop();
+
+      delete inMemoryUrlCache[cacheKey];
+
+      Promise.all([
+        ScriptStorage.deleteAudio(cacheKey),
+        AzureStorageAudio.deleteBlobFromAzure(beatId, voice, speed).catch(function(){})
+      ]).then(function(){
+        showToast('🗑️ Deleted audio for ' + (label || beatId));
+        updateStorageStatus();
+      });
+    }
+
+    function playSequence(){
+      if(sequenceIndex >= sequenceQueue.length){
+        stop();
+        showToast('✨ Finished playing entire script!');
+        return;
+      }
+
+      var item = sequenceQueue[sequenceIndex];
+      var beatEl = document.getElementById(item.id);
+      var btn = beatEl ? beatEl.querySelector('.listen-beat-btn') : null;
+
+      loadAndPlay(item.id, item.label, btn, function(){
+        sequenceIndex++;
+        playSequence();
+      });
+    }
+
+    function togglePlayAll(btn){
+      if(isSequencePlaying){
+        stop();
+        return;
+      }
+
+      stop();
+      isSequencePlaying = true;
+      sequenceQueue = ALL_BEATS.slice();
+      sequenceIndex = 0;
+
+      if(btn){
+        btn.innerHTML = '⏸️ Pause Script Playlist';
+        btn.classList.add('playing');
+      }
+      var stopBtn = document.getElementById('stop-all-btn');
+      if(stopBtn) stopBtn.style.display = 'inline-flex';
+
+      playSequence();
+    }
+
+    function saveAllToAzure(btn){
+      if(btn) btn.disabled = true;
+      var voice = getCurrentVoice();
+      var speed = getCurrentSpeed();
+
+      var idx = 0;
+      function saveNext(){
+        if(idx >= ALL_BEATS.length){
+          updateStatus('✅ All ' + ALL_BEATS.length + ' script sections saved to Azure & local storage!');
+          showToast('☁️ All script audio successfully saved!');
+          updateStorageStatus();
+          if(btn) btn.disabled = false;
+          return;
+        }
+
+        var item = ALL_BEATS[idx];
+        var cacheKey = voice + '_' + speed + '_' + item.id;
+        updateStatus('⏳ Processing & Saving (' + (idx + 1) + '/' + ALL_BEATS.length + '): ' + item.label + '…');
+
+        ScriptStorage.getAudio(cacheKey).then(function(blob){
+          if(blob){
+            return AzureStorageAudio.saveBlobToAzure(item.id, voice, speed, blob).catch(function(){});
+          } else {
+            return fetchAndGenerateAudio(item.id, item.label, null).catch(function(){});
+          }
+        }).then(function(){
+          idx++;
+          setTimeout(saveNext, 300);
+        });
+      }
+
+      saveNext();
+    }
+
+    function deleteAllAudio(){
+      if(!confirm('Delete ALL script audio from Azure Blob Storage and local browser cache?')) return;
+      stop();
+      inMemoryUrlCache = {};
+
+      var voice = getCurrentVoice();
+      var speed = getCurrentSpeed();
+
+      var deletes = ALL_BEATS.map(function(item){
+        return AzureStorageAudio.deleteBlobFromAzure(item.id, voice, speed).catch(function(){});
+      });
+
+      Promise.all(deletes.concat([ScriptStorage.clearAll()])).then(function(){
+        showToast('🗑️ All script audio deleted from Azure and local storage.');
+        updateStorageStatus();
+      });
+    }
+
+    function configureAzureSas(){
+      var current = localStorage.getItem('taskDecomposition_azureContainerSasUrl') || '';
+      var val = prompt(
+        'Configure Azure Blob Storage Container SAS URL for sep-3-agentic-coding:\n(e.g., https://dpprojects.blob.core.windows.net/sep-3-agentic-coding?sp=racwdl&st=...)\n\nLeave empty to restore default container.',
+        current
+      );
+      if(val !== null){
+        if(val.trim()){
+          localStorage.setItem('taskDecomposition_azureContainerSasUrl', val.trim());
+          showToast('☁️ Azure SAS URL updated!');
+        } else {
+          localStorage.removeItem('taskDecomposition_azureContainerSasUrl');
+          showToast('☁️ Azure SAS URL reset to default container.');
+        }
+        updateStorageStatus();
+      }
+    }
+
+    function onVoiceOrSpeedChange(){
+      updateStorageStatus();
+    }
+
+    loadVoices();
+    setTimeout(updateStorageStatus, 200);
+
+    return {
+      toggleBeat: toggleBeat,
+      saveBeatToAzure: saveBeatToAzure,
+      downloadBeatAudio: downloadBeatAudio,
+      deleteBeatAudio: deleteBeatAudio,
+      togglePlayAll: togglePlayAll,
+      saveAllToAzure: saveAllToAzure,
+      deleteAllAudio: deleteAllAudio,
+      configureAzureSas: configureAzureSas,
+      onVoiceOrSpeedChange: onVoiceOrSpeedChange,
+      stop: stop
+    };
+  })();
+
+  // Global functions called by inline HTML attributes
+  function togglePlayBeat(beatId, label, btn){
+    ScriptVoicePlayer.toggleBeat(beatId, label, btn);
+  }
+
+  function saveBeatToAzure(beatId, label, btn){
+    ScriptVoicePlayer.saveBeatToAzure(beatId, label, btn);
+  }
+
+  function deleteBeatAudio(beatId, label, btn){
+    ScriptVoicePlayer.deleteBeatAudio(beatId, label, btn);
+  }
+
+  function downloadBeatAudio(beatId, label, btn){
+    ScriptVoicePlayer.downloadBeatAudio(beatId, label, btn);
+  }
+
+  function togglePlayAll(btn){
+    ScriptVoicePlayer.togglePlayAll(btn);
+  }
+
+  function stopAudio(){
+    ScriptVoicePlayer.stop();
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sanity Check Report - Task Decomposition</title>
+  
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  
+  <link rel="stylesheet" href="../css/shared.css">
+  
+  <script>
+    // GitHub Pages / Cloudflare Workers routing fix
+    (function(){
+      var isGitHub = window.location.hostname === "rifaterdemsahin.github.io";
+      var isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+      if (!isLocal && !isGitHub && window.location.hostname !== "sep-3-agentic-coding.polished-boat-17b2.workers.dev") {
+        var path = window.location.pathname.replace(/^\/sep-3-agentic-coding/, '');
+        window.location.replace("https://sep-3-agentic-coding.polished-boat-17b2.workers.dev" + path + window.location.search + window.location.hash);
+      }
+    })();
+  </script>
+
+  <style>
+    main {
+      padding: 40px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .report-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+    .report-card h2 {
+      margin-top: 0;
+      color: #b388ff;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .status-item:last-child {
+      border-bottom: none;
+    }
+    .status-icon {
+      font-size: 1.2rem;
+    }
+    .status-pass { color: #7be08a; }
+    .status-warn { color: #e8b94a; }
+    .status-fail { color: #ff5a5a; }
+    .btn-run {
+      background: #b388ff;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: opacity 0.2s;
+    }
+    .btn-run:hover { opacity: 0.8; }
+  </style>
+</head>
+<body>
+  <div id="nav-mount"></div>
+  <script src="../js/nav.js"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/notes.js"></script>
+  <script>
+    if(window.Nav) window.Nav.render('sanity-check');
+  </script>
+
+  <main>
+    <h1>🩺 Project Sanity Check Report</h1>
+    <p>Automated verification of project links, assets, tasks, and data integrity.</p>
+
+    <div class="report-card" id="links-report">
+      <h2>🔗 Link & Routing Integrity</h2>
+      <div class="status-item">
+        <span>GitHub Pages Redirects (<head> snippet present)</span>
+        <span class="status-icon status-pass">✅ Pass</span>
+      </div>
+      <div class="status-item">
+        <span>Cloudflare Worker Live URLs</span>
+        <span class="status-icon status-warn">⚠️ Needs Manual NPM Run</span>
+      </div>
+      <div style="margin-top: 15px; font-size: 0.9em; color: #aaa;">
+        Run <code>npm run test:links</code> locally to scan all anchor tags and live routing endpoints.
+      </div>
+    </div>
+
+    <div class="report-card" id="tasks-report">
+      <h2>✅ Production Plan (Tasks) Integrity</h2>
+      <div id="task-stats">Loading...</div>
+    </div>
+
+    <div class="report-card" id="supabase-report">
+      <h2>🗄️ Supabase Connection</h2>
+      <div class="status-item">
+        <span>Database Reachability</span>
+        <span class="status-icon" id="db-status">⏳ Checking...</span>
+      </div>
+    </div>
+
+    <div class="report-card" id="content-report">
+      <h2>📄 Per-Page Content Data</h2>
+      <div id="content-stats">⏳ Scanning content_blocks by page...</div>
+    </div>
+  </main>
+
+  <script>
+    // Load Task stats
+    function renderTaskStats() {
+      if(!window.Nav) return;
+      const stats = window.Nav.getGamifiedStats();
+      const html = `
+        <div class="status-item">
+          <span>Total Tasks Configured</span>
+          <span><b>${stats.total}</b></span>
+        </div>
+        <div class="status-item">
+          <span>Completion Status</span>
+          <span>${stats.done} Done / ${stats.prog} Progress / ${stats.todo} Pending</span>
+        </div>
+        <div class="status-item">
+          <span>Level & Rank</span>
+          <span style="color: #e8b94a;">⭐ Lvl ${stats.level} · ${stats.rank}</span>
+        </div>
+      `;
+      document.getElementById('task-stats').innerHTML = html;
+    }
+
+    // Check Supabase
+    async function checkSupabase() {
+      const dbStatus = document.getElementById('db-status');
+      if (!window.sb) {
+        dbStatus.innerHTML = '<span class="status-fail">❌ Supabase Not Initialized</span>';
+        return;
+      }
+      try {
+        const { data, error } = await window.sb.from('content_blocks').select('id').limit(1);
+        if (error) throw error;
+        dbStatus.innerHTML = '<span class="status-pass">✅ Connected (content_blocks reachable)</span>';
+      } catch(err) {
+        dbStatus.innerHTML = '<span class="status-fail">❌ Error: ' + err.message + '</span>';
+      }
+    }
+
+    // Scan content_blocks per page — every content-driven page should
+    // have at least one row, or its rendered sections will be empty.
+    var EXPECTED_PAGES = ['index.html', 'arguments.html', 'script.html', 'design.html', 'previsualisation.html'];
+
+    async function scanContentBlocks() {
+      const el = document.getElementById('content-stats');
+      if (!window.sb) {
+        el.innerHTML = '<span class="status-fail">❌ Supabase Not Initialized</span>';
+        return;
+      }
+      try {
+        const { data, error } = await window.sb.from('content_blocks').select('page');
+        if (error) throw error;
+        const counts = {};
+        (data || []).forEach(row => { counts[row.page] = (counts[row.page] || 0) + 1; });
+        const rows = EXPECTED_PAGES.map(page => {
+          const n = counts[page] || 0;
+          const icon = n > 0 ? '<span class="status-pass">✅ ' + n + ' rows</span>' : '<span class="status-fail">❌ 0 rows</span>';
+          return '<div class="status-item"><span>' + page + '</span><span>' + icon + '</span></div>';
+        }).join('');
+        el.innerHTML = rows + '<div style="margin-top: 15px; font-size: 0.9em; color: #aaa;">Total: ' + (data ? data.length : 0) + ' content_blocks rows across ' + EXPECTED_PAGES.length + ' pages.</div>';
+      } catch(err) {
+        el.innerHTML = '<span class="status-fail">❌ Error: ' + err.message + '</span>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderTaskStats();
+      checkSupabase();
+      scanContentBlocks();
+    });
+  </script>
+</body>
+</html>

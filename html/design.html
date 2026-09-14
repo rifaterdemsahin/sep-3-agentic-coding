@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  // Canonical host is Cloudflare Workers; GitHub Pages forwards visitors with repo subpath cleaned.
+  if(location.hostname.endsWith('github.io')){
+    var cleanPath = location.pathname.replace(/^\/sep-3-agentic-coding/, '').replace(/^\/[^/]+(?=\/html\/)/, '');
+    if(!cleanPath.startsWith('/')) cleanPath = '/' + cleanPath;
+    location.replace('https://sep-3-agentic-coding.polished-boat-17b2.workers.dev' + cleanPath + location.search + location.hash);
+  }
+</script>
+<title>🎨 Design — Task Decomposition</title>
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+  header{
+    padding:48px 24px 32px;
+    max-width:1000px;
+    margin:0 auto;
+    text-align:center;
+  }
+  header .eyebrow{
+    color:var(--accent);
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    font-size:12px;
+    font-weight:600;
+  }
+  header h1{
+    font-size:clamp(24px,4vw,38px);
+    margin:10px 0 12px;
+    font-weight:700;
+  }
+  header p.sub{
+    color:var(--text-dim);
+    max-width:640px;
+    margin:0 auto;
+    font-size:15px;
+  }
+
+  main{
+    max-width:1000px;
+    margin:0 auto;
+    padding:0 24px 90px;
+  }
+
+  section.block{
+    margin-bottom:40px;
+  }
+  section.block h2{
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    color:var(--accent-2);
+    font-weight:700;
+    margin:0 0 16px;
+  }
+
+  /* Palette & Theme Controls */
+  .theme-bar{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    padding:12px;
+    border-radius:12px;
+    align-items:center;
+  }
+  .theme-bar-label{
+    font-size:12px;
+    font-weight:700;
+    color:var(--text-dim);
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    margin-right:4px;
+  }
+  .theme-chip{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:12.5px;
+    padding:6px 12px;
+    border-radius:20px;
+    border:1px solid var(--panel-border);
+    background:var(--bg);
+    color:var(--text);
+    cursor:pointer;
+    transition:all .15s ease;
+    font-family:inherit;
+  }
+  .theme-chip:hover{
+    border-color:var(--accent-2);
+    transform:translateY(-1px);
+  }
+  .theme-chip.active{
+    border-color:var(--accent-2);
+    background:rgba(90,176,255,.12);
+    color:var(--text);
+    font-weight:600;
+    box-shadow:0 0 0 1px var(--accent-2);
+  }
+  .theme-chip .tc-dot{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    display:inline-block;
+  }
+  .cookie-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:11.5px;
+    color:var(--text-dim);
+    background:rgba(127,127,127,.08);
+    border:1px solid var(--panel-border);
+    padding:4px 10px;
+    border-radius:20px;
+    margin-top:10px;
+  }
+
+  .swatches{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:14px;
+  }
+  .swatch-card{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:10px;
+    overflow:hidden;
+    transition:border-color .15s ease;
+  }
+  .swatch-card:hover{
+    border-color:var(--accent-2);
+  }
+  .swatch-fill{
+    height:64px;
+    border-bottom:1px solid var(--panel-border);
+  }
+  .swatch-meta{padding:10px 12px;font-size:12px;color:var(--text-dim);}
+  .swatch-meta b{display:block;color:var(--text);font-size:13px;margin-bottom:2px;}
+  .swatch-meta code{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:var(--accent);}
+
+  /* Contrast rule cards */
+  .contrast-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  @media (max-width:640px){.contrast-row{grid-template-columns:1fr;}}
+  .mood-card{
+    border-radius:12px;
+    padding:20px 22px;
+    border:1px solid var(--panel-border);
+    background:var(--panel);
+  }
+  .mood-card.cold{
+    border-top:3px solid var(--cold);
+    background:linear-gradient(160deg, rgba(90,176,255,.08), var(--panel));
+  }
+  .mood-card.warm{
+    border-top:3px solid var(--warm);
+    background:linear-gradient(160deg, rgba(232,185,74,.08), var(--panel));
+  }
+  .mood-card h3{margin:0 0 8px;font-size:15px;color:var(--text);}
+  .mood-card ul{margin:0;padding-left:18px;font-size:13.5px;color:var(--text-dim);}
+  .mood-card li{margin-bottom:4px;}
+  .mood-card strong{color:var(--text);}
+
+  /* Typography */
+  .type-sample{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:10px;
+    padding:20px 22px;
+    margin-bottom:12px;
+  }
+  .type-sample .label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--text-dim);
+    margin-bottom:8px;
+    font-weight:700;
+  }
+  .type-sample .sample-h{font-size:28px;font-weight:700;color:var(--text);}
+  .type-sample .sample-sub{font-size:15px;color:var(--text-dim);margin-top:6px;}
+  .type-sample .sample-lower{font-size:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);margin-top:10px;font-weight:600;}
+
+  /* Motion graphic spec */
+  .spec-table{
+    width:100%;
+    border-collapse:collapse;
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:10px;
+    overflow:hidden;
+    font-size:13.5px;
+  }
+  .spec-table th,.spec-table td{
+    text-align:left;
+    padding:12px 16px;
+    border-bottom:1px solid var(--panel-border);
+    color:var(--text);
+  }
+  .spec-table th{
+    color:var(--accent-2);
+    text-transform:uppercase;
+    font-size:11px;
+    letter-spacing:.06em;
+    font-weight:700;
+    background:rgba(127,127,127,.05);
+  }
+  .spec-table tr:last-child td{border-bottom:none;}
+  .spec-table td.dim{color:var(--text-dim);}
+
+  /* Pacing timeline */
+  .pacing{
+    display:flex;
+    border-radius:10px;
+    overflow:hidden;
+    border:1px solid var(--panel-border);
+    font-size:12.5px;
+  }
+  .pacing div{
+    padding:14px 10px;
+    text-align:center;
+    font-weight:700;
+  }
+  .pacing .p1{flex:105;background:rgba(90,176,255,.18);color:var(--text);border-right:1px solid var(--panel-border);}
+  .pacing .p3{flex:120;background:rgba(90,176,255,.32);color:var(--text);border-right:1px solid var(--panel-border);}
+  .pacing .p5{flex:45;background:rgba(232,185,74,.25);color:var(--text);}
+  .pacing-legend{
+    display:flex;
+    justify-content:space-between;
+    font-size:11.5px;
+    color:var(--text-dim);
+    margin-top:6px;
+    font-weight:500;
+  }
+
+  /* Three-act structure */
+  .acts{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+  }
+  @media (max-width:720px){.acts{grid-template-columns:1fr;}}
+  .act-card{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:12px;
+    padding:18px 20px;
+    border-top:3px solid var(--cold);
+  }
+  .act-card.act2{border-top-color:var(--accent-2);}
+  .act-card.act3{border-top-color:var(--warm);}
+  .act-card .act-eyebrow{
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--text-dim);
+    font-weight:700;
+  }
+  .act-card h3{margin:6px 0 4px;font-size:16px;color:var(--text);}
+  .act-card .act-tc{font-size:12px;color:var(--accent);font-weight:600;margin-bottom:10px;}
+  .act-card ul{margin:0;padding-left:18px;font-size:13px;color:var(--text-dim);}
+  .act-card li{margin-bottom:4px;}
+  .act-card a.act-link{font-size:11.5px;color:var(--accent-2);text-decoration:none;font-weight:600;}
+  .act-card a.act-link:hover{text-decoration:underline;}
+
+  footer{
+    max-width:1000px;
+    margin:0 auto;
+    padding:24px;
+    text-align:center;
+    color:var(--text-dim);
+    font-size:12.5px;
+    border-top:1px solid var(--panel-border);
+  }
+  footer a{color:var(--accent-2);text-decoration:none;}
+  footer a:hover{text-decoration:underline;}
+
+  .add-asset-btn{
+    font-size:11px;
+    padding:4px 10px;
+    border-radius:20px;
+    border:1px solid var(--panel-border);
+    background:transparent;
+    color:var(--text-dim);
+    cursor:pointer;
+    transition:border-color .15s ease,color .15s ease,background .15s ease;
+    white-space:nowrap;
+  }
+  .add-asset-btn:hover{border-color:var(--accent-2);color:var(--text);}
+  .add-asset-btn.added{border-color:var(--warm);color:var(--warm);background:rgba(232,185,74,.08);}
+</style>
+<script src="../js/video-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="../js/nav.js"></script>
+<script src="../js/content-db.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/notes.js"></script>
+</head>
+<body>
+
+<div id="nav-mount"></div>
+<script>Nav.render('design');</script>
+
+<header>
+  <div class="eyebrow">🎨 Visual Style Guide · v1</div>
+  <h1>Design</h1>
+  <p class="sub">Palette, typography, and pacing rules for the "Task Decomposition" course module — cold analytical blue for the problem, warm gold for the resolved workflow.</p>
+</header>
+
+<div class="pipeline-wrap" id="pipeline-stepper"></div>
+
+<main>
+
+  <section class="block">
+    <h2>🎬 Three-Act Structure</h2>
+    <p class="sub" style="margin:-10px 0 16px;text-align:left;max-width:none;">The script's five beats collapse into a classic three-act shape — this is the structure design and pacing decisions should key off, not the individual sections.</p>
+    <div class="acts" id="acts-mount"></div>
+  </section>
+
+  <section class="block">
+    <h2>🎛️ Core Editing Rule</h2>
+    <div class="contrast-row" id="editing-rule-mount"></div>
+  </section>
+
+  <section class="block" id="palette-section">
+    <h2>🎨 Theme &amp; Palette</h2>
+    <div class="theme-bar">
+      <span class="theme-bar-label">Active Theme:</span>
+      <div id="theme-chips-container" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+    </div>
+    <div class="swatches" id="palette-swatches"></div>
+    <div class="cookie-badge" id="cookie-status-badge">
+      <span>🍪 Cookie synced: <code id="cookie-val" style="color:var(--accent);font-family:ui-monospace,Menlo,monospace;">taskDecomposition_theme_v1=dark</code> (Persistent 365 days across sessions)</span>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2>🔤 Typography</h2>
+    <div id="typography-mount"></div>
+  </section>
+
+  <section class="block">
+    <h2>✨ Motion Graphic Specs</h2>
+    <table class="spec-table">
+      <tr><th>Graphic</th><th>Style</th><th>Section</th><th></th></tr>
+      <tbody id="motion-specs-mount"></tbody>
+    </table>
+  </section>
+
+  <section class="block">
+    <h2>⏱️ Pacing Across the Timeline</h2>
+    <div class="pacing" id="pacing-mount"></div>
+    <div class="pacing-legend">
+      <span>0:00</span>
+      <span>fast → slower →</span>
+      <span>4:30</span>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  🎨 Design guide for <a href="https://github.com/rifaterdemsahin/sep-3-agentic-coding" target="_blank" rel="noopener">rifaterdemsahin/sep-3-agentic-coding</a> — see the <a href="previsualisation.html">previsualisation</a> for how this applies shot-by-shot. See everything you've saved in 🗂️ <a href="assets.html">Assets</a>.
+</footer>
+
+<script src="../js/pipeline.js"></script>
+<script src="../js/assets.js"></script>
+<script src="../js/links.js"></script>
+<script>
+  Pipeline.render('design');
+  PipelineLinks.init({ file: 'design.html', sourceFile: 'script.html', sourceLabel: 'Script' });
+
+  function escAttr(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;'); }
+
+  function renderDesignContent(){
+    var acts = ContentDB.getBlocks('design.html', 'three-act-structure');
+    document.getElementById('acts-mount').innerHTML = acts.map(function(b){
+      var d = b.data;
+      return '<div class="act-card ' + d.cls + '">' +
+        '<div class="act-eyebrow">' + d.eyebrow + '</div>' +
+        '<h3>' + d.title + '</h3>' +
+        '<div class="act-tc">' + d.tc + '</div>' +
+        '<ul>' + d.items.map(function(li){ return '<li>' + li + '</li>'; }).join('') + '</ul>' +
+        '<a class="act-link" href="' + d.linkHref + '">' + d.linkLabel + '</a>' +
+      '</div>';
+    }).join('');
+
+    var rule = ContentDB.getBlocks('design.html', 'editing-rule')[0];
+    if(rule){
+      var moodCard = function(m, cls){
+        return '<div class="mood-card ' + cls + '"><h3>' + m.title + '</h3><ul>' + m.items.map(function(li){ return '<li>' + li + '</li>'; }).join('') + '</ul></div>';
+      };
+      document.getElementById('editing-rule-mount').innerHTML = moodCard(rule.data.cold, 'cold') + moodCard(rule.data.warm, 'warm');
+    }
+
+    var typo = ContentDB.getBlocks('design.html', 'typography')[0];
+    if(typo){
+      var d = typo.data;
+      document.getElementById('typography-mount').innerHTML =
+        '<div class="type-sample">' +
+          '<div class="label">' + d.title.label + '</div>' +
+          '<div class="sample-h">' + d.title.sample + '</div>' +
+          '<div class="sample-sub">' + d.title.sub + '</div>' +
+        '</div>' +
+        '<div class="type-sample">' +
+          '<div class="label">' + d.lower.label + '</div>' +
+          '<div class="sample-lower">' + d.lower.sample + '</div>' +
+        '</div>';
+    }
+
+    var specs = ContentDB.getBlocks('design.html', 'motion-specs');
+    document.getElementById('motion-specs-mount').innerHTML = specs.map(function(b){
+      var d = b.data;
+      return '<tr>' +
+        '<td>' + d.graphic + '</td>' +
+        '<td class="dim">' + d.style + '</td>' +
+        '<td class="dim">' + d.section + '</td>' +
+        '<td><button class="add-asset-btn" data-id="' + b.id + '" data-type="spec" data-source="Design" data-title="' + escAttr(d.addTitle) + '" data-desc="' + escAttr(d.addDesc) + '">➕ Add to Assets</button></td>' +
+      '</tr>';
+    }).join('');
+
+    var pacing = ContentDB.getBlocks('design.html', 'pacing')[0];
+    if(pacing){
+      var p = pacing.data;
+      document.getElementById('pacing-mount').innerHTML =
+        '<div class="p1" style="flex:' + p.act1Flex + ';">❄️ Act 1 — Setup</div>' +
+        '<div class="p3" style="flex:' + p.act2Flex + ';">🌳 Act 2 — Confrontation</div>' +
+        '<div class="p5" style="flex:' + p.act3Flex + ';background:var(--warm);">🔥 Act 3 — Resolution</div>';
+    }
+  }
+
+  Promise.all([ContentDB.ready, AssetDB.ready]).then(function(){
+    renderDesignContent();
+    AssetDB.initAddButtons();
+  });
+
+  (function(){
+    var chipsContainer = document.getElementById('theme-chips-container');
+    var swatchesContainer = document.getElementById('palette-swatches');
+    if(!chipsContainer || !swatchesContainer) return;
+
+    var SWATCH_DEFS = [
+      { key: 'bg', label: 'Background', desc: 'Page background & canvas' },
+      { key: 'panel', label: 'Panel', desc: 'Cards, containers, navigation' },
+      { key: 'panelBorder', label: 'Border', desc: 'Structure & subtle dividers' },
+      { key: 'cold', label: 'Cold Slate Blue (Panic / Apocalypse)', desc: 'Act 1, headlines, robotics, doom claims' },
+      { key: 'warm', label: 'Warm Gold (Human Agency & Education)', desc: 'Act 3, human potential, family, agency' },
+      { key: 'accent', label: 'Brand Gold', desc: 'Highlights & primary badges' },
+      { key: 'accent2', label: 'Slate Blue Accent', desc: 'Subheadings, links, active pills' },
+      { key: 'text', label: 'Primary Text', desc: 'Main headings & body text' },
+      { key: 'textDim', label: 'Muted Text', desc: 'Labels, captions, timecodes' }
+    ];
+
+    function renderThemeChips(){
+      var current = document.documentElement.getAttribute('data-theme') || 'dark';
+      chipsContainer.innerHTML = '';
+      if(!window.Theme || !window.Theme.THEMES) return;
+
+      window.Theme.THEMES.forEach(function(t){
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'theme-chip' + (t.id === current ? ' active' : '');
+        btn.innerHTML = '<span class="tc-dot" style="background:' + t.vars.accent + ';"></span>' + t.emoji + ' ' + t.label;
+        btn.addEventListener('click', function(){
+          if(window.Theme && window.Theme.apply){
+            window.Theme.apply(t.id);
+            window.Theme.save(t.id);
+          }
+          updateAll();
+        });
+        chipsContainer.appendChild(btn);
+      });
+    }
+
+    function renderSwatches(){
+      var current = document.documentElement.getAttribute('data-theme') || 'dark';
+      var themeObj = (window.Theme && window.Theme.THEMES ? window.Theme.THEMES.find(function(t){ return t.id === current; }) : null) || { vars: {} };
+      var vars = themeObj.vars || {};
+
+      swatchesContainer.innerHTML = '';
+      SWATCH_DEFS.forEach(function(def){
+        var hex = vars[def.key] || '#888888';
+        var card = document.createElement('div');
+        card.className = 'swatch-card';
+        card.innerHTML =
+          '<div class="swatch-fill" style="background:' + hex + ';"></div>' +
+          '<div class="swatch-meta">' +
+            '<b>' + def.label + '</b>' +
+            '<code>' + hex + '</code>' +
+            '<div style="font-size:11px;color:var(--text-dim);margin-top:3px;">' + def.desc + '</div>' +
+          '</div>';
+        swatchesContainer.appendChild(card);
+      });
+    }
+
+    function updateAll(){
+      var current = document.documentElement.getAttribute('data-theme') || 'dark';
+      renderThemeChips();
+      renderSwatches();
+      var cookieValEl = document.getElementById('cookie-val');
+      if(cookieValEl){
+        var match = document.cookie.match(/(?:^|;\s*)taskDecomposition_theme_v1=([^;]*)/);
+        var val = match ? decodeURIComponent(match[1]) : current;
+        cookieValEl.textContent = 'taskDecomposition_theme_v1=' + val;
+      }
+    }
+
+    updateAll();
+    window.addEventListener('themechange', updateAll);
+  })();
+</script>
+</body>
+</html>

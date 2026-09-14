@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  // Canonical host is Cloudflare Workers; GitHub Pages forwards visitors with repo subpath cleaned.
+  if(location.hostname.endsWith('github.io')){
+    var cleanPath = location.pathname.replace(/^\/sep-3-agentic-coding/, '').replace(/^\/[^/]+(?=\/html\/)/, '');
+    if(!cleanPath.startsWith('/')) cleanPath = '/' + cleanPath;
+    location.replace('https://sep-3-agentic-coding.polished-boat-17b2.workers.dev' + cleanPath + location.search + location.hash);
+  }
+</script>
+<title>🎬 About this video — Task Decomposition</title>
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+  header{ padding:48px 24px 24px; max-width:1000px; margin:0 auto; text-align:center; }
+  header .eyebrow{ color:var(--accent); letter-spacing:.14em; text-transform:uppercase; font-size:12px; font-weight:600; }
+  header h1{ font-size:clamp(24px,4vw,38px); margin:10px 0 12px; font-weight:700; }
+  header p.sub{ color:var(--text-dim); max-width:640px; margin:0 auto; font-size:15px; }
+
+  main{ max-width:1000px; margin:0 auto; padding:0 24px 90px; }
+
+  .video-summary{
+    margin:28px 0 0;
+    padding:20px 22px;
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:12px;
+  }
+  .video-summary h2{ margin:0 0 4px; font-size:15px; }
+  .video-summary .vs-intro{ color:var(--text-dim); font-size:13.5px; margin:0 0 16px; }
+  .video-summary dl{
+    display:grid;
+    grid-template-columns:auto 1fr;
+    gap:10px 16px;
+    margin:0;
+  }
+  .video-summary dt{
+    font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--accent); white-space:nowrap; padding-top:1px;
+  }
+  .video-summary dd{ margin:0; color:var(--text); font-size:14px; }
+  .vs-share{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    margin-top:18px; padding-top:16px; border-top:1px solid var(--panel-border);
+  }
+  .vs-share-hint{ font-size:12.5px; color:var(--text-dim); }
+  #whatsappShareBtn{ text-decoration:none; display:inline-flex; align-items:center; }
+
+  footer{
+    max-width:1000px; margin:0 auto; padding:24px; text-align:center;
+    color:var(--text-dim); font-size:12.5px; border-top:1px solid var(--panel-border);
+  }
+  footer a{color:var(--accent-2);text-decoration:none;}
+  footer a:hover{text-decoration:underline;}
+</style>
+<script src="../js/video-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="../js/nav.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/notes.js"></script>
+</head>
+<body>
+
+<div id="nav-mount"></div>
+<script>Nav.render('about');</script>
+
+<header>
+  <div class="eyebrow">🎬 Analysis · v1</div>
+  <h1>About this video</h1>
+  <p class="sub">The story behind "Task Decomposition" — why it exists, what it argues, and how it's put together.</p>
+</header>
+
+<main>
+  <section class="video-summary">
+    <h2>🎬 About this video</h2>
+    <p class="vs-intro">The 5W1H behind "Task Decomposition" — the story this asset library exists to support.</p>
+    <dl>
+      <dt>❓ Why</dt>
+      <dd>To push back on the "work will be optional in 10 years" narrative with counter-evidence — history, economics, and current labor data — rather than vibes.</dd>
+      <dt>🤔 What</dt>
+      <dd>A researched rebuttal video that lays AI agent workflows's job-apocalypse claims side-by-side with the pro/con case, then argues for a more grounded, human-in-the-loop future of work.</dd>
+      <dt>🛠️ How</dt>
+      <dd>By arguing that knowledge combined with AI opens up brand-new sectors rather than draining a fixed pool of jobs — see the full case in 🧩 <a href="arguments.html">Arguments</a>, built from 🔍 <a href="index.html">Research</a> and carried into the 📝 Script → 🎨 Design → 🎞️ Previsualisation pipeline.</dd>
+      <dt>⏰ When</dt>
+      <dd>After generative AI — this is a post-ChatGPT/LLM-era argument; the job-apocalypse claims it's debunking only started circulating once generative AI went mainstream.</dd>
+      <dt>📍 Where</dt>
+      <dd>Globally — the effect of AI on jobs isn't confined to one country or industry, so the video's argument and evidence are drawn from and apply worldwide.</dd>
+    </dl>
+    <div class="vs-share">
+      <button class="btn" id="copySummaryBtn">📋 Copy summary</button>
+      <a class="btn" id="whatsappShareBtn" target="_blank" rel="noopener">💬 Share on WhatsApp</a>
+      <span class="vs-share-hint">Copy or share this summary to collect feedback 🙌</span>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <a href="https://github.com/rifaterdemsahin/sep-3-agentic-coding" target="_blank" rel="noopener">🐙 GitHub Repo</a>
+</footer>
+
+<script>
+  (function(){
+    var summaryText =
+      '🎬 Task Decomposition\n\n' +
+      '❓ Why: To push back on the "work will be optional in 10 years" narrative with counter-evidence — history, economics, and current labor data — rather than vibes.\n\n' +
+      '🤔 What: A researched rebuttal video that lays AI agent workflows\'s job-apocalypse claims side-by-side with the pro/con case, then argues for a more grounded, human-in-the-loop future of work.\n\n' +
+      '🛠️ How: By arguing that knowledge + AI opens up brand-new sectors rather than draining a fixed pool of jobs.\n\n' +
+      '⏰ When: After generative AI — a post-ChatGPT/LLM-era argument.\n\n' +
+      '📍 Where: Globally — AI\'s effect on jobs isn\'t confined to one country or industry.\n\n' +
+      '💬 Got feedback? Reply here!\n' +
+      window.location.href;
+
+    document.getElementById('copySummaryBtn').addEventListener('click', function(){
+      navigator.clipboard.writeText(summaryText).then(function(){
+        var btn = document.getElementById('copySummaryBtn');
+        var original = btn.textContent;
+        btn.textContent = '✅ Copied';
+        setTimeout(function(){ btn.textContent = original; }, 1200);
+      }).catch(function(){
+        alert('Copy failed — your browser may be blocking clipboard access.');
+      });
+    });
+
+    document.getElementById('whatsappShareBtn').href =
+      'https://wa.me/?text=' + encodeURIComponent(summaryText);
+  })();
+</script>
+</body>
+</html>

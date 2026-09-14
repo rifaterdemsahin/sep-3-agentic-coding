@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  // Canonical host is Cloudflare Workers; GitHub Pages forwards visitors with repo subpath cleaned.
+  if(location.hostname.endsWith('github.io')){
+    var cleanPath = location.pathname.replace(/^\/sep-3-agentic-coding/, '').replace(/^\/[^/]+(?=\/html\/)/, '');
+    if(!cleanPath.startsWith('/')) cleanPath = '/' + cleanPath;
+    location.replace('https://sep-3-agentic-coding.polished-boat-17b2.workers.dev' + cleanPath + location.search + location.hash);
+  }
+</script>
+<title>🗂️ Assets — Task Decomposition</title>
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+  header{ padding:48px 24px 24px; max-width:1000px; margin:0 auto; text-align:center; }
+  header .eyebrow{ color:var(--accent); letter-spacing:.14em; text-transform:uppercase; font-size:12px; font-weight:600; }
+  header h1{ font-size:clamp(24px,4vw,38px); margin:10px 0 12px; font-weight:700; }
+  header p.sub{ color:var(--text-dim); max-width:640px; margin:0 auto; font-size:15px; }
+
+  main{ max-width:1000px; margin:0 auto; padding:0 24px 90px; }
+
+  .toolbar{
+    display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap; gap:12px;
+    margin:28px 0 22px;
+    padding:16px 20px;
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:12px;
+  }
+  .toolbar .count{ font-size:13px; color:var(--text-dim); }
+  .toolbar .count b{ color:var(--text); }
+  .toolbar .actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  .btn{
+    font-size:12.5px;
+    padding:7px 14px;
+    border-radius:20px;
+    border:1px solid var(--panel-border);
+    background:transparent;
+    color:var(--text-dim);
+    cursor:pointer;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .btn:hover{ border-color:var(--accent-2); color:var(--text); }
+  .btn.danger:hover{ border-color:var(--danger); color:var(--danger); }
+
+  .empty{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--text-dim);
+    font-size:14px;
+    border:1px dashed var(--panel-border);
+    border-radius:12px;
+  }
+  .empty a{color:var(--accent-2);text-decoration:none;}
+
+  .item{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:12px;
+    padding:18px 20px;
+    margin-bottom:14px;
+  }
+  .item-head{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+    margin-bottom:8px;
+  }
+  .item-tags{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .item-type{
+    font-size:11px; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--accent-2); font-weight:700;
+  }
+  .item-source{
+    font-size:10.5px; color:var(--text-dim);
+    border:1px solid var(--panel-border);
+    padding:2px 8px; border-radius:20px;
+  }
+  .item-order-badge{
+    font-size:11px; color:var(--text-dim);
+    display:inline-flex; align-items:center; gap:4px;
+    background:rgba(255,255,255,.03);
+    border:1px solid var(--panel-border);
+    padding:2px 6px; border-radius:6px;
+  }
+  .item h3{ margin:4px 0 4px; font-size:15.5px; }
+  .item p.desc{ margin:0 0 6px; font-size:13.5px; color:var(--text-dim); }
+  .item a.src-url{ font-size:12px; color:var(--accent-2); text-decoration:none; word-break:break-all; }
+  .item a.src-url:hover{ text-decoration:underline; }
+  .item img.asset-thumb{ display:block; max-width:100%; max-height:220px; border-radius:8px; border:1px solid var(--panel-border); margin:6px 0 10px; cursor:zoom-in; transition:transform .15s ease, border-color .15s ease; }
+  .item img.asset-thumb:hover{ border-color:var(--accent-2); transform:scale(1.01); }
+  .upload-status{ margin:0 0 16px; font-size:12.5px; color:var(--text); padding:8px 14px; border-radius:8px; background:rgba(90,176,255,.1); border:1px solid var(--accent-2); display:flex; align-items:center; gap:8px; }
+  .upload-status.error{ background:rgba(226,104,95,.1); border-color:var(--danger); color:var(--danger); }
+  .upload-status.success{ background:rgba(232,185,74,.1); border-color:var(--accent); color:var(--accent); }
+  .item .meta{ font-size:11px; color:var(--text-dim); margin-top:4px; }
+  .item .remove-btn{
+    font-size:12px; background:none; border:none; color:var(--text-dim);
+    cursor:pointer; padding:2px 6px; border-radius:6px;
+  }
+  .item .remove-btn:hover{ color:var(--danger); }
+
+  .comment-wrap{ margin-top:12px; }
+  .comment-wrap label{
+    font-size:11px; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--text-dim); font-weight:700; display:block; margin-bottom:6px;
+  }
+  .comment-wrap textarea{
+    width:100%;
+    min-height:56px;
+    resize:vertical;
+    background:#0e1017;
+    border:1px solid var(--panel-border);
+    border-radius:8px;
+    color:var(--text);
+    font-family:inherit;
+    font-size:13px;
+    padding:10px 12px;
+  }
+  .comment-wrap textarea:focus{ outline:none; border-color:var(--accent-2); }
+  .save-hint{ font-size:11px; color:var(--text-dim); margin-top:4px; opacity:0; transition:opacity .3s ease; }
+  .save-hint.show{ opacity:1; }
+
+  /* Drag & Drop Overlay */
+  .drop-indicator{
+    display:none;
+    position:fixed;
+    inset:12px;
+    border:2px dashed var(--accent);
+    border-radius:16px;
+    background:rgba(11,13,18,.92);
+    z-index:9999;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:12px;
+    color:var(--text);
+    font-size:18px;
+    font-weight:700;
+    pointer-events:none;
+  }
+  body.drag-active .drop-indicator{ display:flex; }
+
+  /* Image Lightbox Modal */
+  .lightbox-overlay{
+    position:fixed;
+    inset:0;
+    z-index:10000;
+    background:rgba(5,6,9,.88);
+    backdrop-filter:blur(8px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .lightbox-overlay[hidden]{ display:none; }
+  .lightbox-card{
+    max-width:90vw;
+    max-height:90vh;
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:14px;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    box-shadow:0 24px 70px rgba(0,0,0,.8);
+  }
+  .lightbox-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 18px;
+    border-bottom:1px solid var(--panel-border);
+  }
+  .lightbox-head h4{ margin:0; font-size:14px; color:var(--text); }
+  .lightbox-head button{ background:none; border:none; color:var(--text-dim); font-size:18px; cursor:pointer; padding:2px 6px; }
+  .lightbox-head button:hover{ color:var(--text); }
+  .lightbox-body{
+    padding:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:auto;
+    background:#08090d;
+  }
+  .lightbox-body img{ max-width:85vw; max-height:70vh; object-fit:contain; border-radius:6px; }
+  .lightbox-foot{
+    padding:10px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:12px;
+    color:var(--text-dim);
+    border-top:1px solid var(--panel-border);
+  }
+  .lightbox-foot a{ color:var(--accent-2); text-decoration:none; }
+  .lightbox-foot a:hover{ text-decoration:underline; }
+
+  /* Azure Container Image Carousel */
+  .carousel-section{
+    margin:28px 0 0;
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:0 8px 32px rgba(0,0,0,.25);
+  }
+  .carousel-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:12px;
+    padding:16px 20px;
+    border-bottom:1px solid var(--panel-border);
+    background:linear-gradient(180deg, rgba(255,255,255,.02), transparent);
+  }
+  .carousel-title-wrap{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .carousel-title{
+    font-size:15px;
+    font-weight:700;
+    margin:0;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .carousel-badge{
+    font-size:11px;
+    font-weight:600;
+    color:var(--accent-2);
+    background:rgba(90,176,255,.1);
+    border:1px solid rgba(90,176,255,.3);
+    padding:2px 8px;
+    border-radius:20px;
+  }
+  .carousel-header-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .azure-portal-link{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    font-weight:600;
+    color:#5ab0ff;
+    background:rgba(90,176,255,.12);
+    border:1px solid rgba(90,176,255,.35);
+    padding:5px 12px;
+    border-radius:20px;
+    text-decoration:none;
+    transition:all .15s ease;
+  }
+  .azure-portal-link:hover{
+    background:rgba(90,176,255,.22);
+    border-color:var(--accent-2);
+    color:#ffffff;
+  }
+  .carousel-tabs{
+    display:flex;
+    gap:6px;
+    padding:10px 20px;
+    background:#0b0d12;
+    border-bottom:1px solid var(--panel-border);
+    overflow-x:auto;
+  }
+  .carousel-tab{
+    font-size:12px;
+    padding:5px 12px;
+    border-radius:16px;
+    border:1px solid transparent;
+    background:transparent;
+    color:var(--text-dim);
+    cursor:pointer;
+    white-space:nowrap;
+    transition:all .15s ease;
+  }
+  .carousel-tab:hover{ color:var(--text); background:rgba(255,255,255,.04); }
+  .carousel-tab.active{
+    background:rgba(232,185,74,.12);
+    color:var(--accent);
+    border-color:rgba(232,185,74,.35);
+    font-weight:600;
+  }
+
+  .carousel-stage{
+    position:relative;
+    width:100%;
+    aspect-ratio:16/9;
+    max-height:500px;
+    background:#06080c;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    user-select:none;
+  }
+  .carousel-img-wrap{
+    width:100%;
+    height:100%;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .carousel-main-img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    transition:opacity .25s ease;
+    cursor:zoom-in;
+  }
+  .carousel-nav-btn{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    background:rgba(11,13,18,.75);
+    backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,.2);
+    color:var(--text);
+    font-size:22px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    z-index:10;
+    transition:all .2s ease;
+  }
+  .carousel-nav-btn:hover{
+    background:rgba(232,185,74,.9);
+    color:#000000;
+    border-color:var(--accent);
+    transform:translateY(-50%) scale(1.08);
+  }
+  .carousel-nav-btn.prev{ left:16px; }
+  .carousel-nav-btn.next{ right:16px; }
+
+  .carousel-caption{
+    position:absolute;
+    bottom:0;
+    left:0;
+    right:0;
+    padding:32px 20px 14px;
+    background:linear-gradient(to top, rgba(7,9,14,.95) 0%, rgba(7,9,14,.75) 60%, transparent 100%);
+    color:var(--text);
+    z-index:5;
+    pointer-events:auto;
+  }
+  .carousel-caption-tags{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:6px;
+  }
+  .carousel-tag{
+    font-size:10.5px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    padding:2px 8px;
+    border-radius:12px;
+    background:rgba(0,0,0,.6);
+    border:1px solid rgba(255,255,255,.2);
+    color:var(--text);
+  }
+  .carousel-tag.gold{ color:var(--accent); border-color:rgba(232,185,74,.4); }
+  .carousel-tag.blue{ color:var(--accent-2); border-color:rgba(90,176,255,.4); }
+  .carousel-caption-title{
+    font-size:15px;
+    font-weight:700;
+    margin:0 0 3px;
+    color:var(--text);
+  }
+  .carousel-caption-desc{
+    font-size:12.5px;
+    color:#d0d4de;
+    margin:0 0 4px;
+    line-height:1.4;
+  }
+  .carousel-caption-vo{
+    font-size:12px;
+    font-style:italic;
+    color:var(--accent);
+    margin:0;
+  }
+
+  .carousel-progress{
+    height:3px;
+    width:100%;
+    background:rgba(255,255,255,.1);
+    position:relative;
+    overflow:hidden;
+  }
+  .carousel-progress-bar{
+    height:100%;
+    width:0%;
+    background:var(--accent);
+  }
+
+  .carousel-footer-bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:12px;
+    padding:10px 18px;
+    background:#0e1017;
+    border-top:1px solid var(--panel-border);
+  }
+  .carousel-controls-left{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .carousel-counter{
+    font-size:12.5px;
+    color:var(--text-dim);
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  .carousel-counter b{ color:var(--text); }
+  .carousel-filmstrip{
+    display:flex;
+    gap:8px;
+    padding:12px 18px;
+    background:#080a0f;
+    border-top:1px solid var(--panel-border);
+    overflow-x:auto;
+    scrollbar-width:thin;
+  }
+  .carousel-thumb{
+    flex:0 0 80px;
+    height:48px;
+    border-radius:6px;
+    border:2px solid var(--panel-border);
+    background:#131620;
+    cursor:pointer;
+    overflow:hidden;
+    position:relative;
+    transition:all .15s ease;
+    opacity:.6;
+  }
+  .carousel-thumb:hover{
+    opacity:1;
+    border-color:var(--accent-2);
+    transform:scale(1.04);
+  }
+  .carousel-thumb.active{
+    opacity:1;
+    border-color:var(--accent);
+    box-shadow:0 0 0 2px rgba(232,185,74,.4);
+    transform:scale(1.04);
+  }
+  .carousel-thumb img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+  .carousel-thumb-num{
+    position:absolute;
+    bottom:2px;
+    right:3px;
+    font-size:9px;
+    font-weight:700;
+    background:rgba(0,0,0,.8);
+    padding:1px 4px;
+    border-radius:4px;
+    color:#ffffff;
+  }
+
+  footer{
+    max-width:1000px; margin:0 auto; padding:24px; text-align:center;
+    color:var(--text-dim); font-size:12.5px; border-top:1px solid var(--panel-border);
+  }
+  footer a{color:var(--accent-2);text-decoration:none;}
+  footer a:hover{text-decoration:underline;}
+</style>
+<script src="../js/video-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="../js/nav.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/notes.js"></script>
+</head>
+<body>
+
+<div id="nav-mount"></div>
+<script>Nav.render('assets');</script>
+
+<header>
+  <div class="eyebrow">🗂️ Local Database · v1</div>
+  <h1>Asset Database</h1>
+  <p class="sub">Everything you've starred across Research, Arguments, Script, Design, and Previsualisation lands here — add notes per item, then export the whole set. Stored only in this browser's local storage.</p>
+</header>
+
+<main>
+  <!-- Azure Container Image Carousel -->
+  <section class="carousel-section" id="containerCarouselSection">
+    <div class="carousel-header">
+      <div class="carousel-title-wrap">
+        <h2 class="carousel-title">🎞️ Container Media Carousel</h2>
+        <span class="carousel-badge" id="carouselSourceBadge">Azure Blob · sep-3-agentic-coding</span>
+      </div>
+      <div class="carousel-header-actions">
+        <a class="azure-portal-link" href="https://portal.azure.com/#view/Microsoft_Azure_Storage/ContainerMenuBlade/~/overview/storageAccountId/%2Fsubscriptions%2Fb85b029d-9f7c-4c5a-8939-819480780c5d%2FresourceGroups%2Fdeliverypilot-rg%2Fproviders%2FMicrosoft.Storage%2FstorageAccounts%2Fdpprojects/path/sep-3-agentic-coding/etag/%220x8DF0E4F96506ADE%22/defaultId//publicAccessVal/Blob" target="_blank" rel="noopener" title="Open container in Azure Portal">
+          ☁️ Open in Azure Portal ↗
+        </a>
+      </div>
+    </div>
+    
+    <div class="carousel-tabs" id="carouselTabs">
+      <button class="carousel-tab active" data-filter="panels">🎬 Storyboard Panels (9)</button>
+      <button class="carousel-tab" data-filter="all">✨ All Container Media</button>
+      <button class="carousel-tab" data-filter="uploaded">🖼️ Uploaded Assets</button>
+    </div>
+
+    <div class="carousel-stage" id="carouselStage">
+      <button class="carousel-nav-btn prev" id="carouselPrevBtn" aria-label="Previous image">‹</button>
+      <div class="carousel-img-wrap">
+        <img class="carousel-main-img" id="carouselMainImg" src="../images/panel_1.jpg" alt="Panel Preview" title="Click to view full screen">
+      </div>
+      <button class="carousel-nav-btn next" id="carouselNextBtn" aria-label="Next image">›</button>
+
+      <div class="carousel-caption">
+        <div class="carousel-caption-tags">
+          <span class="carousel-tag gold" id="carouselTagNumber">Shot 1 of 9</span>
+          <span class="carousel-tag blue" id="carouselTagTimecode">0:00–0:35</span>
+          <span class="carousel-tag" id="carouselTagSection">Cold Open</span>
+        </div>
+        <h3 class="carousel-caption-title" id="carouselCaptionTitle">Headline Montage: The 5-Year Panic</h3>
+        <p class="carousel-caption-desc" id="carouselCaptionDesc">High-contrast, fast-cut montage of doom headlines ("Robots Take All Jobs", "Musk Predicts End of Work").</p>
+        <p class="carousel-caption-vo" id="carouselCaptionVo">VO: "AI agent workflows says in 5 years, robots and AI will replace human labor..."</p>
+      </div>
+    </div>
+
+    <div class="carousel-progress">
+      <div class="carousel-progress-bar" id="carouselProgressBar"></div>
+    </div>
+
+    <div class="carousel-footer-bar">
+      <div class="carousel-controls-left">
+        <button class="btn" id="carouselPlayBtn">▶️ Auto-Play</button>
+        <span class="carousel-counter" id="carouselCounter">Slide <b>1</b> / 9</span>
+        <button class="btn" id="carouselZoomBtn" title="View Fullscreen / Lightbox">🔍 Enlarge</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <a class="btn" id="carouselDownloadBtn" href="../images/panel_1.jpg" download="panel_1.jpg">⬇️ Download</a>
+        <button class="btn" id="carouselCopyLinkBtn">🔗 Copy Link</button>
+      </div>
+    </div>
+
+    <div class="carousel-filmstrip" id="carouselFilmstrip">
+      <!-- Thumbnails rendered dynamically -->
+    </div>
+  </section>
+
+  <div class="drop-indicator">
+    <span>📥 Drop images here to add to Assets</span>
+    <span style="font-size:13px;font-weight:400;color:var(--text-dim);">Files are instantly processed and saved</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="count"><b id="count">0</b> items saved</div>
+    <div class="actions">
+      <label style="font-size:13px;color:var(--text-dim);display:flex;align-items:center;gap:6px;">
+        Sort:
+        <select id="sortSelect" class="btn" style="padding:6px 10px;">
+          <option value="order" selected>🔢 Relative Order (#)</option>
+          <option value="timecode">🎬 Expected time code</option>
+          <option value="added">🕒 Newest first</option>
+        </select>
+      </label>
+      <button class="btn" id="uploadImageBtn" style="border-color:var(--accent);color:var(--accent);">🖼️ Upload Image</button>
+      <input type="file" id="uploadImageInput" accept="image/*" multiple hidden>
+      <button class="btn" id="azureSyncBtn" title="Configure optional Azure Blob Storage sync">☁️ Azure Sync</button>
+      <button class="btn" id="copyBtn">📋 Copy JSON</button>
+      <button class="btn" id="exportBtn">⬇️ Export JSON</button>
+      <button class="btn danger" id="clearBtn">🗑️ Clear All</button>
+    </div>
+  </div>
+  <div id="uploadStatus" class="upload-status" hidden></div>
+
+  <div id="list"></div>
+  <div class="empty" id="emptyState" hidden>
+    📦 Nothing here yet. Click <b>"🖼️ Upload Image"</b>, drag &amp; drop images here, or paste images directly from your clipboard!
+  </div>
+</main>
+
+<div class="lightbox-overlay" id="lightboxModal" hidden>
+  <div class="lightbox-card">
+    <div class="lightbox-head">
+      <h4 id="lightboxTitle">Image Preview</h4>
+      <button type="button" id="lightboxClose" aria-label="Close">✕</button>
+    </div>
+    <div class="lightbox-body">
+      <img id="lightboxImg" src="" alt="Preview">
+    </div>
+    <div class="lightbox-foot">
+      <span id="lightboxMeta"></span>
+      <div style="display:flex;gap:8px;">
+        <a id="lightboxDownload" class="btn" download="asset-image.png">⬇️ Download</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Asset database for <a href="https://github.com/rifaterdemsahin/sep-3-agentic-coding" target="_blank" rel="noopener">rifaterdemsahin/sep-3-agentic-coding</a> — stored in this browser's local storage, with optional Azure Blob sync.
+</footer>
+
+<script src="../js/assets.js"></script>
+<script>
+  var TYPE_EMOJI = {
+    link: '🔗',
+    footage: '🎥',
+    shot: '🎬',
+    beat: '📝',
+    spec: '🎨',
+    argument: '🧩',
+    image: '🖼️',
+    item: '📦'
+  };
+
+  function fmtDate(iso){
+    try{
+      var d = new Date(iso);
+      return d.toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' }) +
+        ' ' + d.toLocaleTimeString(undefined, { hour:'2-digit', minute:'2-digit' });
+    }catch(e){ return iso; }
+  }
+
+  function formatBytes(bytes){
+    if(!bytes || bytes <= 0) return '0 B';
+    var k = 1024;
+    var sizes = ['B', 'KB', 'MB', 'GB'];
+    var i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  }
+
+  // Parses the "(0:30–1:45)" / "(3:45-4:30)" style time-code range that
+  // script-beat and footage titles/descriptions end with, into seconds
+  // from the start of the video. Returns null when nothing is found, so
+  // items with no expected time code sort after ones that have one.
+  function expectedTimecodeSeconds(item){
+    var text = (item.title || '') + ' ' + (item.description || '');
+    var m = text.match(/(\d{1,2}):(\d{2})\s*[–-]\s*\d{1,2}:\d{2}/);
+    if(!m) return null;
+    return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+  }
+
+  function getAssetOrder(id){
+    var v = localStorage.getItem('taskDecomposition_assetOrder_' + id);
+    if(v !== null && v !== '') return parseInt(v, 10);
+    return 999;
+  }
+  function setAssetOrder(id, val){
+    if(val === '' || isNaN(val)){
+      localStorage.removeItem('taskDecomposition_assetOrder_' + id);
+    } else {
+      localStorage.setItem('taskDecomposition_assetOrder_' + id, String(val));
+    }
+  }
+
+  function getSortMode(){
+    var sel = document.getElementById('sortSelect');
+    return sel ? sel.value : 'order';
+  }
+
+  function render(){
+    var mode = getSortMode();
+    var list = AssetDB.getAssets().slice().sort(function(a, b){
+      if(mode === 'order'){
+        var oa = getAssetOrder(a.id);
+        var ob = getAssetOrder(b.id);
+        if(oa !== ob) return oa - ob;
+        var ta = expectedTimecodeSeconds(a);
+        var tb = expectedTimecodeSeconds(b);
+        if(ta !== null && tb !== null && ta !== tb) return ta - tb;
+        return new Date(b.addedAt) - new Date(a.addedAt);
+      }
+      if(mode === 'timecode'){
+        var ta = expectedTimecodeSeconds(a);
+        var tb = expectedTimecodeSeconds(b);
+        if(ta === null && tb === null) return new Date(b.addedAt) - new Date(a.addedAt);
+        if(ta === null) return 1;
+        if(tb === null) return -1;
+        return ta - tb;
+      }
+      return new Date(b.addedAt) - new Date(a.addedAt);
+    });
+    document.getElementById('count').textContent = list.length;
+    var container = document.getElementById('list');
+    var empty = document.getElementById('emptyState');
+    container.innerHTML = '';
+    empty.hidden = list.length > 0;
+
+    list.forEach(function(item){
+      var el = document.createElement('div');
+      el.className = 'item';
+      var emoji = TYPE_EMOJI[item.type] || TYPE_EMOJI.item;
+      var curOrder = getAssetOrder(item.id);
+      el.innerHTML =
+        '<div class="item-head">' +
+          '<div class="item-tags">' +
+            '<span class="item-type">' + emoji + ' ' + item.type + '</span>' +
+            (item.source ? '<span class="item-source">' + item.source + '</span>' : '') +
+            '<label class="item-order-badge" title="Set relative order value for sorting">' +
+              '🔢 Order: <input type="number" class="order-input" data-id="' + item.id + '" value="' + (curOrder === 999 ? '' : curOrder) + '" placeholder="—" style="width:46px;background:#0e1017;border:1px solid var(--panel-border);border-radius:4px;color:var(--text);font-size:11px;padding:2px 4px;text-align:center;">' +
+            '</label>' +
+          '</div>' +
+          '<button class="remove-btn" title="Remove">🗑️</button>' +
+        '</div>' +
+        '<h3>' + (item.title || '(untitled)') + '</h3>' +
+        (item.type === 'image' && item.url ? '<img class="asset-thumb" src="' + item.url + '" alt="' + (item.title || '') + '" title="Click to view full size">' : '') +
+        (item.description ? '<p class="desc">' + item.description + '</p>' : '') +
+        (item.url && !item.url.startsWith('data:') ? '<a class="src-url" href="' + item.url + '" target="_blank" rel="noopener">' + item.url + '</a>' : '') +
+        '<div class="meta">Added ' + fmtDate(item.addedAt) + '</div>' +
+        '<div class="comment-wrap">' +
+          '<label>💬 Comment</label>' +
+          '<textarea placeholder="Add a note…">' + (item.comment || '') + '</textarea>' +
+          '<div class="save-hint">Saved ✓</div>' +
+        '</div>';
+
+      var orderInput = el.querySelector('.order-input');
+      if(orderInput){
+        orderInput.addEventListener('change', function(){
+          var val = parseInt(orderInput.value, 10);
+          setAssetOrder(item.id, isNaN(val) ? '' : val);
+          if(getSortMode() === 'order') render();
+        });
+      }
+
+      el.querySelector('.remove-btn').addEventListener('click', function(){
+        AssetDB.removeAsset(item.id);
+        render();
+      });
+
+      if(item.type === 'image' && item.url){
+        var thumb = el.querySelector('.asset-thumb');
+        if(thumb){
+          thumb.addEventListener('click', function(){
+            openLightbox(item);
+          });
+        }
+      }
+
+      var textarea = el.querySelector('textarea');
+      var hint = el.querySelector('.save-hint');
+      var saveTimer;
+      textarea.addEventListener('input', function(){
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(function(){
+          AssetDB.updateComment(item.id, textarea.value);
+          hint.classList.add('show');
+          setTimeout(function(){ hint.classList.remove('show'); }, 1200);
+        }, 400);
+      });
+
+      container.appendChild(el);
+    });
+  }
+
+  // Lightbox modal logic
+  var lightbox = document.getElementById('lightboxModal');
+  var lightboxImg = document.getElementById('lightboxImg');
+  var lightboxTitle = document.getElementById('lightboxTitle');
+  var lightboxMeta = document.getElementById('lightboxMeta');
+  var lightboxDownload = document.getElementById('lightboxDownload');
+  var lightboxClose = document.getElementById('lightboxClose');
+
+  function openLightbox(item){
+    lightboxTitle.textContent = item.title || 'Image Preview';
+    lightboxImg.src = item.url;
+    lightboxMeta.textContent = item.description || '';
+    lightboxDownload.href = item.url;
+    lightboxDownload.download = (item.title ? item.title.replace(/[^a-zA-Z0-9_-]/g, '_') : 'asset-image') + '.png';
+    lightbox.hidden = false;
+  }
+  function closeLightbox(){
+    lightbox.hidden = true;
+    lightboxImg.src = '';
+  }
+  lightboxClose.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', function(e){
+    if(e.target === lightbox) closeLightbox();
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && !lightbox.hidden) closeLightbox();
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', function(){
+    var data = JSON.stringify(AssetDB.getAssets(), null, 2);
+    navigator.clipboard.writeText(data).then(function(){
+      var btn = document.getElementById('copyBtn');
+      var original = btn.textContent;
+      btn.textContent = '✅ Copied';
+      setTimeout(function(){ btn.textContent = original; }, 1200);
+    }).catch(function(){
+      alert('Copy failed — your browser may be blocking clipboard access.');
+    });
+  });
+
+  document.getElementById('exportBtn').addEventListener('click', function(){
+    var data = JSON.stringify(AssetDB.getAssets(), null, 2);
+    var blob = new Blob([data], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'job-apocalypse-assets.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', function(){
+    if(confirm('Clear all saved assets? This cannot be undone.')){
+      AssetDB.clearAssets();
+      render();
+    }
+  });
+
+  // Image Upload, Optimization & Sync Engine
+  (function(){
+    var SAS_KEY = 'taskDecomposition_azureContainerSasUrl';
+    var uploadBtn = document.getElementById('uploadImageBtn');
+    var fileInput = document.getElementById('uploadImageInput');
+    var azureSyncBtn = document.getElementById('azureSyncBtn');
+    var statusEl = document.getElementById('uploadStatus');
+
+    function setStatus(msg, type){
+      statusEl.hidden = false;
+      statusEl.textContent = msg;
+      statusEl.className = 'upload-status ' + (type || '');
+      if(type === 'success'){
+        setTimeout(function(){ statusEl.hidden = true; }, 4000);
+      }
+    }
+
+    function optimizeImage(file, callback){
+      var reader = new FileReader();
+      reader.onload = function(e){
+        var dataUrl = e.target.result;
+        var img = new Image();
+        img.onload = function(){
+          var maxDim = 1600;
+          var w = img.naturalWidth;
+          var h = img.naturalHeight;
+          var width = w;
+          var height = h;
+
+          if(w > maxDim || h > maxDim){
+            if(w > h){
+              width = maxDim;
+              height = Math.round(h * (maxDim / w));
+            } else {
+              height = maxDim;
+              width = Math.round(w * (maxDim / h));
+            }
+            var canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            dataUrl = canvas.toDataURL('image/jpeg', 0.86);
+          }
+          callback({
+            dataUrl: dataUrl,
+            width: w,
+            height: h,
+            displaySize: width + '×' + height
+          });
+        };
+        img.onerror = function(){
+          callback({ dataUrl: dataUrl, width: 0, height: 0, displaySize: 'Image' });
+        };
+        img.src = dataUrl;
+      };
+      reader.onerror = function(){
+        setStatus('❌ Failed to read file: ' + file.name, 'error');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function syncToAzure(file, itemId){
+      var sasUrl = localStorage.getItem(SAS_KEY);
+      if(!sasUrl) return;
+      var qIdx = sasUrl.indexOf('?');
+      if(qIdx === -1) return;
+      var containerUrl = sasUrl.slice(0, qIdx).replace(/\/$/, '');
+      var sasQuery = sasUrl.slice(qIdx + 1);
+
+      var safeName = file.name ? file.name.replace(/[^a-zA-Z0-9._-]/g, '-') : 'pasted-image.png';
+      var blobName = Date.now() + '-' + safeName;
+      var blobUrl = containerUrl + '/' + blobName;
+      var putUrl = blobUrl + '?' + sasQuery;
+
+      fetch(putUrl, {
+        method: 'PUT',
+        headers: {
+          'x-ms-blob-type': 'BlockBlob',
+          'x-ms-blob-content-type': file.type || 'image/png',
+          'Content-Type': file.type || 'image/png'
+        },
+        body: file
+      }).then(function(res){
+        if(res.ok){
+          AssetDB.updateAsset(itemId, {
+            url: blobUrl,
+            description: (file.name || 'Image') + ' · ☁️ Synced to Azure Blob'
+          });
+          render();
+          setStatus('☁️ Synced to Azure: ' + (file.name || blobName), 'success');
+        }
+      }).catch(function(err){
+        console.warn('Azure sync failed in background:', err);
+      });
+    }
+
+    function processFile(file){
+      if(!file.type || !file.type.startsWith('image/')){
+        setStatus('⚠️ Skipped non-image file: ' + (file.name || 'unknown'), 'error');
+        return;
+      }
+      setStatus('⏳ Processing ' + (file.name || 'image') + '…');
+      optimizeImage(file, function(opt){
+        var itemId = 'image-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+        var title = file.name || ('Image ' + new Date().toLocaleTimeString());
+        var item = {
+          id: itemId,
+          type: 'image',
+          title: title,
+          description: opt.displaySize + ' (' + formatBytes(file.size) + ')',
+          source: 'Image Upload',
+          url: opt.dataUrl,
+          comment: '',
+          addedAt: new Date().toISOString()
+        };
+        AssetDB.addAsset(item);
+        render();
+        setStatus('✅ Added image: ' + title, 'success');
+        syncToAzure(file, itemId);
+      });
+    }
+
+    uploadBtn.addEventListener('click', function(){
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', function(){
+      var files = Array.from(fileInput.files);
+      fileInput.value = '';
+      if(!files.length) return;
+      files.forEach(processFile);
+    });
+
+    // Azure Settings Modal / Prompt
+    function updateAzureButtonLabel(){
+      var saved = localStorage.getItem(SAS_KEY);
+      azureSyncBtn.textContent = saved ? '☁️ Azure: Connected' : '☁️ Azure Sync';
+      azureSyncBtn.style.borderColor = saved ? 'var(--accent)' : 'var(--panel-border)';
+      azureSyncBtn.style.color = saved ? 'var(--accent)' : 'var(--text-dim)';
+    }
+    updateAzureButtonLabel();
+
+    azureSyncBtn.addEventListener('click', function(){
+      var saved = localStorage.getItem(SAS_KEY) || '';
+      var promptMsg = saved
+        ? 'Current Azure Blob SAS URL is configured.\nPaste a new SAS URL to update it, or click OK with empty text to remove it:'
+        : 'Paste your Azure Blob container SAS URL for sep-3-agentic-coding\n(e.g., https://dpprojects.blob.core.windows.net/sep-3-agentic-coding?sv=...)\n\nStored only in this browser (localStorage).';
+      var res = window.prompt(promptMsg, saved);
+      if(res !== null){
+        res = res.trim();
+        if(res){
+          localStorage.setItem(SAS_KEY, res);
+          setStatus('✅ Azure SAS URL saved.', 'success');
+        } else {
+          localStorage.removeItem(SAS_KEY);
+          setStatus('ℹ️ Azure SAS URL removed. Images will be stored locally.', 'success');
+        }
+        updateAzureButtonLabel();
+      }
+    });
+
+    // Drag and drop support
+    var dragTimer;
+    window.addEventListener('dragenter', function(e){
+      e.preventDefault();
+      document.body.classList.add('drag-active');
+    });
+    window.addEventListener('dragover', function(e){
+      e.preventDefault();
+      clearTimeout(dragTimer);
+      document.body.classList.add('drag-active');
+    });
+    window.addEventListener('dragleave', function(e){
+      clearTimeout(dragTimer);
+      dragTimer = setTimeout(function(){
+        document.body.classList.remove('drag-active');
+      }, 100);
+    });
+    window.addEventListener('drop', function(e){
+      e.preventDefault();
+      document.body.classList.remove('drag-active');
+      if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length){
+        Array.from(e.dataTransfer.files).forEach(processFile);
+      }
+    });
+
+    // Clipboard Paste support
+    window.addEventListener('paste', function(e){
+      var activeEl = document.activeElement;
+      if(activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA') && activeEl.type !== 'file'){
+        // If user is pasting into a text field, check if clipboard has files
+        if(!e.clipboardData || !e.clipboardData.files || !e.clipboardData.files.length) return;
+      }
+      if(e.clipboardData && e.clipboardData.files && e.clipboardData.files.length){
+        var imgFiles = Array.from(e.clipboardData.files).filter(function(f){ return f.type.startsWith('image/'); });
+        if(imgFiles.length){
+          e.preventDefault();
+          imgFiles.forEach(processFile);
+        }
+      }
+    });
+  })();
+
+  // Azure Container Image Carousel Engine
+  (function(){
+    var panelsData = [
+      {
+        id: 'panel_1',
+        n: 1,
+        title: 'Headline Montage: The 5-Year Panic',
+        section: 'Act 1 · Hook',
+        tc: '0:00–0:35',
+        tag: 'Fast Montage · Cold',
+        mood: 'cold',
+        img: '../images/panel_1.jpg',
+        downloadName: 'panel_1_headline_montage.jpg',
+        desc: 'High-contrast, fast-cut montage of doom headlines ("Robots Take All Jobs", "Musk Predicts End of Work"). Overlaid with stock tickers and robot arms.',
+        vo: 'VO: "AI agent workflows says in 5 years, robots and AI will replace human labor. But history, economics, and my two daughters tell a very different story."'
+      },
+      {
+        id: 'panel_2',
+        n: 2,
+        title: 'The Personal Stakes: Home Studio & Daughters',
+        section: 'Act 1 · Personal Context',
+        tc: '0:35–1:15',
+        tag: 'Home Studio · Warm',
+        mood: 'warm',
+        img: '../images/panel_2.jpg',
+        downloadName: 'panel_2_host_home_studio.jpg',
+        desc: 'Warmly lit home studio desk with microphone, camera, and framed photos of two daughters with laptop and math books in background.',
+        vo: 'VO: "This isn\'t wishful thinking. As a father of two daughters, I have a personal stake in what the world will look like when they graduate."'
+      },
+      {
+        id: 'panel_3',
+        n: 3,
+        title: 'Historical Anchor 1: Stone Age to Farm Revolution',
+        section: 'Act 2 · Historical Argument',
+        tc: '1:15–2:00',
+        tag: 'Historical Split · Warm',
+        mood: 'warm',
+        img: '../images/panel_3.jpg',
+        downloadName: 'panel_3_stone_age_agriculture.jpg',
+        desc: 'Historical transition visual: Stone age flint tools on left morphing into agricultural plow and wheat field on right.',
+        vo: 'VO: "When agriculture freed humans from hunting, we didn\'t run out of work — we created trade, cities, science, and the entire modern world."'
+      },
+      {
+        id: 'panel_4',
+        n: 4,
+        title: 'Historical Anchor 2: Calculators & Office Shift',
+        section: 'Act 2 · Automation Creates Depth',
+        tc: '2:00–2:45',
+        tag: 'Tech Evolution · Warm',
+        mood: 'warm',
+        img: '../images/panel_4.jpg',
+        downloadName: 'panel_4_mainframe_pc.jpg',
+        desc: '1960s human "computer" room full of clerks with paper ledgers cross-fading into modern open office with dual monitors.',
+        vo: 'VO: "When digital computers replaced human calculators, they didn\'t destroy finance — they expanded it a thousandfold."'
+      },
+      {
+        id: 'panel_5',
+        n: 5,
+        title: 'Core Thesis: Tree of Infinite Permutations',
+        section: 'Act 3 · The Permutation Thesis',
+        tc: '2:45–3:30',
+        tag: 'Branching Infographic · Warm',
+        mood: 'warm',
+        img: '../images/panel_5.jpg',
+        downloadName: 'panel_5_job_tree_branching_diagram.jpg',
+        desc: 'Glowing fractal tree diagram showing base job trunk branching into dozens of new specialized AI-collaborative roles.',
+        vo: 'VO: "Every tool creates an infinite number of permutations. AI doesn\'t subtract jobs — it multiplies the combinatorial possibilities of what humans can build."'
+      },
+      {
+        id: 'panel_6',
+        n: 6,
+        title: 'The Math Literacy Pillar: Daughters & AI',
+        section: 'Act 3 · Math & Reasoning',
+        tc: '3:30–4:15',
+        tag: 'Math Visualization · Warm',
+        mood: 'warm',
+        img: '../images/panel_6.jpg',
+        downloadName: 'panel_6_daughter_holo_tablet.jpg',
+        desc: 'Young girl working with tablet showing glowing geometric shapes, neural network nodes, and math equations.',
+        vo: 'VO: "My daughters will use math and quantitative thinking more than any generation before them — not to calculate, but to orchestrate."'
+      },
+      {
+        id: 'panel_7',
+        n: 7,
+        title: 'Moravec\'s Paradox & Collaborative Desk',
+        section: 'Act 4 · Human-AI Synthesis',
+        tc: '4:15–4:45',
+        tag: 'Father & Daughter · Warm',
+        mood: 'warm',
+        img: '../images/panel_7.jpg',
+        downloadName: 'panel_7_host_daughter_holo_device.jpg',
+        desc: 'Father and daughter at workstation exploring complex interactive simulation together, smiling.',
+        vo: 'VO: "AI handles the computation; humans provide intent, taste, empathy, and judgment. That partnership is where value lives."'
+      },
+      {
+        id: 'panel_8',
+        n: 8,
+        title: 'Global Evidence: Velocity & Leapfrogging',
+        section: 'Act 4 · Macro Economy',
+        tc: '4:45–5:15',
+        tag: 'Global Grid · Cold/Warm',
+        mood: 'cold',
+        img: '../images/panel_8.jpg',
+        downloadName: 'panel_8_collaboration_split_frame.jpg',
+        desc: 'Split screen: AI coding copilot generating software on left; human creative director crafting narrative on right.',
+        vo: 'VO: "Just like mobile banking leapfrogged landlines across Africa, AI will unlock hyper-velocity productivity across the entire globe."'
+      },
+      {
+        id: 'panel_9',
+        n: 9,
+        title: 'Closing Call: The Future is Bright',
+        section: 'Act 5 · Conclusion & CTA',
+        tc: '5:15–5:45',
+        tag: 'Host Direct Address · Warm',
+        mood: 'warm',
+        img: '../images/panel_9.jpg',
+        downloadName: 'panel_9_host_direct_address_skool_cta.jpg',
+        desc: 'Direct address to camera, confident warm smile, lower third displaying community link.',
+        vo: 'VO: "The future is bright. The job apocalypse isn\'t coming — the era of human magnification has just begun. What role are you preparing for?"'
+      }
+    ];
+
+    var currentFilter = 'panels';
+    var currentIndex = 0;
+    var autoPlayTimer = null;
+    var isPlaying = false;
+    var autoPlayDuration = 4500;
+    var progressTimer = null;
+    var progressStart = 0;
+
+    var mainImg = document.getElementById('carouselMainImg');
+    var prevBtn = document.getElementById('carouselPrevBtn');
+    var nextBtn = document.getElementById('carouselNextBtn');
+    var playBtn = document.getElementById('carouselPlayBtn');
+    var zoomBtn = document.getElementById('carouselZoomBtn');
+    var downloadBtn = document.getElementById('carouselDownloadBtn');
+    var copyLinkBtn = document.getElementById('carouselCopyLinkBtn');
+    var counterEl = document.getElementById('carouselCounter');
+    var tagNumEl = document.getElementById('carouselTagNumber');
+    var tagTcEl = document.getElementById('carouselTagTimecode');
+    var tagSecEl = document.getElementById('carouselTagSection');
+    var titleEl = document.getElementById('carouselCaptionTitle');
+    var descEl = document.getElementById('carouselCaptionDesc');
+    var voEl = document.getElementById('carouselCaptionVo');
+    var filmstrip = document.getElementById('carouselFilmstrip');
+    var tabsWrap = document.getElementById('carouselTabs');
+    var progressBar = document.getElementById('carouselProgressBar');
+    var stage = document.getElementById('carouselStage');
+
+    function getActiveItems(){
+      var uploadedImages = AssetDB.getAssets().filter(function(a){
+        return a.type === 'image' || (a.url && (a.url.startsWith('data:image') || a.url.includes('.jpg') || a.url.includes('.png') || a.url.includes('.webp') || a.url.includes('blob.core.windows.net')));
+      }).map(function(a, idx){
+        return {
+          id: a.id,
+          n: idx + 1,
+          title: a.title || 'Uploaded Asset #' + (idx + 1),
+          section: a.source || 'Asset DB',
+          tc: 'User Asset',
+          tag: 'Uploaded Image',
+          mood: 'warm',
+          img: a.url,
+          downloadName: (a.title || 'uploaded-asset').replace(/[^a-zA-Z0-9_-]/g, '_') + '.png',
+          desc: a.description || 'Custom uploaded asset in container storage.',
+          vo: a.comment ? 'Note: "' + a.comment + '"' : ''
+        };
+      });
+
+      if(currentFilter === 'panels') return panelsData;
+      if(currentFilter === 'uploaded') return uploadedImages.length ? uploadedImages : panelsData;
+      return panelsData.concat(uploadedImages);
+    }
+
+    function updateSlide(idx, animate){
+      var items = getActiveItems();
+      if(!items.length) return;
+      if(idx < 0) idx = items.length - 1;
+      if(idx >= items.length) idx = 0;
+      currentIndex = idx;
+
+      var cur = items[currentIndex];
+      if(!cur) return;
+
+      if(animate !== false){
+        mainImg.style.opacity = '0';
+        setTimeout(function(){
+          mainImg.src = cur.img;
+          mainImg.alt = cur.title;
+          mainImg.style.opacity = '1';
+        }, 120);
+      } else {
+        mainImg.src = cur.img;
+        mainImg.alt = cur.title;
+      }
+
+      tagNumEl.textContent = 'Slide ' + (currentIndex + 1) + ' of ' + items.length;
+      tagTcEl.textContent = cur.tc || '16:9';
+      tagSecEl.textContent = cur.section || cur.tag || 'Container Media';
+      titleEl.textContent = cur.title;
+      descEl.textContent = cur.desc || '';
+      voEl.textContent = cur.vo || '';
+      voEl.style.display = cur.vo ? 'block' : 'none';
+
+      counterEl.innerHTML = 'Slide <b>' + (currentIndex + 1) + '</b> / ' + items.length;
+      downloadBtn.href = cur.img;
+      downloadBtn.download = cur.downloadName || 'container-image.jpg';
+
+      // Update filmstrip active state
+      var thumbs = filmstrip.querySelectorAll('.carousel-thumb');
+      thumbs.forEach(function(th, tIdx){
+        if(tIdx === currentIndex){
+          th.classList.add('active');
+          th.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        } else {
+          th.classList.remove('active');
+        }
+      });
+
+      if(isPlaying){
+        resetProgressBar();
+      }
+    }
+
+    function renderFilmstrip(){
+      var items = getActiveItems();
+      filmstrip.innerHTML = '';
+      items.forEach(function(it, idx){
+        var thumb = document.createElement('div');
+        thumb.className = 'carousel-thumb' + (idx === currentIndex ? ' active' : '');
+        thumb.title = (it.n ? 'Panel ' + it.n + ': ' : '') + it.title;
+        thumb.innerHTML = '<img src="' + it.img + '" alt="thumb">' +
+          '<span class="carousel-thumb-num">' + (idx + 1) + '</span>';
+        thumb.addEventListener('click', function(){
+          updateSlide(idx);
+          if(isPlaying) stopAutoPlay();
+        });
+        filmstrip.appendChild(thumb);
+      });
+    }
+
+    function resetProgressBar(){
+      clearInterval(progressTimer);
+      progressBar.style.transition = 'none';
+      progressBar.style.width = '0%';
+      progressStart = Date.now();
+      setTimeout(function(){
+        progressBar.style.transition = 'width ' + autoPlayDuration + 'ms linear';
+        progressBar.style.width = '100%';
+      }, 30);
+    }
+
+    function startAutoPlay(){
+      isPlaying = true;
+      playBtn.textContent = '⏸️ Pause';
+      playBtn.style.borderColor = 'var(--accent)';
+      playBtn.style.color = 'var(--accent)';
+      resetProgressBar();
+      autoPlayTimer = setInterval(function(){
+        updateSlide(currentIndex + 1);
+      }, autoPlayDuration);
+    }
+
+    function stopAutoPlay(){
+      isPlaying = false;
+      playBtn.textContent = '▶️ Auto-Play';
+      playBtn.style.borderColor = 'var(--panel-border)';
+      playBtn.style.color = 'var(--text-dim)';
+      clearInterval(autoPlayTimer);
+      clearInterval(progressTimer);
+      progressBar.style.transition = 'none';
+      progressBar.style.width = '0%';
+    }
+
+    function toggleAutoPlay(){
+      if(isPlaying) stopAutoPlay();
+      else startAutoPlay();
+    }
+
+    prevBtn.addEventListener('click', function(){
+      updateSlide(currentIndex - 1);
+      if(isPlaying) stopAutoPlay();
+    });
+
+    nextBtn.addEventListener('click', function(){
+      updateSlide(currentIndex + 1);
+      if(isPlaying) stopAutoPlay();
+    });
+
+    playBtn.addEventListener('click', toggleAutoPlay);
+
+    zoomBtn.addEventListener('click', function(){
+      var items = getActiveItems();
+      var cur = items[currentIndex];
+      if(cur && window.openLightbox){
+        openLightbox({
+          title: cur.title,
+          url: cur.img,
+          description: (cur.section ? cur.section + ' · ' : '') + cur.desc + (cur.vo ? ' · ' + cur.vo : '')
+        });
+      }
+    });
+
+    mainImg.addEventListener('click', function(){
+      zoomBtn.click();
+    });
+
+    copyLinkBtn.addEventListener('click', function(){
+      var items = getActiveItems();
+      var cur = items[currentIndex];
+      if(!cur) return;
+      var fullUrl = new URL(cur.img, window.location.href).href;
+      navigator.clipboard.writeText(fullUrl).then(function(){
+        var orig = copyLinkBtn.textContent;
+        copyLinkBtn.textContent = '✅ Link Copied';
+        setTimeout(function(){ copyLinkBtn.textContent = orig; }, 1500);
+      }).catch(function(){
+        alert('Image link: ' + fullUrl);
+      });
+    });
+
+    // Tab switching
+    if(tabsWrap){
+      tabsWrap.querySelectorAll('.carousel-tab').forEach(function(tab){
+        tab.addEventListener('click', function(){
+          tabsWrap.querySelectorAll('.carousel-tab').forEach(function(t){ t.classList.remove('active'); });
+          tab.classList.add('active');
+          currentFilter = tab.dataset.filter || 'panels';
+          currentIndex = 0;
+          renderFilmstrip();
+          updateSlide(0, false);
+        });
+      });
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e){
+      if(document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) return;
+      if(e.key === 'ArrowLeft'){
+        updateSlide(currentIndex - 1);
+      } else if(e.key === 'ArrowRight'){
+        updateSlide(currentIndex + 1);
+      }
+    });
+
+    // Touch swipe support
+    var touchStartX = 0;
+    var touchEndX = 0;
+    stage.addEventListener('touchstart', function(e){
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    stage.addEventListener('touchend', function(e){
+      touchEndX = e.changedTouches[0].screenX;
+      var diff = touchStartX - touchEndX;
+      if(Math.abs(diff) > 45){
+        if(diff > 0) updateSlide(currentIndex + 1);
+        else updateSlide(currentIndex - 1);
+      }
+    }, { passive: true });
+
+    function initCarousel(){
+      renderFilmstrip();
+      updateSlide(0, false);
+    }
+
+    window.refreshCarousel = function(){
+      renderFilmstrip();
+      updateSlide(currentIndex, false);
+    };
+
+    initCarousel();
+  })();
+
+  document.getElementById('sortSelect').addEventListener('change', render);
+
+  AssetDB.ready.then(function(){
+    render();
+    if(window.refreshCarousel) window.refreshCarousel();
+  });
+</script>
+</body>
+</html>

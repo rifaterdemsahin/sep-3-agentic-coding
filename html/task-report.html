@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task Report - Task Decomposition</title>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase-client.js"></script>
+
+<link rel="stylesheet" href="../css/shared.css">
+
+<script>
+  // GitHub Pages / Cloudflare Workers routing fix
+  (function(){
+    var isGitHub = window.location.hostname === "rifaterdemsahin.github.io";
+    var isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    if (!isLocal && !isGitHub && window.location.hostname !== "sep-3-agentic-coding.polished-boat-17b2.workers.dev") {
+      var path = window.location.pathname.replace(/^\/sep-3-agentic-coding/, '');
+      window.location.replace("https://sep-3-agentic-coding.polished-boat-17b2.workers.dev" + path + window.location.search + window.location.hash);
+    }
+  })();
+</script>
+
+<style>
+  main { padding: 40px; max-width: 980px; margin: 0 auto; }
+  .report-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  }
+  .report-card h2 {
+    margin-top: 0;
+    color: #b388ff;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .focus-banner {
+    background: linear-gradient(135deg, rgba(179,136,255,.18), rgba(90,176,255,.12));
+    border: 1px solid rgba(179,136,255,.4);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+  .focus-banner h2 { color: #d7c1ff; border: none; padding: 0; margin: 0 0 8px; }
+  .focus-banner .stage-name { font-size: 1.3em; font-weight: bold; color: #fff; }
+  .focus-list { margin: 12px 0 0; padding-left: 20px; }
+  .focus-list li { margin-bottom: 6px; line-height: 1.4; }
+  .stat-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+  .stat-box {
+    flex: 1 1 120px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+  }
+  .stat-box .n { font-size: 1.6em; font-weight: bold; display: block; }
+  .stat-box .l { font-size: .8em; color: #aaa; text-transform: uppercase; letter-spacing: .04em; }
+  .stat-box.done .n { color: #7be08a; }
+  .stat-box.progress .n { color: #e8b94a; }
+  .stat-box.todo .n { color: #ff8a8a; }
+  .overall-bar {
+    height: 14px;
+    border-radius: 7px;
+    background: rgba(255,255,255,.08);
+    overflow: hidden;
+    display: flex;
+    margin: 16px 0 4px;
+  }
+  .overall-bar .seg-done { background: #7be08a; height: 100%; }
+  .overall-bar .seg-prog { background: #e8b94a; height: 100%; }
+  .stage-row {
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+  }
+  .stage-row:last-child { border-bottom: none; }
+  .stage-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 12px;
+  }
+  .stage-head .name { font-weight: bold; }
+  .stage-head .pct { color: #aaa; font-size: .9em; white-space: nowrap; }
+  .stage-bar {
+    height: 10px;
+    border-radius: 5px;
+    background: rgba(255,255,255,.08);
+    overflow: hidden;
+    display: flex;
+  }
+  .stage-bar .seg-done { background: #7be08a; height: 100%; }
+  .stage-bar .seg-prog { background: #e8b94a; height: 100%; }
+  .stage-meta { font-size: .8em; color: #999; margin-top: 6px; }
+  .badge-status {
+    font-size: .72em;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .badge-status.done { background: rgba(123,224,138,.15); color: #7be08a; }
+  .badge-status.progress { background: rgba(232,185,74,.15); color: #e8b94a; }
+  .badge-status.todo { background: rgba(255,138,138,.12); color: #ff8a8a; }
+  .task-line { font-size: .85em; color: #ccc; padding: 3px 0 3px 4px; }
+  .task-line .note { color: #888; display: block; margin-top: 2px; font-size: .92em; }
+</style>
+</head>
+<body>
+<div id="nav-mount"></div>
+<script src="../js/nav.js"></script>
+<script src="../js/theme.js"></script>
+
+<main>
+  <h1>📊 Task Report</h1>
+  <p>A snapshot of the production plan: what's finished, what's actively moving, and what should get attention next.</p>
+
+  <div class="focus-banner" id="focus-banner">Loading…</div>
+
+  <div class="report-card">
+    <h2>📈 Overall Progress</h2>
+    <div id="overview">Loading…</div>
+  </div>
+
+  <div class="report-card">
+    <h2>🧭 Stage-by-Stage Breakdown</h2>
+    <div id="stage-breakdown">Loading…</div>
+  </div>
+
+  <div class="report-card">
+    <h2>🟡 In Progress Right Now</h2>
+    <div id="in-progress-list">Loading…</div>
+  </div>
+</main>
+
+<script>
+// ---------------------------------------------------------------------
+// Mirrors the curated PRODUCTION_PLAN in todo.html (kept in sync by
+// hand — this page reports on the plan, it doesn't own it) plus any
+// per-browser localStorage overrides/custom tasks from that page, so
+// the numbers here match what the Production Plan board shows.
+// ---------------------------------------------------------------------
+var PRODUCTION_PLAN = [
+  {
+    id: 'research', emoji: '🔍', name: 'Research', status: 'done',
+    tasks: [
+      { title: 'Collect source links (pro/con)', status: 'done' },
+      { title: 'Pro/con video comparison table', status: 'done' },
+      { title: 'Perspective comparison (Apocalypse vs. Permutation vs. Skeptic)', status: 'done' },
+      { title: 'Economist AI jobs-impact charts (hard-hat labour & STEM)', status: 'done' },
+      { title: 'Transcript pulled for key counter-source ("The REAL Reason…")', status: 'done' },
+      { title: 'Mark research-verified findings on premise-supporting sources', status: 'done' }
+    ]
+  },
+  {
+    id: 'arguments', emoji: '🧩', name: 'Arguments', status: 'progress', wipLimit: 1,
+    tasks: [
+      { title: 'Core message', status: 'done' },
+      { title: 'Premise', status: 'done' },
+      { title: 'Audience transformation (before/after)', status: 'done' },
+      { title: '20 argument cards', status: 'done' },
+      { title: 'Argument 16 added: Moravec\'s Paradox & physical dexterity moat', status: 'done' },
+      { title: 'Argument 17 added: Velocity of money & micro-business boom', status: 'done' },
+      { title: 'Argument 18 added: The Stripe Indicator', status: 'done' },
+      { title: 'Argument 19 added: Digital Leapfrog in emerging markets', status: 'done' },
+      { title: 'Argument 20 added: Steelman Rebuttal & Long-Tail Economics', status: 'done' },
+      { title: 'Conclusion', status: 'done' },
+      { title: '7 Sanity-check cards', status: 'done' },
+      { title: 'Commit + push wording refresh', status: 'progress', note: 'html/arguments.html and seed-content.js currently modified but uncommitted.' }
+    ]
+  },
+  {
+    id: 'script', emoji: '📝', name: 'Script', status: 'progress', wipLimit: 1,
+    tasks: [
+      { title: 'Hook (0:00–0:30)', status: 'done' },
+      { title: 'Section 1 — Productivity Fallacy & Historical Proof (0:30–1:45)', status: 'done' },
+      { title: 'Section 2 — Infinite Permutation Principle (1:45–2:45)', status: 'done' },
+      { title: 'Section 3 — Education Democratization, Math & Human Insight (2:45–3:45)', status: 'done' },
+      { title: 'Conclusion & Outro (3:45–4:30)', status: 'done' },
+      { title: 'Convert script into layman\'s terms (plain English review)', status: 'done', note: 'Published to ⚖️ Evaluate → 🗣️ Plain English Review.' },
+      { title: 'Commit + push beat-timing refresh', status: 'progress', note: 'html/script.html and seed-content.js currently modified but uncommitted.' }
+    ]
+  },
+  {
+    id: 'design', emoji: '🎨', name: 'Design', status: 'done',
+    tasks: [
+      { title: 'Three-act structure', status: 'done' },
+      { title: 'Core editing rule (cold → warm contrast)', status: 'done' },
+      { title: 'Palette & theme tokens', status: 'done' },
+      { title: 'Typography samples', status: 'done' },
+      { title: 'Motion specs table', status: 'done' },
+      { title: 'Pacing bar across the timeline', status: 'done' }
+    ]
+  },
+  {
+    id: 'previsualisation', emoji: '🎞️', name: 'Previsualisation', status: 'done',
+    tasks: [
+      { title: 'Shot board: 9 panels boarded (Hook → Outro)', status: 'done' },
+      { title: 'Panel images generated for all 9 shots', status: 'done' },
+      { title: 'Image-gen prompts written per panel', status: 'done' },
+      { title: '"Plain English" explainer per panel', status: 'done' },
+      { title: 'VO line paired to each panel', status: 'done' }
+    ]
+  },
+  {
+    id: 'assets', emoji: '🗂️', name: 'Assets', status: 'progress', wipLimit: 1,
+    tasks: [
+      { title: 'B-roll categories mapped to script sections', status: 'done' },
+      { title: 'YouTube search terms per category', status: 'done' },
+      { title: 'Save-to-assets + Azure Blob image upload', status: 'done' },
+      { title: 'Generate visual assets with Google Flow', status: 'todo' },
+      { title: 'Generate asset creation tasks with relative order sorting', status: 'todo' },
+      { title: 'Source/license actual footage for each saved item', status: 'todo' },
+      { title: 'Sort & finalize by expected time-code and relative order', status: 'progress' }
+    ]
+  },
+  {
+    id: 'voice', emoji: '🎙️', name: 'Voice Recording', status: 'todo',
+    tasks: [
+      { title: 'Record/generate VO for Hook beat', status: 'todo' },
+      { title: 'Record/generate VO for Section 1–3 beats', status: 'todo' },
+      { title: 'Record/generate VO for Outro + Skool CTA', status: 'todo' },
+      { title: 'Cache generated audio (ElevenLabs)', status: 'todo' },
+      { title: 'Time VO against each shot\'s timecode', status: 'todo' }
+    ]
+  },
+  {
+    id: 'footage', emoji: '🎥', name: 'Footage & Graphics Sourcing', status: 'todo',
+    tasks: [
+      { title: 'Generate/commission motion graphics from previz prompts', status: 'todo' },
+      { title: 'Shoot or source talking-head footage', status: 'todo' },
+      { title: 'Pull licensed news-headline montage clips', status: 'todo' },
+      { title: 'Verify usage rights on every sourced clip', status: 'todo' }
+    ]
+  },
+  {
+    id: 'edit', emoji: '✂️', name: 'Edit', status: 'todo',
+    tasks: [
+      { title: 'Assemble rough cut from the 9-panel shot board', status: 'todo' },
+      { title: 'Sync VO to visuals per beat', status: 'todo' },
+      { title: 'Color grade: cold slate-blue → warm gold arc', status: 'todo' },
+      { title: 'Sound design & music bed', status: 'todo' },
+      { title: 'Captions/subtitles', status: 'todo' }
+    ]
+  },
+  {
+    id: 'review', emoji: '✅', name: 'Review & QA', status: 'todo',
+    tasks: [
+      { title: 'Fact-check every on-screen claim against Research sources', status: 'todo' },
+      { title: 'Walk the 3 sanity-check items against the final cut', status: 'todo' },
+      { title: 'Layman\'s terms & clarity review pass', status: 'todo' },
+      { title: 'Full watch-through pass for pacing vs. the pacing bar', status: 'todo' },
+      { title: 'Accessibility pass (captions, contrast)', status: 'todo' }
+    ]
+  },
+  {
+    id: 'publish', emoji: '🚀', name: 'Publish', status: 'todo',
+    tasks: [
+      { title: 'Final render/export', status: 'todo' },
+      { title: 'Title, description, thumbnail', status: 'todo' },
+      { title: 'Upload to YouTube', status: 'todo' },
+      { title: 'Skool community CTA cross-link', status: 'todo' },
+      { title: 'Redeploy site (wrangler deploy) with any last content edits', status: 'todo' },
+      { title: 'Convert table structure to generic multi-video architecture', status: 'todo' },
+      { title: 'Create project template specs to scaffold new video projects', status: 'todo' },
+      { title: 'Post-production YouTube & multi-channel promotion', status: 'todo' },
+      { title: 'Review GitHub commits & extract streamlined tasks for the next video', status: 'todo' }
+    ]
+  }
+];
+
+(function(){
+  var statusOverrides = {};
+  var customTasks = {};
+  try{ statusOverrides = JSON.parse(localStorage.getItem('todoStatusOverrides') || '{}'); }catch(e){}
+  try{ customTasks = JSON.parse(localStorage.getItem('todoCustomTasks') || '{}'); }catch(e){}
+
+  function stageTasks(stage){
+    var built = stage.tasks.map(function(t, i){
+      return { id: 'todo-' + stage.id + '-' + i, title: t.title, status: statusOverrides['todo-' + stage.id + '-' + i] || t.status, note: t.note };
+    });
+    var custom = (customTasks[stage.id] || []).map(function(t){
+      return { id: t.id, title: t.title, status: statusOverrides[t.id] || t.status || 'todo', note: t.note, custom: true };
+    });
+    return built.concat(custom);
+  }
+
+  var stageStats = PRODUCTION_PLAN.map(function(stage){
+    var tasks = stageTasks(stage);
+    var done = tasks.filter(function(t){ return t.status === 'done'; }).length;
+    var prog = tasks.filter(function(t){ return t.status === 'progress'; }).length;
+    var todo = tasks.length - done - prog;
+    var pct = tasks.length ? Math.round((done / tasks.length) * 100) : 0;
+    return { stage: stage, tasks: tasks, done: done, prog: prog, todo: todo, total: tasks.length, pct: pct };
+  });
+
+  var totals = stageStats.reduce(function(acc, s){
+    acc.done += s.done; acc.prog += s.prog; acc.todo += s.todo; acc.total += s.total;
+    return acc;
+  }, { done: 0, prog: 0, todo: 0, total: 0 });
+  var overallPct = totals.total ? Math.round((totals.done / totals.total) * 100) : 0;
+  var donePct = totals.total ? (totals.done / totals.total * 100).toFixed(1) : 0;
+  var progPct = totals.total ? (totals.prog / totals.total * 100).toFixed(1) : 0;
+
+  // ---- Overview ----
+  document.getElementById('overview').innerHTML =
+    '<div class="stat-row">' +
+      '<div class="stat-box done"><span class="n">' + totals.done + '</span><span class="l">Done</span></div>' +
+      '<div class="stat-box progress"><span class="n">' + totals.prog + '</span><span class="l">In Progress</span></div>' +
+      '<div class="stat-box todo"><span class="n">' + totals.todo + '</span><span class="l">To Do</span></div>' +
+      '<div class="stat-box"><span class="n">' + totals.total + '</span><span class="l">Total Tasks</span></div>' +
+    '</div>' +
+    '<div class="overall-bar"><div class="seg-done" style="width:' + donePct + '%"></div><div class="seg-prog" style="width:' + progPct + '%"></div></div>' +
+    '<div style="text-align:right; color:#aaa; font-size:.85em;">' + overallPct + '% complete across ' + PRODUCTION_PLAN.length + ' stages</div>';
+
+  // ---- Stage breakdown ----
+  document.getElementById('stage-breakdown').innerHTML = stageStats.map(function(s){
+    var donePctS = s.total ? (s.done / s.total * 100).toFixed(1) : 0;
+    var progPctS = s.total ? (s.prog / s.total * 100).toFixed(1) : 0;
+    var badge = s.pct === 100 ? 'done' : (s.prog > 0 || s.done > 0 ? 'progress' : 'todo');
+    var openTasks = s.tasks.filter(function(t){ return t.status !== 'done'; });
+    var openList = openTasks.length
+      ? openTasks.map(function(t){
+          return '<div class="task-line">' + (t.status === 'progress' ? '🟡' : '⬜') + ' ' + t.title +
+            (t.note ? '<span class="note">' + t.note + '</span>' : '') + '</div>';
+        }).join('')
+      : '';
+    return '<div class="stage-row">' +
+      '<div class="stage-head">' +
+        '<span class="name">' + s.stage.emoji + ' ' + s.stage.name + ' <span class="badge-status ' + badge + '">' + (s.pct === 100 ? 'Done' : (s.prog > 0 ? 'In Progress' : 'To Do')) + '</span></span>' +
+        '<span class="pct">' + s.done + '/' + s.total + ' · ' + s.pct + '%</span>' +
+      '</div>' +
+      '<div class="stage-bar"><div class="seg-done" style="width:' + donePctS + '%"></div><div class="seg-prog" style="width:' + progPctS + '%"></div></div>' +
+      openList +
+    '</div>';
+  }).join('');
+
+  // ---- In progress list ----
+  var inProgress = [];
+  stageStats.forEach(function(s){
+    s.tasks.forEach(function(t){
+      if(t.status === 'progress') inProgress.push({ stage: s.stage, task: t });
+    });
+  });
+  document.getElementById('in-progress-list').innerHTML = inProgress.length
+    ? '<ul class="focus-list">' + inProgress.map(function(x){
+        return '<li>' + x.stage.emoji + ' <b>' + x.stage.name + '</b> — ' + x.task.title + (x.task.note ? '<span class="task-line note" style="padding:0;">' + x.task.note + '</span>' : '') + '</li>';
+      }).join('') + '</ul>'
+    : '<p style="color:#888;">Nothing currently in progress.</p>';
+
+  // ---- Focus recommendation ----
+  // Pipeline runs in the order the stages are defined. The active frontier
+  // is the earliest stage that isn't 100% done — everything after it is
+  // blocked on it in practice, so that's where attention should go first.
+  var frontier = stageStats.filter(function(s){ return s.pct < 100; })[0];
+  var banner = document.getElementById('focus-banner');
+  if(!frontier){
+    banner.innerHTML = '<h2>🏆 Everything is done!</h2><p>Every stage in the production plan is complete.</p>';
+  } else {
+    var remaining = frontier.tasks.filter(function(t){ return t.status !== 'done'; });
+    var progFirst = remaining.filter(function(t){ return t.status === 'progress'; })
+      .concat(remaining.filter(function(t){ return t.status === 'todo'; }));
+    banner.innerHTML =
+      '<h2>🎯 Recommended Focus</h2>' +
+      '<div class="stage-name">' + frontier.stage.emoji + ' ' + frontier.stage.name + ' (' + frontier.pct + '% done, ' + remaining.length + ' task' + (remaining.length === 1 ? '' : 's') + ' left)</div>' +
+      '<div style="color:#ccc; font-size:.9em; margin-top:4px;">This is the earliest stage in the pipeline that isn\'t finished — clearing it unblocks everything downstream (' +
+        stageStats.slice(stageStats.indexOf(frontier) + 1).map(function(s){ return s.stage.name; }).join(', ') + ').</div>' +
+      '<ul class="focus-list">' + progFirst.slice(0, 5).map(function(t){
+        return '<li>' + (t.status === 'progress' ? '🟡 <b>Finish:</b> ' : '⬜ <b>Start:</b> ') + t.title + '</li>';
+      }).join('') + '</ul>';
+  }
+
+  if(window.Nav) window.Nav.render('task-report');
+})();
+</script>
+</body>
+</html>

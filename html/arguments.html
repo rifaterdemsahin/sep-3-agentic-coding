@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  // Canonical host is Cloudflare Workers; GitHub Pages forwards visitors with repo subpath cleaned.
+  if(location.hostname.endsWith('github.io')){
+    var cleanPath = location.pathname.replace(/^\/sep-3-agentic-coding/, '').replace(/^\/[^/]+(?=\/html\/)/, '');
+    if(!cleanPath.startsWith('/')) cleanPath = '/' + cleanPath;
+    location.replace('https://sep-3-agentic-coding.polished-boat-17b2.workers.dev' + cleanPath + location.search + location.hash);
+  }
+</script>
+<title>🧩 Arguments — Task Decomposition</title>
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+  header{
+    padding:48px 24px 32px;
+    max-width:1000px;
+    margin:0 auto;
+    text-align:center;
+  }
+  header .eyebrow{
+    color:var(--accent);
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    font-size:12px;
+    font-weight:600;
+  }
+  header h1{
+    font-size:clamp(24px,4vw,38px);
+    margin:10px 0 12px;
+    font-weight:700;
+  }
+  header p.sub{
+    color:var(--text-dim);
+    max-width:640px;
+    margin:0 auto;
+    font-size:15px;
+  }
+
+  main{
+    max-width:1000px;
+    margin:0 auto;
+    padding:0 24px 90px;
+  }
+
+  section.block{margin-bottom:44px;}
+  section.block h2{
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    color:var(--accent-2);
+    font-weight:700;
+    margin:0 0 16px;
+  }
+  section.block p.intro{
+    color:var(--text-dim);
+    font-size:14px;
+    margin:-8px 0 18px;
+  }
+
+  .core-message-card{
+    background:linear-gradient(135deg, rgba(232,185,74,.14), rgba(90,176,255,.12));
+    border:1px solid var(--accent);
+    border-radius:12px;
+    padding:22px 26px;
+    box-shadow:0 4px 20px rgba(0,0,0,.2);
+  }
+  .core-message-card p{margin:0 0 10px;font-size:16px;line-height:1.6;}
+  .core-message-card p:last-child{margin-bottom:0;}
+  .core-message-card strong{color:var(--accent);}
+  .core-message-card .highlight-tag{
+    display:inline-block;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.06em;
+    color:var(--accent);
+    text-transform:uppercase;
+    margin-bottom:8px;
+  }
+
+  .premise-card{
+    background:var(--panel);
+    border:1px solid var(--accent-2);
+    border-radius:12px;
+    padding:22px 24px;
+  }
+  .premise-card p{margin:0;font-size:16px;}
+  .premise-card strong{color:var(--accent);}
+
+  /* Audience Transformation Card */
+  .audience-transformation-card{
+    background:linear-gradient(145deg, rgba(90,176,255,.07), rgba(232,185,74,.07));
+    border:1px solid var(--panel-border);
+    border-radius:12px;
+    padding:22px 24px;
+  }
+  .transform-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin:14px 0 16px;
+  }
+  @media (max-width:700px){.transform-grid{grid-template-columns:1fr;}}
+  .transform-col{
+    border-radius:10px;
+    padding:16px 18px;
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+  }
+  .transform-col.cold{
+    border-top:3px solid var(--cold);
+    background:linear-gradient(160deg, rgba(90,176,255,.06), var(--panel));
+  }
+  .transform-col.warm{
+    border-top:3px solid var(--warm);
+    background:linear-gradient(160deg, rgba(232,185,74,.06), var(--panel));
+  }
+  .transform-col h4{
+    margin:0 0 10px;
+    font-size:14px;
+    font-weight:700;
+  }
+  .transform-col.cold h4{color:var(--accent-2);}
+  .transform-col.warm h4{color:var(--accent);}
+  .transform-col ul{
+    margin:0;
+    padding-left:18px;
+    font-size:13.5px;
+    color:var(--text-dim);
+  }
+  .transform-col li{margin-bottom:6px;}
+  .transform-col li:last-child{margin-bottom:0;}
+  .transform-summary{
+    margin:0;
+    padding:12px 14px;
+    background:rgba(232,185,74,.08);
+    border:1px solid rgba(232,185,74,.25);
+    border-radius:8px;
+    font-size:13.5px;
+    color:var(--text);
+    line-height:1.5;
+  }
+  .transform-summary strong{color:var(--accent);}
+
+  .arg-list{display:flex;flex-direction:column;gap:14px;}
+  .arg-card{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:10px;
+    padding:18px 20px;
+  }
+  .arg-card .arg-num{
+    display:inline-block;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.06em;
+    color:var(--accent);
+    text-transform:uppercase;
+    margin-bottom:6px;
+  }
+  .arg-card h3{margin:0 0 8px;font-size:16px;}
+  .arg-card p{margin:0;color:var(--text-dim);font-size:14px;}
+  .arg-card .arg-link{
+    display:inline-block;
+    margin-top:10px;
+    font-size:12.5px;
+    color:var(--accent-2);
+    text-decoration:none;
+  }
+  .arg-card .arg-link:hover{text-decoration:underline;}
+
+  .conclusion-card{
+    background:linear-gradient(135deg, rgba(232,185,74,.08), rgba(90,176,255,.08));
+    border:1px solid var(--panel-border);
+    border-radius:12px;
+    padding:22px 24px;
+  }
+  .conclusion-card p{margin:0 0 10px;font-size:15px;}
+  .conclusion-card p:last-child{margin-bottom:0;}
+  .conclusion-card strong{color:var(--accent);}
+
+  /* Sanity Check Styles */
+  .sanity-container{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:12px;
+    padding:22px 24px;
+    margin-top:14px;
+  }
+  .sanity-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:18px;
+  }
+  .sanity-score{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:rgba(90,176,255,.12);
+    border:1px solid var(--accent-2);
+    color:var(--accent-2);
+    padding:4px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:700;
+  }
+  .sanity-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+  .sanity-card{
+    background:var(--bg);
+    border:1px solid var(--panel-border);
+    border-radius:10px;
+    padding:16px 18px;
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+    transition:border-color .15s ease;
+  }
+  .sanity-card:hover{
+    border-color:var(--accent);
+  }
+  .sanity-card.passed{
+    border-left:3px solid var(--warm);
+  }
+  .sanity-checkbox{
+    width:20px;
+    height:20px;
+    accent-color:var(--accent);
+    cursor:pointer;
+    margin-top:2px;
+  }
+  .sanity-body{
+    flex:1;
+  }
+  .sanity-title{
+    font-size:14.5px;
+    font-weight:700;
+    color:var(--text);
+    margin:0 0 4px;
+  }
+  .sanity-desc{
+    font-size:13px;
+    color:var(--text-dim);
+    margin:0 0 6px;
+    line-height:1.5;
+  }
+  .sanity-verdict{
+    font-size:12px;
+    font-weight:600;
+    color:var(--warm);
+    display:inline-block;
+  }
+
+  /* Clipboard Copy & Toolbar Styles */
+  .card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:8px;
+  }
+  .card-btn-group{
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .copy-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    background:rgba(255,255,255,.05);
+    border:1px solid var(--panel-border);
+    color:var(--text-dim);
+    padding:4px 10px;
+    border-radius:6px;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all .18s ease;
+    font-family:inherit;
+    line-height:1;
+    white-space:nowrap;
+  }
+  .copy-btn:hover{
+    color:var(--text);
+    background:rgba(255,255,255,.1);
+    border-color:var(--accent-2);
+    transform:translateY(-1px);
+  }
+  .copy-btn:active{
+    transform:translateY(0);
+  }
+  .copy-btn.copied{
+    background:rgba(90,176,255,.2) !important;
+    border-color:var(--accent-2) !important;
+    color:var(--text) !important;
+  }
+
+  /* Kokoro Voice Over Audio Styles */
+  .listen-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    background:rgba(90,176,255,.12);
+    border:1px solid rgba(90,176,255,.35);
+    color:var(--accent-2);
+    padding:4px 10px;
+    border-radius:6px;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all .18s ease;
+    font-family:inherit;
+    line-height:1;
+    white-space:nowrap;
+  }
+  .listen-btn:hover{
+    background:var(--accent-2);
+    color:var(--bg);
+    transform:translateY(-1px);
+  }
+  .listen-btn:active{
+    transform:translateY(0);
+  }
+  .listen-btn.has-local{
+    border-color:rgba(52,211,153,.5);
+    color:#34d399;
+    background:rgba(52,211,153,.1);
+  }
+  .listen-btn.has-local:hover{
+    background:#34d399;
+    color:#0b0d12;
+  }
+  .listen-btn.loading{
+    background:rgba(232,185,74,.18);
+    border-color:var(--accent);
+    color:var(--accent);
+    animation:pulse-btn 1.2s infinite;
+  }
+  .listen-btn.playing{
+    background:#34d399 !important;
+    border-color:#34d399 !important;
+    color:#0b0d12 !important;
+  }
+  @keyframes pulse-btn {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+
+  .card-reading-active {
+    outline: 2px solid var(--accent-2) !important;
+    box-shadow: 0 0 20px rgba(90,176,255,0.25) !important;
+    transition: all 0.25s ease;
+  }
+
+  .voice-bar{
+    background:linear-gradient(135deg, rgba(90,176,255,.08), rgba(232,185,74,.06));
+    border:1px solid rgba(90,176,255,.3);
+    border-radius:12px;
+    padding:14px 18px;
+    margin-bottom:14px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .voice-bar-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .voice-bar-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .voice-bar-title{
+    font-size:13px;
+    font-weight:700;
+    color:var(--accent-2);
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .voice-select-wrap, .voice-speed-wrap{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    color:var(--text-dim);
+  }
+  .voice-select{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    color:var(--text);
+    padding:5px 8px;
+    border-radius:6px;
+    font-size:12px;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .voice-select:focus{
+    outline:none;
+    border-color:var(--accent-2);
+  }
+  .voice-bar-right{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .voice-action-btn{
+    background:rgba(90,176,255,.15);
+    border:1px solid var(--accent-2);
+    color:var(--accent-2);
+    padding:6px 14px;
+    border-radius:8px;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    transition:all .18s ease;
+    font-family:inherit;
+  }
+  .voice-action-btn:hover{
+    background:var(--accent-2);
+    color:var(--bg);
+    transform:translateY(-1px);
+  }
+  .voice-stop-btn{
+    background:rgba(255,100,100,.15);
+    border:1px solid rgba(255,100,100,.4);
+    color:#ff8585;
+    padding:6px 12px;
+    border-radius:8px;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    transition:all .18s ease;
+    font-family:inherit;
+  }
+  .voice-stop-btn:hover{
+    background:#ff8585;
+    color:#0b0d12;
+  }
+  .voice-status{
+    font-size:12px;
+    color:var(--text-dim);
+    font-weight:500;
+  }
+  .voice-storage-info{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:11.5px;
+    color:var(--text-dim);
+    padding-top:8px;
+    border-top:1px solid rgba(255,255,255,.06);
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .voice-storage-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    background:rgba(52,211,153,.12);
+    color:#34d399;
+    border:1px solid rgba(52,211,153,.3);
+    padding:2px 8px;
+    border-radius:12px;
+    font-weight:600;
+    font-size:11px;
+  }
+  .voice-storage-actions{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .voice-sub-btn{
+    background:transparent;
+    border:1px solid var(--panel-border);
+    color:var(--text-dim);
+    padding:2px 8px;
+    border-radius:4px;
+    font-size:11px;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .voice-sub-btn:hover{
+    color:var(--text);
+    border-color:var(--accent-2);
+  }
+
+  .quick-copy-bar{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:12px;
+    padding:14px 18px;
+    margin-bottom:30px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .quick-copy-label{
+    font-size:13px;
+    font-weight:700;
+    color:var(--accent);
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .quick-copy-actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .quick-copy-btn{
+    background:rgba(232,185,74,.1);
+    border:1px solid rgba(232,185,74,.35);
+    color:var(--accent);
+    padding:6px 14px;
+    border-radius:8px;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    transition:all .18s ease;
+    font-family:inherit;
+  }
+  .quick-copy-btn:hover{
+    background:var(--accent);
+    color:var(--bg);
+    transform:translateY(-1px);
+  }
+  .quick-copy-btn.copied{
+    background:#34d399 !important;
+    border-color:#34d399 !important;
+    color:#0b0d12 !important;
+  }
+
+  /* Toast Notification */
+  .toast-notice{
+    position:fixed;
+    bottom:24px;
+    right:24px;
+    background:#161b26;
+    border:1px solid var(--accent);
+    color:var(--text);
+    padding:10px 18px;
+    border-radius:8px;
+    font-size:13px;
+    font-weight:600;
+    box-shadow:0 8px 24px rgba(0,0,0,.5);
+    z-index:9999;
+    opacity:0;
+    transform:translateY(12px);
+    transition:all .25s ease;
+    pointer-events:none;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .toast-notice.show{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  footer{
+    max-width:1000px;
+    margin:0 auto;
+    padding:24px;
+    text-align:center;
+    color:var(--text-dim);
+    font-size:12.5px;
+    border-top:1px solid var(--panel-border);
+  }
+  footer a{color:var(--accent-2);text-decoration:none;}
+  footer a:hover{text-decoration:underline;}
+
+  .add-asset-btn{
+    font-size:11px;
+    padding:4px 10px;
+    border-radius:20px;
+    border:1px solid var(--panel-border);
+    background:transparent;
+    color:var(--text-dim);
+    cursor:pointer;
+    transition:border-color .15s ease,color .15s ease,background .15s ease;
+    white-space:nowrap;
+  }
+  .add-asset-btn:hover{border-color:var(--accent-2);color:var(--text);}
+  .add-asset-btn.added{border-color:var(--warm);color:var(--warm);background:rgba(232,185,74,.08);}
+</style>
+<script src="../js/video-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="../js/nav.js"></script>
+<script src="../js/content-db.js"></script>
+<script src="../js/audio-clips.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/notes.js"></script>
+</head>
+<body>
+
+<div id="nav-mount"></div>
+<script>Nav.render('arguments');</script>
+
+<header>
+  <div class="eyebrow">🧩 Pre-production · Arguments v1</div>
+  <h1>Arguments</h1>
+  <p class="sub">The premise, supporting arguments, and conclusion of "Task Decomposition" — distilled from 🔍 Research before it's written into the 📝 Script.</p>
+</header>
+
+<div class="pipeline-wrap" id="pipeline-stepper"></div>
+
+<main>
+
+  <!-- Kokoro Voice-Over & Audio Bar -->
+  <div class="voice-bar" id="kokoro-voice-bar">
+    <div class="voice-bar-row">
+      <div class="voice-bar-left">
+        <div class="voice-bar-title">🎙️ Kokoro Voice Over:</div>
+        <div class="voice-select-wrap">
+          <label for="voice-select">Voice:</label>
+          <select id="voice-select" class="voice-select" onchange="KokoroPlayer.onVoiceOrSpeedChange()">
+            <option value="af_heart" selected>❤️ af_heart (US Female - Heart)</option>
+            <option value="af_bella">🌸 af_bella (US Female - Bella)</option>
+            <option value="af_nicole">✨ af_nicole (US Female - Nicole)</option>
+            <option value="am_adam">🎯 am_adam (US Male - Adam)</option>
+            <option value="am_michael">💼 am_michael (US Male - Michael)</option>
+            <option value="bf_emma">👑 bf_emma (UK Female - Emma)</option>
+            <option value="bm_george">🎩 bm_george (UK Male - George)</option>
+            <option value="tr-TR-AhmetNeural">🇹🇷 Ahmet (TR Male)</option>
+            <option value="tr-TR-EmelNeural">🇹🇷 Emel (TR Female)</option>
+          </select>
+        </div>
+        <div class="voice-speed-wrap">
+          <label for="speed-select">Speed:</label>
+          <select id="speed-select" class="voice-select" onchange="KokoroPlayer.onVoiceOrSpeedChange()">
+            <option value="0.85">0.85x</option>
+            <option value="1.0" selected>1.0x</option>
+            <option value="1.15">1.15x</option>
+            <option value="1.25">1.25x</option>
+          </select>
+        </div>
+      </div>
+      <div class="voice-bar-right">
+        <button class="voice-action-btn" id="play-all-btn" onclick="togglePlayAll(this)">▶️ Listen to All Sections</button>
+        <button class="voice-stop-btn" id="stop-all-btn" onclick="stopAudio()" style="display:none;">⏹️ Stop</button>
+        <span class="voice-status" id="voice-status">⚡ Kokoro Ready</span>
+      </div>
+    </div>
+    <div class="voice-storage-info">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span class="voice-storage-badge" id="storage-badge">💾 Local Backup: 0/10 Saved</span>
+        <span id="storage-note" style="color:var(--text-dim);">Generated audio is backed up to local storage (IndexedDB) and synced to Azure Blob Storage in the background to avoid re-triggering the API.</span>
+      </div>
+      <div class="voice-storage-actions">
+        <button class="voice-sub-btn" onclick="KokoroPlayer.configureAzureSas()" title="Configure the Azure Blob Storage container SAS URL used to back up generated audio">☁️ Azure Sync</button>
+        <button class="voice-sub-btn" onclick="KokoroPlayer.backupAllToLocal(this)" title="Generate and back up all sections to local browser storage + Azure">⬇️ Back Up All to Local</button>
+        <button class="voice-sub-btn" onclick="KokoroPlayer.clearLocalCache()" title="Clear cached audio from browser storage">🗑️ Clear Local Cache</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Copy Toolbar -->
+  <div class="quick-copy-bar">
+    <div class="quick-copy-label">⚡ Practical Clipboard Tools:</div>
+    <div class="quick-copy-actions">
+      <button class="quick-copy-btn" id="copy-all-btn" onclick="copyAllArguments(this)">📋 Copy Complete Argument Outline</button>
+      <button class="quick-copy-btn" id="copy-thesis-btn" onclick="copyThesis(this)">✨ Copy Core Message &amp; Premise</button>
+      <button class="quick-copy-btn" id="copy-sanity-btn" onclick="copySanityReport(this)">🛡️ Copy Sanity Report</button>
+    </div>
+  </div>
+
+  <section class="block">
+    <h2>🎯 Core Message</h2>
+    <div id="core-message-mount"></div>
+  </section>
+
+  <section class="block">
+    <h2>🌱 Premise &amp; Audience Takeaway</h2>
+    <div id="premise-mount"></div>
+    <div id="audience-transformation-mount" style="margin-top:16px;"></div>
+  </section>
+
+  <section class="block">
+    <h2>🧩 Arguments</h2>
+    <p class="intro">Each argument here becomes a script beat — click 🔊 Listen to hear the voice-over or see the link on each card.</p>
+    <div class="arg-list" id="arg-list"></div>
+  </section>
+
+  <section class="block">
+    <h2>🎬 Conclusion</h2>
+    <div id="conclusion-mount"></div>
+  </section>
+
+  <section class="block" id="sanity-check-section">
+    <h2>🛡️ Thesis Sanity Check</h2>
+    <p class="intro">7 rigorous stress-tests verifying the logical validity, historical coherence, and economic soundness of our counter-argument against Musk's apocalypse hypothesis.</p>
+
+    <div class="sanity-container" id="card-sanity-report">
+      <div class="sanity-header">
+        <div>
+          <strong style="font-size:15px;color:var(--text);">Verification Status:</strong>
+          <span style="font-size:13px;color:var(--text-dim);margin-left:6px;">All core pillars stress-tested against counter-evidence</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <div class="sanity-score" id="sanity-score-badge">✅ 7/7 Sanity Checks Passed</div>
+          <button class="listen-btn" onclick="togglePlayCard('card-sanity-report', 'Sanity Report', this)">🔊 Listen Report</button>
+          <button class="copy-btn" onclick="copySanityReport(this)">📋 Copy Report</button>
+        </div>
+      </div>
+
+      <div class="sanity-grid" id="sanity-grid"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  🧩 Arguments for <a href="https://github.com/rifaterdemsahin/sep-3-agentic-coding" target="_blank" rel="noopener">rifaterdemsahin/sep-3-agentic-coding</a> — built from 🔍 <a href="index.html">Research</a>, feeds the 📝 <a href="script.html">Script</a>. See everything you've saved in 🗂️ <a href="assets.html">Assets</a>.
+</footer>
+
+<script src="../js/pipeline.js"></script>
+<script src="../js/assets.js"></script>
+<script src="../js/links.js"></script>
+<script>
+  Pipeline.render('arguments');
+  PipelineLinks.init({ file: 'arguments.html', sourceFile: 'index.html', sourceLabel: 'Research' });
+
+  function esc(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;'); }
+
+  function renderArgumentsContent(){
+    var cm = ContentDB.getBlocks('arguments.html', 'core-message')[0];
+    if(cm){
+      var d = cm.data;
+      document.getElementById('core-message-mount').innerHTML =
+        '<div class="core-message-card" id="card-core-message">' +
+          '<div class="card-top">' +
+            '<span class="highlight-tag">' + d.tag + '</span>' +
+            '<div class="card-btn-group">' +
+              '<button class="listen-btn" onclick="togglePlayCard(\'card-core-message\', \'Core Message\', this)">🔊 Listen</button>' +
+              '<button class="copy-btn" onclick="copyCardText(\'card-core-message\', \'Core Message\', this)">📋 Copy</button>' +
+              '<button class="add-asset-btn" data-id="' + cm.id + '" data-type="argument" data-source="Arguments" data-title="' + esc(d.title) + '" data-desc="' + esc(d.desc) + '" data-url="arguments.html#card-core-message">➕ Add to Assets</button>' +
+            '</div>' +
+          '</div>' +
+          '<p>' + d.body + '</p>' +
+          '<p style="color:var(--warm);font-weight:700;font-size:15px;margin-top:10px;">' + d.footer + '</p>' +
+        '</div>';
+    }
+
+    var pr = ContentDB.getBlocks('arguments.html', 'premise')[0];
+    if(pr){
+      var dp = pr.data;
+      document.getElementById('premise-mount').innerHTML =
+        '<div class="premise-card" id="card-premise">' +
+          '<div class="card-top">' +
+            '<span style="font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--accent-2);text-transform:uppercase;">' + dp.tag + '</span>' +
+            '<div class="card-btn-group">' +
+              '<button class="listen-btn" onclick="togglePlayCard(\'card-premise\', \'Premise\', this)">🔊 Listen</button>' +
+              '<button class="copy-btn" onclick="copyCardText(\'card-premise\', \'Premise\', this)">📋 Copy</button>' +
+              '<button class="add-asset-btn" data-id="' + pr.id + '" data-type="argument" data-source="Arguments" data-title="' + esc(dp.title) + '" data-desc="' + esc(dp.desc) + '" data-url="arguments.html#card-premise">➕ Add to Assets</button>' +
+            '</div>' +
+          '</div>' +
+          '<p>' + dp.body + '</p>' +
+        '</div>';
+    }
+
+    var at = ContentDB.getBlocks('arguments.html', 'audience-transformation')[0];
+    if(at){
+      var da = at.data;
+      document.getElementById('audience-transformation-mount').innerHTML =
+        '<div class="audience-transformation-card" id="card-audience-transformation">' +
+          '<div class="card-top">' +
+            '<span style="font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--accent);text-transform:uppercase;">' + da.tag + '</span>' +
+            '<div class="card-btn-group">' +
+              '<button class="listen-btn" onclick="togglePlayCard(\'card-audience-transformation\', \'Audience Transformation\', this)">🔊 Listen</button>' +
+              '<button class="copy-btn" onclick="copyCardText(\'card-audience-transformation\', \'Audience Transformation\', this)">📋 Copy</button>' +
+              '<button class="add-asset-btn" data-id="' + at.id + '" data-type="argument" data-source="Arguments" data-title="' + esc(da.title) + '" data-desc="' + esc(da.desc) + '" data-url="arguments.html#card-audience-transformation">➕ Add to Assets</button>' +
+            '</div>' +
+          '</div>' +
+          '<h3 style="margin:0 0 14px;font-size:16px;color:var(--text);">' + da.title + '</h3>' +
+          '<div class="transform-grid">' +
+            '<div class="transform-col cold">' +
+              '<h4>' + da.beforeTitle + '</h4>' +
+              '<ul>' + da.beforeItems.map(function(li){ return '<li>' + li + '</li>'; }).join('') + '</ul>' +
+            '</div>' +
+            '<div class="transform-col warm">' +
+              '<h4>' + da.afterTitle + '</h4>' +
+              '<ul>' + da.afterItems.map(function(li){ return '<li>' + li + '</li>'; }).join('') + '</ul>' +
+            '</div>' +
+          '</div>' +
+          '<p class="transform-summary">' + da.summary + '</p>' +
+        '</div>';
+    }
+
+    var args = ContentDB.getBlocks('arguments.html', 'arguments');
+    document.getElementById('arg-list').innerHTML = args.map(function(b){
+      var d = b.data;
+      return '<div class="arg-card" id="' + d.cardId + '">' +
+        '<div class="card-top">' +
+          '<span class="arg-num">' + d.num + '</span>' +
+          '<div class="card-btn-group">' +
+            '<button class="listen-btn" onclick="togglePlayCard(\'' + d.cardId + '\', \'' + d.num + '\', this)">🔊 Listen</button>' +
+            '<button class="copy-btn" onclick="copyCardText(\'' + d.cardId + '\', \'' + d.num + '\', this)">📋 Copy</button>' +
+            '<button class="add-asset-btn" data-id="' + b.id + '" data-type="argument" data-source="Arguments" data-title="' + esc(d.fullTitle) + '" data-desc="' + esc(d.desc) + '" data-url="arguments.html#' + d.cardId + '">➕ Add to Assets</button>' +
+          '</div>' +
+        '</div>' +
+        '<h3>' + d.title + '</h3>' +
+        '<p>' + d.body + '</p>' +
+        (d.body2 ? '<p>' + d.body2 + '</p>' : '') +
+        '<a class="arg-link" href="' + d.linkHref + '">' + d.linkLabel + '</a>' +
+      '</div>';
+    }).join('');
+
+    var conc = ContentDB.getBlocks('arguments.html', 'conclusion')[0];
+    if(conc){
+      var dc = conc.data;
+      document.getElementById('conclusion-mount').innerHTML =
+        '<div class="conclusion-card" id="card-conclusion">' +
+          '<div class="card-top">' +
+            '<span style="font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--accent);text-transform:uppercase;">' + dc.tag + '</span>' +
+            '<div class="card-btn-group">' +
+              '<button class="listen-btn" onclick="togglePlayCard(\'card-conclusion\', \'Conclusion\', this)">🔊 Listen</button>' +
+              '<button class="copy-btn" onclick="copyCardText(\'card-conclusion\', \'Conclusion\', this)">📋 Copy</button>' +
+              '<button class="add-asset-btn" data-id="' + conc.id + '" data-type="argument" data-source="Arguments" data-title="' + esc(dc.title) + '" data-desc="' + esc(dc.desc) + '" data-url="arguments.html#card-conclusion">➕ Add to Assets</button>' +
+            '</div>' +
+          '</div>' +
+          '<p>' + dc.body + '</p>' +
+          '<p>' + dc.body2 + '</p>' +
+        '</div>';
+    }
+
+    var sanity = ContentDB.getBlocks('arguments.html', 'sanity-check');
+    document.getElementById('sanity-grid').innerHTML = sanity.map(function(b){
+      var d = b.data;
+      return '<div class="sanity-card passed" id="' + d.cardId + '">' +
+        '<input type="checkbox" class="sanity-checkbox" id="' + d.checkboxId + '" checked>' +
+        '<div class="sanity-body">' +
+          '<div class="sanity-title">' + esc(d.title) + '</div>' +
+          '<div class="sanity-desc">' + d.desc + '</div>' +
+          '<div class="sanity-verdict">' + d.verdict + '</div>' +
+        '</div>' +
+        '<div class="card-btn-group" style="align-self:flex-start;">' +
+          '<button class="listen-btn" onclick="togglePlayCard(\'' + d.cardId + '\', \'' + esc(d.label) + '\', this)">🔊</button>' +
+          '<button class="copy-btn" onclick="copyCardText(\'' + d.cardId + '\', \'' + esc(d.label) + '\', this)">📋</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function initSanityScoring(){
+    var checkboxes = document.querySelectorAll('.sanity-checkbox');
+    var badge = document.getElementById('sanity-score-badge');
+    if(!checkboxes.length || !badge) return;
+
+    function updateScore(){
+      var total = checkboxes.length;
+      var passed = 0;
+      checkboxes.forEach(function(cb){
+        var card = cb.closest('.sanity-card');
+        if(cb.checked){
+          passed++;
+          if(card) card.classList.add('passed');
+        } else {
+          if(card) card.classList.remove('passed');
+        }
+      });
+      badge.textContent = (passed === total ? '✅ ' : '⚠️ ') + passed + '/' + total + ' Sanity Checks Passed';
+      badge.style.borderColor = passed === total ? 'var(--accent-2)' : 'var(--warm)';
+      badge.style.color = passed === total ? 'var(--accent-2)' : 'var(--warm)';
+    }
+
+    checkboxes.forEach(function(cb){
+      cb.addEventListener('change', updateScore);
+    });
+  }
+
+  Promise.all([ContentDB.ready, AssetDB.ready]).then(function(){
+    renderArgumentsContent();
+    initSanityScoring();
+    AssetDB.initAddButtons();
+  });
+
+  // Clipboard Copy Utilities
+  function showToast(msg){
+    var toast = document.getElementById('toast-notice');
+    if(!toast){
+      toast = document.createElement('div');
+      toast.id = 'toast-notice';
+      toast.className = 'toast-notice';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(function(){
+      toast.classList.remove('show');
+    }, 2200);
+  }
+
+  function copyText(text, btnElement, successMsg){
+    function done(ok){
+      if(btnElement){
+        var orig = btnElement.getAttribute('data-orig') || btnElement.innerHTML;
+        if(!btnElement.getAttribute('data-orig')){
+          btnElement.setAttribute('data-orig', orig);
+        }
+        btnElement.innerHTML = ok ? '✅ Copied!' : '⚠️ Failed';
+        btnElement.classList.add('copied');
+        setTimeout(function(){
+          btnElement.innerHTML = btnElement.getAttribute('data-orig');
+          btnElement.classList.remove('copied');
+        }, 1800);
+      }
+      showToast(ok ? (successMsg || '📋 Copied to clipboard!') : '⚠️ Copy failed');
+    }
+
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ done(true); }, function(){ done(false); });
+    } else {
+      var tmp = document.createElement('textarea');
+      tmp.value = text;
+      tmp.style.position = 'fixed';
+      tmp.style.opacity = '0';
+      document.body.appendChild(tmp);
+      tmp.select();
+      try {
+        document.execCommand('copy');
+        done(true);
+      } catch(e){
+        done(false);
+      }
+      document.body.removeChild(tmp);
+    }
+  }
+
+  function copyCardText(cardId, label, btn){
+    var card = document.getElementById(cardId);
+    if(!card) return;
+    if(!btn) btn = card.querySelector('.copy-btn');
+
+    var clone = card.cloneNode(true);
+    clone.querySelectorAll('.copy-btn, .listen-btn, input, a').forEach(function(el){ el.remove(); });
+
+    var title = '';
+    var h = card.querySelector('h3, .sanity-title');
+    if(h) title = h.textContent.trim();
+
+    var paragraphs = [];
+    clone.querySelectorAll('p, .sanity-desc, .sanity-verdict').forEach(function(p){
+      var t = p.textContent.trim();
+      if(t) paragraphs.push(t);
+    });
+
+    var text = '';
+    if(title){
+      text = title + '\n\n' + paragraphs.join('\n\n');
+    } else {
+      text = paragraphs.join('\n\n');
+    }
+
+    var link = card.querySelector('.arg-link');
+    if(link){
+      text += '\n\n' + link.textContent.trim();
+    }
+
+    copyText(text.trim(), btn, (label || 'Card') + ' copied!');
+  }
+
+  function copyAllArguments(btn){
+    var md = [];
+    md.push('# 🧩 Arguments Outline: Task Decomposition\n');
+
+    // Core Message
+    md.push('## 🎯 Core Message');
+    var cm = document.querySelector('.core-message-card');
+    if(cm){
+      var cloneCm = cm.cloneNode(true);
+      cloneCm.querySelectorAll('.copy-btn, .listen-btn').forEach(function(el){ el.remove(); });
+      cloneCm.querySelectorAll('p').forEach(function(p){ md.push(p.textContent.trim()); });
+    }
+    md.push('');
+
+    // Premise
+    md.push('## 🌱 Premise');
+    var pm = document.querySelector('.premise-card');
+    if(pm){
+      var clonePm = pm.cloneNode(true);
+      clonePm.querySelectorAll('.copy-btn, .listen-btn').forEach(function(el){ el.remove(); });
+      clonePm.querySelectorAll('p').forEach(function(p){ md.push(p.textContent.trim()); });
+    }
+    md.push('');
+
+    // Audience Transformation
+    var at = document.querySelector('.audience-transformation-card');
+    if(at){
+      md.push('## 💡 Audience Transformation');
+      var atClone = at.cloneNode(true);
+      atClone.querySelectorAll('.copy-btn, .listen-btn').forEach(function(el){ el.remove(); });
+      var h3 = atClone.querySelector('h3') ? atClone.querySelector('h3').textContent.trim() : '';
+      if(h3) md.push(h3);
+      atClone.querySelectorAll('.transform-col').forEach(function(col){
+        var h4 = col.querySelector('h4') ? col.querySelector('h4').textContent.trim() : '';
+        if(h4) md.push('\n**' + h4 + '**');
+        col.querySelectorAll('li').forEach(function(li){ md.push('- ' + li.textContent.trim()); });
+      });
+      var summary = atClone.querySelector('.transform-summary') ? atClone.querySelector('.transform-summary').textContent.trim() : '';
+      if(summary) md.push('\n' + summary);
+      md.push('');
+    }
+
+    // Arguments
+    md.push('## 🧩 Supporting Arguments');
+    document.querySelectorAll('.arg-card').forEach(function(ac, idx){
+      var num = ac.querySelector('.arg-num') ? ac.querySelector('.arg-num').textContent.trim() : ('Argument ' + (idx + 1));
+      var h3 = ac.querySelector('h3') ? ac.querySelector('h3').textContent.trim() : '';
+      var p = ac.querySelector('p') ? ac.querySelector('p').textContent.trim() : '';
+      var link = ac.querySelector('.arg-link') ? ac.querySelector('.arg-link').textContent.trim() : '';
+
+      md.push('### ' + num + ': ' + h3);
+      if(p) md.push(p);
+      if(link) md.push('(' + link + ')');
+      md.push('');
+    });
+
+    // Conclusion
+    md.push('## 🎬 Conclusion');
+    var cc = document.querySelector('.conclusion-card');
+    if(cc){
+      var cloneCc = cc.cloneNode(true);
+      cloneCc.querySelectorAll('.copy-btn, .listen-btn').forEach(function(el){ el.remove(); });
+      cloneCc.querySelectorAll('p').forEach(function(p){ md.push(p.textContent.trim()); });
+    }
+    md.push('');
+
+    // Sanity checks
+    md.push('## 🛡️ Thesis Sanity Checks (5/5 Passed)');
+    document.querySelectorAll('.sanity-card').forEach(function(sc, idx){
+      var title = sc.querySelector('.sanity-title') ? sc.querySelector('.sanity-title').textContent.trim() : ('Check ' + (idx + 1));
+      var desc = sc.querySelector('.sanity-desc') ? sc.querySelector('.sanity-desc').textContent.trim() : '';
+      var verdict = sc.querySelector('.sanity-verdict') ? sc.querySelector('.sanity-verdict').textContent.trim() : '';
+      md.push('- **' + title + '**: ' + desc + ' (' + verdict + ')');
+    });
+
+    copyText(md.join('\n'), btn, 'All arguments outline copied!');
+  }
+
+  function copyThesis(btn){
+    var text = '🎯 CORE MESSAGE & PREMISE\n\n' +
+      '✨ Vision & Purpose:\nWhile rapid AI advancement elevates skill expectations across every discipline, it simultaneously unlocks AI-empowered self-learning. With this unprecedented multiplier, humanity is not heading toward a job apocalypse — we are gaining the collective power to solve grand challenges, construct civilizational megastructures, and eradicate global poverty.\n🚀 The future is not a shortage of work — the future is profoundly bright.\n\n' +
+      '🔒 Key Premise Locked:\nAI relocates and multiplies work, rather than shrinking the total pool. Applied together, human intent, domain knowledge, and AI tooling open entirely new sectors and problem domains that could never exist before, rather than simply automating away the finite tasks of the past.\n\n' +
+      '💡 Audience Takeaway (Before vs. After):\n- Before: Panic & fixed-pie dread of robots taking all human jobs.\n- After: Verified proof that automation waves expand net employment, focus on education democratization & tool multiplication as Multi-X Synthesizers.';
+    copyText(text, btn, 'Core Thesis copied!');
+  }
+
+  function copySanityReport(btn){
+    var lines = ['🛡️ THESIS SANITY CHECK REPORT (5/5 PASSED)\n'];
+    document.querySelectorAll('.sanity-card').forEach(function(sc, idx){
+      var title = sc.querySelector('.sanity-title') ? sc.querySelector('.sanity-title').textContent.trim() : ('Check ' + (idx + 1));
+      var desc = sc.querySelector('.sanity-desc') ? sc.querySelector('.sanity-desc').textContent.trim() : '';
+      var verdict = sc.querySelector('.sanity-verdict') ? sc.querySelector('.sanity-verdict').textContent.trim() : '';
+      lines.push((idx + 1) + '. ' + title);
+      lines.push('   ' + desc);
+      lines.push('   ' + verdict + '\n');
+    });
+    copyText(lines.join('\n'), btn, 'Sanity check report copied!');
+  }
+
+  // ==========================================
+  // Kokoro Voice Over Persistent Storage Engine
+  // ==========================================
+  var KokoroStorage = {
+    dbName: 'KokoroVoiceStorage',
+    storeName: 'audio_clips',
+    db: null,
+
+    open: function(){
+      var self = this;
+      return new Promise(function(resolve){
+        if(self.db) return resolve(self.db);
+        if(!window.indexedDB){
+          resolve(null);
+          return;
+        }
+        try{
+          var req = indexedDB.open(self.dbName, 1);
+          req.onupgradeneeded = function(e){
+            var db = e.target.result;
+            if(!db.objectStoreNames.contains(self.storeName)){
+              db.createObjectStore(self.storeName, { keyPath: 'key' });
+            }
+          };
+          req.onsuccess = function(e){
+            self.db = e.target.result;
+            resolve(self.db);
+          };
+          req.onerror = function(){
+            resolve(null);
+          };
+        } catch(e){
+          resolve(null);
+        }
+      });
+    },
+
+    getAudio: function(key){
+      var self = this;
+      return this.open().then(function(db){
+        if(!db) return null;
+        return new Promise(function(resolve){
+          try{
+            var tx = db.transaction(self.storeName, 'readonly');
+            var store = tx.objectStore(self.storeName);
+            var req = store.get(key);
+            req.onsuccess = function(){
+              resolve(req.result ? req.result.blob : null);
+            };
+            req.onerror = function(){
+              resolve(null);
+            };
+          } catch(e){
+            resolve(null);
+          }
+        });
+      });
+    },
+
+    saveAudio: function(key, blob, meta){
+      var self = this;
+      return this.open().then(function(db){
+        if(!db) return false;
+        return new Promise(function(resolve){
+          try{
+            var tx = db.transaction(self.storeName, 'readwrite');
+            var store = tx.objectStore(self.storeName);
+            var record = {
+              key: key,
+              blob: blob,
+              voice: meta.voice,
+              speed: meta.speed,
+              cardId: meta.cardId,
+              timestamp: Date.now(),
+              size: blob.size
+            };
+            var req = store.put(record);
+            req.onsuccess = function(){ resolve(true); };
+            req.onerror = function(){ resolve(false); };
+          } catch(e){
+            resolve(false);
+          }
+        });
+      });
+    },
+
+    getAllKeys: function(){
+      var self = this;
+      return this.open().then(function(db){
+        if(!db) return [];
+        return new Promise(function(resolve){
+          try{
+            var tx = db.transaction(self.storeName, 'readonly');
+            var store = tx.objectStore(self.storeName);
+            var req = store.getAllKeys();
+            req.onsuccess = function(){ resolve(req.result || []); };
+            req.onerror = function(){ resolve([]); };
+          } catch(e){
+            resolve([]);
+          }
+        });
+      });
+    },
+
+    clearAll: function(){
+      var self = this;
+      return this.open().then(function(db){
+        if(!db) return;
+        try{
+          var tx = db.transaction(self.storeName, 'readwrite');
+          tx.objectStore(self.storeName).clear();
+        } catch(e){}
+      });
+    }
+  };
+
+  // ==========================================
+  // Azure Blob Storage Audio Engine
+  // (Same SAS URL / container used by the image uploader in assets.html and
+  // the script.html voice-over bar — shared via localStorage, same origin.)
+  // ==========================================
+  var AzureStorageAudio = (function(){
+    var SAS_KEY = 'taskDecomposition_azureContainerSasUrl';
+
+    function getSasUrl(){
+      return localStorage.getItem(SAS_KEY) || '';
+    }
+
+    function parseSasUrl(sasUrl){
+      if(!sasUrl) return null;
+      var qIdx = sasUrl.indexOf('?');
+      if(qIdx === -1) return null;
+      return {
+        containerUrl: sasUrl.slice(0, qIdx).replace(/\/$/, ''),
+        sasQuery: sasUrl.slice(qIdx + 1)
+      };
+    }
+
+    function getBlobName(cardId, voice, speed){
+      return 'audio/arguments-' + cardId + '-' + voice + '-' + speed + '.mp3';
+    }
+
+    function getBlobUrl(cardId, voice, speed){
+      var parsed = parseSasUrl(getSasUrl());
+      if(!parsed) return null;
+      return parsed.containerUrl + '/' + getBlobName(cardId, voice, speed) + '?' + parsed.sasQuery;
+    }
+
+    function saveBlobToAzure(cardId, voice, speed, blob){
+      var putUrl = getBlobUrl(cardId, voice, speed);
+      if(!putUrl) return Promise.reject(new Error('Azure SAS URL is not configured'));
+
+      return fetch(putUrl, {
+        method: 'PUT',
+        headers: {
+          'x-ms-blob-type': 'BlockBlob',
+          'x-ms-blob-content-type': 'audio/mpeg',
+          'Content-Type': 'audio/mpeg'
+        },
+        body: blob
+      }).then(function(res){
+        if(!res.ok) throw new Error('Azure PUT failed status ' + res.status);
+        AudioClips.record('arguments.html', cardId, voice, speed, getBlobName(cardId, voice, speed));
+        return true;
+      });
+    }
+
+    function configureSas(){
+      var current = localStorage.getItem(SAS_KEY) || '';
+      var val = prompt(
+        'Configure Azure Blob Storage Container SAS URL for sep-3-agentic-coding:\n(e.g., https://dpprojects.blob.core.windows.net/sep-3-agentic-coding?sp=racwdl&st=...)\n\nLeave empty to disable Azure sync.',
+        current
+      );
+      if(val === null) return;
+      if(val.trim()){
+        localStorage.setItem(SAS_KEY, val.trim());
+        showToast('☁️ Azure SAS URL updated!');
+      } else {
+        localStorage.removeItem(SAS_KEY);
+        showToast('☁️ Azure Sync disabled.');
+      }
+    }
+
+    return {
+      isConfigured: function(){ return !!getSasUrl(); },
+      saveBlobToAzure: saveBlobToAzure,
+      getBlobUrl: getBlobUrl,
+      configureSas: configureSas
+    };
+  })();
+
+  // ==========================================
+  // Kokoro Voice Over Player & Audio Engine
+  // ==========================================
+  var KokoroPlayer = (function(){
+    var KOKORO_BASE = 'https://secondbrain-kokoro.fly.dev';
+    var inMemoryUrlCache = {}; // key -> Blob Object URL
+    var currentAudio = null;
+    var currentBtn = null;
+    var currentCardId = null;
+    var isSequencePlaying = false;
+    var sequenceQueue = [];
+    var sequenceIndex = 0;
+
+    var ALL_TRACK_IDS = [
+      { id: 'card-core-message', label: 'Core Message' },
+      { id: 'card-premise', label: 'Premise' },
+      { id: 'card-arg-1', label: 'Argument 1' },
+      { id: 'card-arg-2', label: 'Argument 2' },
+      { id: 'card-arg-3', label: 'Argument 3' },
+      { id: 'card-arg-4', label: 'Argument 4' },
+      { id: 'card-arg-5', label: 'Argument 5' },
+      { id: 'card-arg-6', label: 'Argument 6' },
+      { id: 'card-arg-7', label: 'Argument 7' },
+      { id: 'card-arg-8', label: 'Argument 8' },
+      { id: 'card-arg-9', label: 'Argument 9' },
+      { id: 'card-arg-10', label: 'Argument 10' },
+      { id: 'card-arg-11', label: 'Argument 11' },
+      { id: 'card-arg-12', label: 'Argument 12' },
+      { id: 'card-arg-13', label: 'Argument 13' },
+      { id: 'card-arg-14', label: 'Argument 14' },
+      { id: 'card-conclusion', label: 'Conclusion' }
+    ];
+
+    function getCurrentVoice(){
+      var voiceSelect = document.getElementById('voice-select');
+      return voiceSelect ? voiceSelect.value : 'af_heart';
+    }
+
+    function getCurrentSpeed(){
+      var speedSelect = document.getElementById('speed-select');
+      return speedSelect ? (parseFloat(speedSelect.value) || 1.0) : 1.0;
+    }
+
+    function getCacheKey(cardId){
+      return getCurrentVoice() + '_' + getCurrentSpeed() + '_' + cardId;
+    }
+
+    // Update UI indicators for locally backed up clips
+    function updateLocalBackupStatus(){
+      var voice = getCurrentVoice();
+      var speed = getCurrentSpeed();
+
+      KokoroStorage.getAllKeys().then(function(keys){
+        var cachedCount = 0;
+        var prefix = voice + '_' + speed + '_';
+
+        ALL_TRACK_IDS.forEach(function(item){
+          var key = prefix + item.id;
+          var cardEl = document.getElementById(item.id);
+          var btn = cardEl ? cardEl.querySelector('.listen-btn') : null;
+          var isCached = keys.indexOf(key) !== -1 || inMemoryUrlCache[key];
+
+          if(isCached){
+            cachedCount++;
+            if(btn && !btn.classList.contains('playing') && !btn.classList.contains('loading')){
+              btn.innerHTML = '🔊 Listen (💾 Local)';
+              btn.classList.add('has-local');
+              btn.title = 'Backed up to local storage — plays instantly without API';
+            }
+          } else {
+            if(btn && !btn.classList.contains('playing') && !btn.classList.contains('loading')){
+              btn.innerHTML = '🔊 Listen';
+              btn.classList.remove('has-local');
+              btn.title = 'Click to generate audio and back up locally';
+            }
+          }
+        });
+
+        var badge = document.getElementById('storage-badge');
+        if(badge){
+          badge.textContent = '💾 Local Backup: ' + cachedCount + '/' + ALL_TRACK_IDS.length + ' Saved';
+          badge.style.color = cachedCount === ALL_TRACK_IDS.length ? '#34d399' : 'var(--accent)';
+          badge.style.borderColor = cachedCount === ALL_TRACK_IDS.length ? 'rgba(52,211,153,.4)' : 'rgba(232,185,74,.3)';
+        }
+      });
+    }
+
+    // Fetch dynamic voice list from API if available
+    function loadVoices(){
+      var select = document.getElementById('voice-select');
+      if(!select) return;
+
+      fetch(KOKORO_BASE + '/voices')
+        .then(function(res){ return res.json(); })
+        .then(function(data){
+          if(data && data.voices){
+            var currentVal = select.value;
+            select.innerHTML = '';
+            Object.keys(data.voices).forEach(function(vKey){
+              var vObj = data.voices[vKey];
+              var opt = document.createElement('option');
+              opt.value = vKey;
+              opt.textContent = (vObj.lang === 'tr-TR' ? '🇹🇷 ' : (vObj.lang === 'en-GB' ? '🇬🇧 ' : '🇺🇸 ')) + vKey + ' (' + vObj.name + ')';
+              if(vKey === currentVal || (!currentVal && vKey === 'af_heart')) {
+                opt.selected = true;
+              }
+              select.appendChild(opt);
+            });
+            updateStatus('⚡ Kokoro Voices Ready (' + Object.keys(data.voices).length + ' loaded)');
+            updateLocalBackupStatus();
+          }
+        })
+        .catch(function(){
+          updateLocalBackupStatus();
+        });
+    }
+
+    function updateStatus(text){
+      var statusEl = document.getElementById('voice-status');
+      if(statusEl) statusEl.textContent = text;
+    }
+
+    function cleanTextForSpeech(rawText){
+      if(!rawText) return '';
+      // Remove emojis and symbols for natural pronunciation
+      var text = rawText.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '');
+      text = text.replace(/https?:\/\/\S+/g, '');
+      text = text.replace(/[→✓✔✅🛡️🧩🎯🌱🎬⚙️🌌🎓🌍🧮🌳🪨✨🚀💾]/g, '');
+      text = text.replace(/[*_#`~]/g, '');
+      return text.trim();
+    }
+
+    function getCardSpeech(cardId){
+      var card = document.getElementById(cardId);
+      if(!card) return '';
+
+      if(cardId === 'card-sanity-report'){
+        var lines = ['Thesis Sanity Check. 5 out of 5 stress-tests validated.'];
+        card.querySelectorAll('.sanity-card').forEach(function(sc){
+          var title = sc.querySelector('.sanity-title') ? sc.querySelector('.sanity-title').textContent : '';
+          var desc = sc.querySelector('.sanity-desc') ? sc.querySelector('.sanity-desc').textContent : '';
+          var verdict = sc.querySelector('.sanity-verdict') ? sc.querySelector('.sanity-verdict').textContent : '';
+          lines.push(cleanTextForSpeech(title) + '. ' + cleanTextForSpeech(desc) + '. ' + cleanTextForSpeech(verdict));
+        });
+        return lines.join(' ');
+      }
+
+      var clone = card.cloneNode(true);
+      clone.querySelectorAll('.copy-btn, .listen-btn, input, a').forEach(function(el){ el.remove(); });
+
+      var title = '';
+      var h = card.querySelector('h3, .sanity-title');
+      if(h) title = cleanTextForSpeech(h.textContent);
+
+      var paras = [];
+      clone.querySelectorAll('p, .sanity-desc, .sanity-verdict').forEach(function(p){
+        var t = cleanTextForSpeech(p.textContent);
+        if(t) paras.push(t);
+      });
+
+      var full = (title ? (title + '. ') : '') + paras.join('. ');
+      return full.replace(/\.\s*\./g, '.');
+    }
+
+    function highlightCard(cardId, active){
+      document.querySelectorAll('.card-reading-active').forEach(function(el){
+        el.classList.remove('card-reading-active');
+      });
+      if(active && cardId){
+        var card = document.getElementById(cardId);
+        if(card){
+          card.classList.add('card-reading-active');
+          card.scrollIntoView({ behavior:'smooth', block:'center' });
+        }
+      }
+    }
+
+    function stop(){
+      if(currentAudio){
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        currentAudio = null;
+      }
+      if(window.speechSynthesis && window.speechSynthesis.speaking){
+        window.speechSynthesis.cancel();
+      }
+      if(currentBtn){
+        currentBtn.innerHTML = currentBtn.getAttribute('data-orig') || (currentBtn.classList.contains('has-local') ? '🔊 Listen (💾 Local)' : '🔊 Listen');
+        currentBtn.classList.remove('playing', 'loading');
+        currentBtn = null;
+      }
+      highlightCard(null, false);
+      currentCardId = null;
+      isSequencePlaying = false;
+      sequenceQueue = [];
+
+      var playAllBtn = document.getElementById('play-all-btn');
+      if(playAllBtn){
+        playAllBtn.innerHTML = '▶️ Listen to All Sections';
+        playAllBtn.classList.remove('playing');
+      }
+      var stopBtn = document.getElementById('stop-all-btn');
+      if(stopBtn) stopBtn.style.display = 'none';
+
+      updateStatus('⚡ Kokoro Ready');
+      updateLocalBackupStatus();
+    }
+
+    function playAudioUrl(audioUrl, btn, cardId, isLocal, onFinished){
+      if(currentAudio){
+        currentAudio.pause();
+      }
+
+      var audio = new Audio(audioUrl);
+      var speed = getCurrentSpeed();
+      audio.playbackRate = speed;
+
+      currentAudio = audio;
+      currentBtn = btn;
+      currentCardId = cardId;
+
+      if(btn){
+        if(!btn.getAttribute('data-orig')) btn.setAttribute('data-orig', btn.innerHTML);
+        btn.innerHTML = '⏸️ Pause';
+        btn.classList.remove('loading');
+        btn.classList.add('playing');
+      }
+
+      var stopBtn = document.getElementById('stop-all-btn');
+      if(stopBtn) stopBtn.style.display = 'inline-flex';
+
+      highlightCard(cardId, true);
+
+      var sourceTag = isLocal ? '💾 [Local Backup]' : '⚡ [API Live]';
+      updateStatus('🔊 Playing ' + sourceTag + ': ' + (cardId.replace('card-', '').replace('-', ' ').toUpperCase()));
+
+      if(isLocal){
+        showToast('💾 Playing from local backup (0 API calls used)');
+      }
+
+      audio.onended = function(){
+        if(btn){
+          btn.innerHTML = btn.getAttribute('data-orig') || '🔊 Listen (💾 Local)';
+          btn.classList.remove('playing');
+        }
+        highlightCard(null, false);
+        currentAudio = null;
+        if(typeof onFinished === 'function'){
+          onFinished();
+        } else {
+          stop();
+        }
+      };
+
+      audio.onerror = function(){
+        updateStatus('⚠️ Playback error, trying fallback...');
+        fallbackBrowserSpeech(getCardSpeech(cardId), btn, cardId, onFinished);
+      };
+
+      audio.play().catch(function(e){
+        console.warn('Audio play error:', e);
+        fallbackBrowserSpeech(getCardSpeech(cardId), btn, cardId, onFinished);
+      });
+    }
+
+    function fallbackBrowserSpeech(text, btn, cardId, onFinished){
+      if(!('speechSynthesis' in window)){
+        showToast('Speech audio unavailable in this browser');
+        stop();
+        return;
+      }
+      window.speechSynthesis.cancel();
+      var utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = getCurrentSpeed();
+
+      if(btn){
+        if(!btn.getAttribute('data-orig')) btn.setAttribute('data-orig', btn.innerHTML);
+        btn.innerHTML = '⏸️ Pause';
+        btn.classList.add('playing');
+      }
+      var stopBtn = document.getElementById('stop-all-btn');
+      if(stopBtn) stopBtn.style.display = 'inline-flex';
+      highlightCard(cardId, true);
+      updateStatus('🔊 Browser Voice Playing...');
+
+      utterance.onend = function(){
+        if(btn){
+          btn.innerHTML = btn.getAttribute('data-orig') || '🔊 Listen';
+          btn.classList.remove('playing');
+        }
+        highlightCard(null, false);
+        if(typeof onFinished === 'function'){
+          onFinished();
+        } else {
+          stop();
+        }
+      };
+      utterance.onerror = function(){ stop(); };
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function loadAndPlay(cardId, label, btn, onFinished){
+      var speechText = getCardSpeech(cardId);
+      if(!speechText){
+        showToast('No text found for audio');
+        return;
+      }
+
+      var voice = getCurrentVoice();
+      var speed = getCurrentSpeed();
+      var cacheKey = getCacheKey(cardId);
+
+      // 1. Check in-memory URL cache
+      if(inMemoryUrlCache[cacheKey]){
+        playAudioUrl(inMemoryUrlCache[cacheKey], btn, cardId, true, onFinished);
+        return;
+      }
+
+      // 2. Check IndexedDB persistent local storage
+      KokoroStorage.getAudio(cacheKey).then(function(storedBlob){
+        if(storedBlob){
+          var blobUrl = URL.createObjectURL(storedBlob);
+          inMemoryUrlCache[cacheKey] = blobUrl;
+          playAudioUrl(blobUrl, btn, cardId, true, onFinished);
+          updateLocalBackupStatus();
+          return;
+        }
+
+        // 3. Not on this browser — check the Supabase audio_clips manifest;
+        // if a previous session already saved this exact card/voice/speed to
+        // Azure, fetch that instead of re-triggering the Kokoro API.
+        AudioClips.ready.then(function(){
+          var rec = AudioClips.get('arguments.html', cardId, voice, speed);
+          var azureUrl = rec ? AzureStorageAudio.getBlobUrl(cardId, voice, speed) : null;
+          if(!azureUrl) return null;
+          return fetch(azureUrl).then(function(res){ return res.ok ? res.blob() : null; }).catch(function(){ return null; });
+        }).then(function(azureBlob){
+          if(azureBlob){
+            KokoroStorage.saveAudio(cacheKey, azureBlob, { voice: voice, speed: speed, cardId: cardId })
+              .then(function(){ updateLocalBackupStatus(); });
+            var blobUrl = URL.createObjectURL(azureBlob);
+            inMemoryUrlCache[cacheKey] = blobUrl;
+            playAudioUrl(blobUrl, btn, cardId, true, onFinished);
+            showToast('☁️ Loaded from Azure Blob Storage — no Kokoro call needed.');
+            return;
+          }
+          requestFromKokoro();
+        });
+      });
+
+      // 4. Not cached anywhere — request from Kokoro API & back it up locally + Azure
+      function requestFromKokoro(){
+        if(btn){
+          if(!btn.getAttribute('data-orig')) btn.setAttribute('data-orig', btn.innerHTML);
+          btn.innerHTML = '⏳ Generating...';
+          btn.classList.add('loading');
+        }
+        updateStatus('⏳ Kokoro generating audio for ' + (label || cardId) + ' (Will back up locally)...');
+
+        fetch(KOKORO_BASE + '/api/speak', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: speechText,
+            voice: voice,
+            speed: speed
+          })
+        })
+        .then(function(res){
+          if(!res.ok) throw new Error('TTS server status ' + res.status);
+          return res.blob();
+        })
+        .then(function(blob){
+          // Save immediately to local IndexedDB storage
+          KokoroStorage.saveAudio(cacheKey, blob, {
+            voice: voice,
+            speed: speed,
+            cardId: cardId
+          }).then(function(){
+            showToast('💾 Audio backed up locally! Future plays will not re-trigger API.');
+            updateLocalBackupStatus();
+          });
+
+          // Sync to Azure Blob Storage in the background (fire-and-forget)
+          AzureStorageAudio.saveBlobToAzure(cardId, voice, speed, blob)
+            .then(function(){
+              showToast('☁️ Synced to Azure Blob Storage!');
+            })
+            .catch(function(err){
+              console.log('Azure background save note:', err);
+            });
+
+          var blobUrl = URL.createObjectURL(blob);
+          inMemoryUrlCache[cacheKey] = blobUrl;
+          playAudioUrl(blobUrl, btn, cardId, false, onFinished);
+        })
+        .catch(function(err){
+          console.warn('Kokoro server error, switching to browser TTS fallback:', err);
+          updateStatus('⚠️ Kokoro unreachable — Using Web Speech fallback');
+          fallbackBrowserSpeech(speechText, btn, cardId, onFinished);
+        });
+      }
+    }
+
+    function toggleCard(cardId, label, btn){
+      if(currentCardId === cardId && currentAudio && !currentAudio.paused){
+        stop();
+        return;
+      }
+      stop();
+      loadAndPlay(cardId, label, btn);
+    }
+
+    function playSequence(){
+      if(sequenceIndex >= sequenceQueue.length){
+        stop();
+        showToast('✨ Finished playing argument playlist!');
+        return;
+      }
+
+      var item = sequenceQueue[sequenceIndex];
+      var cardEl = document.getElementById(item.id);
+      var btn = cardEl ? cardEl.querySelector('.listen-btn') : null;
+
+      loadAndPlay(item.id, item.label, btn, function(){
+        sequenceIndex++;
+        playSequence();
+      });
+    }
+
+    function togglePlayAll(btn){
+      if(isSequencePlaying){
+        stop();
+        return;
+      }
+
+      stop();
+      isSequencePlaying = true;
+      sequenceQueue = ALL_TRACK_IDS.slice();
+      sequenceIndex = 0;
+
+      if(btn){
+        btn.innerHTML = '⏸️ Pause Argument Playlist';
+        btn.classList.add('playing');
+      }
+      var stopBtn = document.getElementById('stop-all-btn');
+      if(stopBtn) stopBtn.style.display = 'inline-flex';
+
+      playSequence();
+    }
+
+    // Pre-fetch and back up all missing sections locally
+    function backupAllToLocal(btn){
+      if(btn) btn.disabled = true;
+      var voice = getCurrentVoice();
+      var speed = getCurrentSpeed();
+
+      KokoroStorage.getAllKeys().then(function(keys){
+        var missing = ALL_TRACK_IDS.filter(function(item){
+          var key = voice + '_' + speed + '_' + item.id;
+          return keys.indexOf(key) === -1;
+        });
+
+        if(!missing.length){
+          showToast('✅ All sections are already backed up locally!');
+          if(btn) btn.disabled = false;
+          return;
+        }
+
+        var idx = 0;
+        function backupNext(){
+          if(idx >= missing.length){
+            updateStatus('✅ All ' + ALL_TRACK_IDS.length + ' sections backed up locally!');
+            showToast('✅ Backup complete! All sections will now play from local storage.');
+            updateLocalBackupStatus();
+            if(btn) btn.disabled = false;
+            return;
+          }
+
+          var item = missing[idx];
+          var speechText = getCardSpeech(item.id);
+          var cacheKey = voice + '_' + speed + '_' + item.id;
+
+          updateStatus('⏳ Backing up (' + (idx + 1) + '/' + missing.length + '): ' + item.label + '...');
+
+          fetch(KOKORO_BASE + '/api/speak', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              text: speechText,
+              voice: voice,
+              speed: speed
+            })
+          })
+          .then(function(res){ return res.blob(); })
+          .then(function(blob){
+            // Sync to Azure Blob Storage in the background (fire-and-forget)
+            AzureStorageAudio.saveBlobToAzure(item.id, voice, speed, blob).catch(function(err){
+              console.log('Azure background save note:', err);
+            });
+            return KokoroStorage.saveAudio(cacheKey, blob, {
+              voice: voice,
+              speed: speed,
+              cardId: item.id
+            });
+          })
+          .then(function(){
+            idx++;
+            updateLocalBackupStatus();
+            setTimeout(backupNext, 300);
+          })
+          .catch(function(e){
+            console.warn('Backup error for ' + item.id, e);
+            idx++;
+            setTimeout(backupNext, 300);
+          });
+        }
+
+        backupNext();
+      });
+    }
+
+    function clearLocalCache(){
+      if(confirm('Clear all local Kokoro audio backups from your browser storage?')){
+        KokoroStorage.clearAll().then(function(){
+          inMemoryUrlCache = {};
+          showToast('🗑️ Local audio cache cleared.');
+          updateLocalBackupStatus();
+        });
+      }
+    }
+
+    function onVoiceOrSpeedChange(){
+      updateLocalBackupStatus();
+    }
+
+    // Auto initialize voice list & local cache status
+    loadVoices();
+    setTimeout(updateLocalBackupStatus, 200);
+
+    return {
+      toggleCard: toggleCard,
+      togglePlayAll: togglePlayAll,
+      stop: stop,
+      backupAllToLocal: backupAllToLocal,
+      clearLocalCache: clearLocalCache,
+      onVoiceOrSpeedChange: onVoiceOrSpeedChange,
+      configureAzureSas: function(){ AzureStorageAudio.configureSas(); }
+    };
+  })();
+
+  // Global helper functions invoked by inline onclick handlers
+  function togglePlayCard(cardId, label, btn){
+    KokoroPlayer.toggleCard(cardId, label, btn);
+  }
+
+  function togglePlayAll(btn){
+    KokoroPlayer.togglePlayAll(btn);
+  }
+
+  function stopAudio(){
+    KokoroPlayer.stop();
+  }
+</script>
+</body>
+</html>

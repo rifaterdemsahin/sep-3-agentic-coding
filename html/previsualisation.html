@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  // Canonical host is Cloudflare Workers; GitHub Pages forwards visitors with repo subpath cleaned.
+  if(location.hostname.endsWith('github.io')){
+    var cleanPath = location.pathname.replace(/^\/sep-3-agentic-coding/, '').replace(/^\/[^/]+(?=\/html\/)/, '');
+    if(!cleanPath.startsWith('/')) cleanPath = '/' + cleanPath;
+    location.replace('https://sep-3-agentic-coding.polished-boat-17b2.workers.dev' + cleanPath + location.search + location.hash);
+  }
+</script>
+<title>🎞️ Previsualisation — Task Decomposition</title>
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+  header{
+    padding:48px 24px 32px;
+    max-width:1200px;
+    margin:0 auto;
+    text-align:center;
+  }
+  header .eyebrow{
+    color:var(--accent);
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    font-size:12px;
+    font-weight:600;
+  }
+  header h1{
+    font-size:clamp(24px,4vw,40px);
+    margin:10px 0 12px;
+    font-weight:700;
+  }
+  header p.sub{
+    color:var(--text-dim);
+    max-width:680px;
+    margin:0 auto;
+    font-size:15px;
+  }
+  .meta-row{
+    display:flex;
+    justify-content:center;
+    gap:24px;
+    flex-wrap:wrap;
+    margin-top:24px;
+    font-size:13px;
+    color:var(--text-dim);
+  }
+  .meta-row span b{color:var(--text);}
+
+  main{
+    max-width:1200px;
+    margin:0 auto;
+    padding:0 24px 80px;
+  }
+
+  .layman-intro{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-left:3px solid var(--accent-2);
+    border-radius:10px;
+    padding:18px 22px;
+    margin:28px 0 8px;
+  }
+  .layman-intro h2{
+    margin:0 0 8px;
+    font-size:15px;
+    color:var(--accent-2);
+  }
+  .layman-intro p{
+    margin:0;
+    font-size:13.5px;
+    line-height:1.6;
+    color:var(--text-dim);
+  }
+  .layman-line{
+    margin-top:10px;
+    padding:8px 12px;
+    background:rgba(90,176,255,.08);
+    border:1px solid var(--accent-2);
+    border-radius:8px;
+    font-size:12.5px;
+    line-height:1.5;
+  }
+  .layman-line b{color:var(--accent-2);}
+
+  .legend{
+    display:flex;
+    justify-content:center;
+    gap:28px;
+    flex-wrap:wrap;
+    margin:32px 0 40px;
+    font-size:13px;
+    color:var(--text-dim);
+  }
+  .legend .swatch{
+    display:inline-block;
+    width:12px;height:12px;
+    border-radius:3px;
+    margin-right:6px;
+    vertical-align:middle;
+  }
+  .swatch.cold{background:var(--cold);}
+  .swatch.warm{background:var(--warm);}
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+  }
+  @media (max-width:900px){
+    .grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (max-width:600px){
+    .grid{grid-template-columns:1fr;}
+  }
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:12px;
+    overflow:visible;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    transition:transform .15s ease, border-color .15s ease;
+  }
+  .card:hover{
+    transform:translateY(-2px);
+    border-color:#3a4258;
+    z-index:100;
+  }
+  .card.cold{border-top:3px solid var(--cold);}
+  .card.warm{border-top:3px solid var(--warm);}
+
+  .frame{
+    aspect-ratio:16/9;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(90,176,255,.10), transparent 60%),
+      linear-gradient(135deg,#171b26,#0e1017);
+    border-bottom:1px solid var(--panel-border);
+    border-radius:11px 11px 0 0;
+    overflow:visible;
+  }
+  .frame-img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    border-radius:11px 11px 0 0;
+    cursor:zoom-in;
+    transition:transform .25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow .25s ease;
+    transform-origin:center center;
+  }
+  .frame:hover .frame-img:hover{
+    transform:scale(4);
+    z-index:9999;
+    position:relative;
+    border-radius:8px;
+    box-shadow:0 24px 60px rgba(0,0,0,.95), 0 0 0 2px var(--accent-2);
+    cursor:zoom-out;
+  }
+  .frame .num{
+    position:absolute;
+    top:10px;
+    left:10px;
+    width:26px;height:26px;
+    border-radius:50%;
+    background:rgba(0,0,0,.7);
+    backdrop-filter:blur(4px);
+    border:1px solid rgba(255,255,255,.2);
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:700;
+    color:var(--text);
+    z-index:2;
+    pointer-events:none;
+  }
+  .frame .tc{
+    position:absolute;
+    top:10px;right:10px;
+    font-size:11px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    background:rgba(0,0,0,.7);
+    backdrop-filter:blur(4px);
+    border:1px solid rgba(255,255,255,.2);
+    padding:3px 8px;
+    border-radius:20px;
+    color:var(--text);
+    z-index:2;
+    pointer-events:none;
+  }
+  .frame .shot-tag{
+    position:absolute;
+    bottom:10px;left:10px;
+    font-size:10.5px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:#ffffff;
+    background:rgba(0,0,0,.7);
+    backdrop-filter:blur(4px);
+    padding:3px 8px;
+    border-radius:20px;
+    z-index:2;
+    pointer-events:none;
+  }
+
+  .body{
+    padding:16px 18px 18px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    flex:1;
+  }
+  .body h3{
+    margin:0;
+    font-size:15px;
+    font-weight:650;
+  }
+  .body .section{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--accent-2);
+    font-weight:700;
+  }
+  .body p{
+    margin:0;
+    font-size:13px;
+    color:var(--text-dim);
+  }
+  .body .vo{
+    margin-top:6px;
+    padding-top:8px;
+    border-top:1px dashed var(--panel-border);
+    font-size:12.5px;
+    color:#c8cdd8;
+    font-style:italic;
+  }
+
+  .add-asset-btn{
+    align-self:flex-start;
+    margin-top:2px;
+    font-size:11px;
+    padding:4px 10px;
+    border-radius:20px;
+    border:1px solid var(--panel-border);
+    background:transparent;
+    color:var(--text-dim);
+    cursor:pointer;
+    transition:border-color .15s ease,color .15s ease,background .15s ease;
+    white-space:nowrap;
+  }
+  .add-asset-btn:hover{border-color:var(--accent-2);color:var(--text);}
+  .add-asset-btn.added{border-color:var(--warm);color:var(--warm);background:rgba(232,185,74,.08);}
+
+  .body .actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .prompt-btn{
+    align-self:flex-start;
+    font-size:11px;
+    padding:4px 10px;
+    border-radius:20px;
+    border:1px solid var(--panel-border);
+    background:transparent;
+    color:var(--text-dim);
+    cursor:pointer;
+    transition:border-color .15s ease,color .15s ease,background .15s ease;
+    white-space:nowrap;
+  }
+  .prompt-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+  .download-btn{
+    align-self:flex-start;
+    font-size:11px;
+    padding:4px 10px;
+    border-radius:20px;
+    border:1px solid var(--panel-border);
+    background:transparent;
+    color:var(--text-dim);
+    cursor:pointer;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    transition:border-color .15s ease,color .15s ease,background .15s ease;
+    white-space:nowrap;
+  }
+  .download-btn:hover{border-color:var(--accent-2);color:var(--text);background:rgba(90,176,255,.08);}
+
+  .download-all-wrap{
+    display:flex;
+    justify-content:center;
+    margin:14px 0 0;
+  }
+  .download-all-btn{
+    font-size:12px;
+    padding:6px 16px;
+    border-color:var(--panel-border);
+    background:var(--panel);
+    font-weight:500;
+  }
+  .download-all-btn:hover{
+    border-color:var(--accent);
+    color:var(--accent);
+    background:rgba(232,185,74,.08);
+  }
+
+  .modal-overlay{
+    position:fixed;
+    inset:0;
+    z-index:600;
+    background:rgba(5,6,9,.72);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .modal-overlay[hidden]{display:none;}
+  .modal-box{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:14px;
+    max-width:560px;
+    width:100%;
+    max-height:80vh;
+    display:flex;
+    flex-direction:column;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+  }
+  .modal-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:16px 20px;
+    border-bottom:1px solid var(--panel-border);
+  }
+  .modal-head h4{margin:0;font-size:14px;flex:1;}
+  .modal-close{
+    border:none;
+    background:transparent;
+    color:var(--text-dim);
+    font-size:18px;
+    cursor:pointer;
+    line-height:1;
+    padding:2px 6px;
+  }
+  .modal-close:hover{color:var(--text);}
+  .modal-body{
+    padding:18px 20px;
+    overflow-y:auto;
+    font-size:13.5px;
+    line-height:1.6;
+    color:var(--text);
+    white-space:pre-wrap;
+  }
+  .modal-actions{
+    padding:14px 20px 18px;
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+  }
+  .modal-actions button{
+    border:1px solid var(--panel-border);
+    background:var(--bg);
+    color:var(--text);
+    border-radius:7px;
+    padding:7px 14px;
+    font-size:12.5px;
+    cursor:pointer;
+  }
+  .modal-actions button:hover{border-color:var(--accent-2);}
+
+  /* Azure Container & Carousel Controls */
+  .view-controls-bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:12px;
+    margin:24px 0 20px;
+    padding:12px 18px;
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:12px;
+  }
+  .view-toggle-grp{
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .view-btn{
+    font-size:12.5px;
+    padding:6px 14px;
+    border-radius:20px;
+    border:1px solid var(--panel-border);
+    background:transparent;
+    color:var(--text-dim);
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .view-btn:hover{ color:var(--text); border-color:var(--accent-2); }
+  .view-btn.active{
+    background:rgba(232,185,74,.12);
+    border-color:var(--accent);
+    color:var(--accent);
+    font-weight:600;
+  }
+  .azure-portal-link{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    font-weight:600;
+    color:#5ab0ff;
+    background:rgba(90,176,255,.12);
+    border:1px solid rgba(90,176,255,.35);
+    padding:5px 12px;
+    border-radius:20px;
+    text-decoration:none;
+    transition:all .15s ease;
+  }
+  .azure-portal-link:hover{
+    background:rgba(90,176,255,.22);
+    border-color:var(--accent-2);
+    color:#ffffff;
+  }
+
+  /* Carousel Section */
+  .carousel-wrap{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:0 12px 40px rgba(0,0,0,.35);
+    margin-bottom:28px;
+  }
+  .carousel-stage{
+    position:relative;
+    width:100%;
+    aspect-ratio:16/9;
+    max-height:560px;
+    background:#06080c;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    user-select:none;
+  }
+  .carousel-img-wrap{
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .carousel-main-img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    transition:opacity .25s ease;
+    cursor:zoom-in;
+  }
+  .carousel-nav-btn{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    width:46px;
+    height:46px;
+    border-radius:50%;
+    background:rgba(11,13,18,.8);
+    backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,.2);
+    color:var(--text);
+    font-size:24px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    z-index:10;
+    transition:all .2s ease;
+  }
+  .carousel-nav-btn:hover{
+    background:rgba(232,185,74,.9);
+    color:#000000;
+    border-color:var(--accent);
+    transform:translateY(-50%) scale(1.08);
+  }
+  .carousel-nav-btn.prev{ left:16px; }
+  .carousel-nav-btn.next{ right:16px; }
+
+  .carousel-caption{
+    position:absolute;
+    bottom:0;
+    left:0;
+    right:0;
+    padding:36px 24px 18px;
+    background:linear-gradient(to top, rgba(7,9,14,.96) 0%, rgba(7,9,14,.75) 65%, transparent 100%);
+    color:var(--text);
+    z-index:5;
+  }
+  .carousel-caption-tags{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:6px;
+  }
+  .carousel-tag{
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    padding:2px 9px;
+    border-radius:12px;
+    background:rgba(0,0,0,.6);
+    border:1px solid rgba(255,255,255,.2);
+    color:var(--text);
+  }
+  .carousel-tag.gold{ color:var(--accent); border-color:rgba(232,185,74,.4); }
+  .carousel-tag.blue{ color:var(--accent-2); border-color:rgba(90,176,255,.4); }
+  .carousel-caption-title{
+    font-size:17px;
+    font-weight:700;
+    margin:0 0 4px;
+    color:var(--text);
+  }
+  .carousel-caption-desc{
+    font-size:13px;
+    color:#d0d4de;
+    margin:0 0 6px;
+    line-height:1.45;
+  }
+  .carousel-caption-vo{
+    font-size:12.5px;
+    font-style:italic;
+    color:var(--accent);
+    margin:0 0 4px;
+  }
+  .carousel-caption-layman{
+    font-size:12px;
+    color:#a0b8d8;
+    background:rgba(90,176,255,.08);
+    padding:4px 8px;
+    border-radius:6px;
+    display:inline-block;
+    border-left:2px solid var(--accent-2);
+  }
+
+  .carousel-progress{
+    height:3px;
+    width:100%;
+    background:rgba(255,255,255,.1);
+    position:relative;
+    overflow:hidden;
+  }
+  .carousel-progress-bar{
+    height:100%;
+    width:0%;
+    background:var(--accent);
+  }
+
+  .carousel-footer-bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:12px;
+    padding:12px 20px;
+    background:#0e1017;
+    border-top:1px solid var(--panel-border);
+  }
+  .carousel-counter{
+    font-size:13px;
+    color:var(--text-dim);
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  .carousel-counter b{ color:var(--text); }
+  .carousel-filmstrip{
+    display:flex;
+    gap:10px;
+    padding:14px 20px;
+    background:#080a0f;
+    border-top:1px solid var(--panel-border);
+    overflow-x:auto;
+    scrollbar-width:thin;
+  }
+  .carousel-thumb{
+    flex:0 0 92px;
+    height:54px;
+    border-radius:6px;
+    border:2px solid var(--panel-border);
+    background:#131620;
+    cursor:pointer;
+    overflow:hidden;
+    position:relative;
+    transition:all .15s ease;
+    opacity:.6;
+  }
+  .carousel-thumb:hover{
+    opacity:1;
+    border-color:var(--accent-2);
+    transform:scale(1.04);
+  }
+  .carousel-thumb.active{
+    opacity:1;
+    border-color:var(--accent);
+    box-shadow:0 0 0 2px rgba(232,185,74,.4);
+    transform:scale(1.04);
+  }
+  .carousel-thumb img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+  .carousel-thumb-num{
+    position:absolute;
+    bottom:2px;
+    right:3px;
+    font-size:9.5px;
+    font-weight:700;
+    background:rgba(0,0,0,.8);
+    padding:1px 5px;
+    border-radius:4px;
+    color:#ffffff;
+  }
+
+  footer{
+    max-width:1200px;
+    margin:0 auto;
+    padding:24px;
+    text-align:center;
+    color:var(--text-dim);
+    font-size:12.5px;
+    border-top:1px solid var(--panel-border);
+  }
+  footer a{color:var(--accent-2);text-decoration:none;}
+  footer a:hover{text-decoration:underline;}
+</style>
+<script src="../js/video-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="../js/nav.js"></script>
+<script src="../js/content-db.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/notes.js"></script>
+</head>
+<body>
+
+<div id="nav-mount"></div>
+<script>Nav.render('previsualisation');</script>
+
+<header>
+  <div class="eyebrow">🎞️ Previsualization · Storyboard v1</div>
+  <h1>Previsualisation</h1>
+  <p class="sub">9-panel shot board for the "Task Decomposition" course module, mapped to the script's beats and building toward "use in real life in a meaningful manner."</p>
+  <div class="meta-row">
+    <span>⏱️ Runtime: <b>~3:00</b></span>
+    <span>📐 Aspect: <b>16:9</b></span>
+    <span>🖼️ Panels: <b>9</b></span>
+    <span>🐙 Repo: <b>rifaterdemsahin/sep-3-agentic-coding</b></span>
+  </div>
+</header>
+
+<div class="pipeline-wrap" id="pipeline-stepper"></div>
+
+<main>
+  <div class="layman-intro" id="layman-intro-mount"></div>
+
+  <div class="view-controls-bar">
+    <div class="view-toggle-grp">
+      <button type="button" class="view-btn active" id="viewModeCarouselBtn">🎞️ Carousel View</button>
+      <button type="button" class="view-btn" id="viewModeGridBtn">🍱 3x3 Grid View</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <a class="azure-portal-link" href="https://portal.azure.com/#view/Microsoft_Azure_Storage/ContainerMenuBlade/~/overview/storageAccountId/%2Fsubscriptions%2Fb85b029d-9f7c-4c5a-8939-819480780c5d%2FresourceGroups%2Fdeliverypilot-rg%2Fproviders%2FMicrosoft.Storage%2FstorageAccounts%2Fdpprojects/path/sep-3-agentic-coding/etag/%220x8DF0E4F96506ADE%22/defaultId//publicAccessVal/Blob" target="_blank" rel="noopener" title="Open Azure Container in Portal">
+        ☁️ Azure Blob Container ↗
+      </a>
+      <button type="button" id="download-all-btn" class="download-btn" style="padding:5px 12px;font-size:12px;">⬇️ Download All (9)</button>
+    </div>
+  </div>
+
+  <!-- Storyboard Carousel Section -->
+  <div class="carousel-wrap" id="previzCarouselWrap">
+    <div class="carousel-stage" id="previzCarouselStage">
+      <button class="carousel-nav-btn prev" id="previzPrevBtn" aria-label="Previous shot">‹</button>
+      <div class="carousel-img-wrap">
+        <img class="carousel-main-img" id="previzMainImg" src="../images/panel_1.jpg" alt="Panel 1" title="Click to enlarge / zoom">
+      </div>
+      <button class="carousel-nav-btn next" id="previzNextBtn" aria-label="Next shot">›</button>
+
+      <div class="carousel-caption">
+        <div class="carousel-caption-tags">
+          <span class="carousel-tag gold" id="previzTagNum">Panel 1 of 9</span>
+          <span class="carousel-tag blue" id="previzTagTc">0:00–0:35</span>
+          <span class="carousel-tag" id="previzTagSection">Act 1 · Hook</span>
+        </div>
+        <h3 class="carousel-caption-title" id="previzCaptionTitle">Headline Montage: The 5-Year Panic</h3>
+        <p class="carousel-caption-desc" id="previzCaptionDesc">High-contrast, fast-cut montage of doom headlines ("Robots Take All Jobs", "Musk Predicts End of Work").</p>
+        <p class="carousel-caption-vo" id="previzCaptionVo">VO: "AI agent workflows says in 5 years, robots and AI will replace human labor..."</p>
+        <div class="carousel-caption-layman" id="previzCaptionLayman"><b>In plain English:</b> Hook the audience with Musk's provocative claim.</div>
+      </div>
+    </div>
+
+    <div class="carousel-progress">
+      <div class="carousel-progress-bar" id="previzProgressBar"></div>
+    </div>
+
+    <div class="carousel-footer-bar">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <button class="view-btn" id="previzPlayBtn">▶️ Auto-Play Slideshow</button>
+        <span class="carousel-counter" id="previzCounter">Panel <b>1</b> / 9</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <button class="view-btn" id="previzPromptBtn">🖼️ View Prompt</button>
+        <a class="download-btn" id="previzDownloadBtn" href="../images/panel_1.jpg" download="panel_1_headline_montage.jpg">⬇️ Download Panel</a>
+      </div>
+    </div>
+
+    <div class="carousel-filmstrip" id="previzFilmstrip"></div>
+  </div>
+
+  <div class="legend" id="previzLegend" style="display:none;">
+    <span><span class="swatch cold"></span>❄️ Cold Slate Blue / fast-paced — Musk, headlines, panic &amp; apocalyptic framing</span>
+    <span><span class="swatch warm"></span>🔥 Warm Gold / cinematic — daughters, history, human agency &amp; education</span>
+  </div>
+
+  <div class="grid" style="margin-top:24px;display:none;" id="shots-grid">
+
+  </div>
+</main>
+
+<div class="modal-overlay" id="prompt-modal" hidden>
+  <div class="modal-box">
+    <div class="modal-head">
+      <h4 id="prompt-modal-title">Image Prompt</h4>
+      <button class="modal-close" type="button" id="prompt-modal-close" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body" id="prompt-modal-body"></div>
+    <div class="modal-actions">
+      <button type="button" id="prompt-modal-copy">📋 Copy Prompt</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  🎞️ Previsualization board for <a href="https://github.com/rifaterdemsahin/sep-3-agentic-coding" target="_blank" rel="noopener">rifaterdemsahin/sep-3-agentic-coding</a> — built for pre-production planning before shoot/edit. See everything you've saved in 🗂️ <a href="assets.html">Assets</a>.
+</footer>
+
+<script src="../js/pipeline.js"></script>
+<script src="../js/assets.js"></script>
+<script src="../js/links.js"></script>
+<script>
+  Pipeline.render('previsualisation');
+  PipelineLinks.init({ file: 'previsualisation.html', sourceFile: 'design.html', sourceLabel: 'Design' });
+
+  function escAttr(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;'); }
+
+  function renderPrevizContent(){
+    var intro = ContentDB.getBlocks('previsualisation.html', 'intro')[0];
+    if(intro){
+      document.getElementById('layman-intro-mount').innerHTML =
+        '<h2>' + intro.data.title + '</h2><p>' + intro.data.body + '</p>';
+    }
+
+    var shots = ContentDB.getBlocks('previsualisation.html', 'shot-board');
+    document.getElementById('shots-grid').innerHTML = shots.map(function(b){
+      var d = b.data;
+      return '<div class="card ' + d.mood + '">' +
+        '<div class="frame">' +
+          '<img src="' + d.img + '" alt="Panel ' + d.n + ' — ' + escAttr(d.title) + '" class="frame-img">' +
+          '<div class="num">' + d.n + '</div>' +
+          '<div class="tc">' + d.tc + '</div>' +
+          '<div class="shot-tag">' + d.tag + '</div>' +
+        '</div>' +
+        '<div class="body">' +
+          '<div class="section">' + d.section + '</div>' +
+          '<h3>' + d.title + '</h3>' +
+          '<p>' + d.desc + '</p>' +
+          '<p class="vo">' + d.vo + '</p>' +
+          '<div class="layman-line"><b>In plain English:</b> ' + d.layman + '</div>' +
+          '<div class="actions">' +
+            '<button class="add-asset-btn" data-id="' + b.id + '" data-type="shot" data-source="Previsualisation" data-title="Panel ' + d.n + ' — ' + escAttr(d.title) + ' (' + d.tc + ')" data-desc="' + escAttr(d.desc) + '">➕ Add to Assets</button>' +
+            '<button class="prompt-btn" data-title="Panel ' + d.n + ' — ' + escAttr(d.title) + '" data-prompt="' + escAttr(d.prompt) + '">🖼️ Prompt</button>' +
+            '<a class="download-btn" href="' + d.img + '" download="' + d.downloadName + '" title="Download Panel ' + d.n + ' image">⬇️ Download</a>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  Promise.all([ContentDB.ready, AssetDB.ready]).then(function(){
+    renderPrevizContent();
+    AssetDB.initAddButtons();
+    if(window.wirePromptButtons) window.wirePromptButtons();
+  });
+
+  (function(){
+    var modal = document.getElementById('prompt-modal');
+    var titleEl = document.getElementById('prompt-modal-title');
+    var bodyEl = document.getElementById('prompt-modal-body');
+    var closeBtn = document.getElementById('prompt-modal-close');
+    var copyBtn = document.getElementById('prompt-modal-copy');
+    var currentPrompt = '';
+
+    function openModal(title, prompt){
+      titleEl.textContent = title;
+      bodyEl.textContent = prompt;
+      currentPrompt = prompt;
+      copyBtn.textContent = '📋 Copy Prompt';
+      modal.hidden = false;
+    }
+    function closeModal(){
+      modal.hidden = true;
+    }
+
+    function wirePromptButtons(){
+      document.querySelectorAll('.prompt-btn').forEach(function(btn){
+        if(btn.dataset.wired) return;
+        btn.dataset.wired = '1';
+        btn.addEventListener('click', function(){
+          openModal(btn.dataset.title || 'Image Prompt', btn.dataset.prompt || '');
+        });
+      });
+    }
+    wirePromptButtons();
+    window.wirePromptButtons = wirePromptButtons;
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e){
+      if(e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && !modal.hidden) closeModal();
+    });
+
+    copyBtn.addEventListener('click', function(){
+      function done(ok){
+        copyBtn.textContent = ok ? '✅ Copied' : '⚠️ Copy failed';
+        setTimeout(function(){ copyBtn.textContent = '📋 Copy Prompt'; }, 1500);
+      }
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(currentPrompt).then(function(){ done(true); }, function(){ done(false); });
+      } else {
+        var tmp = document.createElement('textarea');
+        tmp.value = currentPrompt;
+        tmp.style.position = 'fixed';
+        tmp.style.opacity = '0';
+        document.body.appendChild(tmp);
+        tmp.select();
+        try{ document.execCommand('copy'); done(true); }
+        catch(err){ done(false); }
+        document.body.removeChild(tmp);
+      }
+    });
+
+    // View Switcher (Carousel vs Grid)
+    var viewCarouselBtn = document.getElementById('viewModeCarouselBtn');
+    var viewGridBtn = document.getElementById('viewModeGridBtn');
+    var carouselWrap = document.getElementById('previzCarouselWrap');
+    var shotsGrid = document.getElementById('shots-grid');
+    var legend = document.getElementById('previzLegend');
+
+    function setViewMode(mode){
+      if(mode === 'carousel'){
+        viewCarouselBtn.classList.add('active');
+        viewGridBtn.classList.remove('active');
+        carouselWrap.style.display = 'block';
+        shotsGrid.style.display = 'none';
+        legend.style.display = 'none';
+      } else {
+        viewGridBtn.classList.add('active');
+        viewCarouselBtn.classList.remove('active');
+        carouselWrap.style.display = 'none';
+        shotsGrid.style.display = 'grid';
+        legend.style.display = 'flex';
+      }
+    }
+
+    if(viewCarouselBtn && viewGridBtn){
+      viewCarouselBtn.addEventListener('click', function(){ setViewMode('carousel'); });
+      viewGridBtn.addEventListener('click', function(){ setViewMode('grid'); });
+    }
+
+    // Storyboard Carousel Engine
+    (function(){
+      var panels = [
+        {
+          n: 1,
+          title: 'Headline Montage: The 5-Year Panic',
+          section: 'Act 1 · Hook',
+          tc: '0:00–0:35',
+          tag: 'Fast Montage · Cold',
+          mood: 'cold',
+          img: '../images/panel_1.jpg',
+          downloadName: 'panel_1_headline_montage.jpg',
+          desc: 'High-contrast, fast-cut montage of doom headlines ("Robots Take All Jobs", "Musk Predicts End of Work"). Overlaid with stock tickers and robot arms.',
+          vo: 'VO: "AI agent workflows says in 5 years, robots and AI will replace human labor. But history, economics, and my two daughters tell a very different story."',
+          layman: 'Hook the audience with Musk\'s provocative claim, then state our counter-thesis clearly.',
+          prompt: 'Editorial news montage, dark studio lighting, holographic headlines "Musk: End of Work", robotic arms holding tools, high cinematic contrast, 16:9, hyperrealistic, 8k resolution.'
+        },
+        {
+          n: 2,
+          title: 'The Personal Stakes: Home Studio & Daughters',
+          section: 'Act 1 · Personal Context',
+          tc: '0:35–1:15',
+          tag: 'Home Studio · Warm',
+          mood: 'warm',
+          img: '../images/panel_2.jpg',
+          downloadName: 'panel_2_host_home_studio.jpg',
+          desc: 'Warmly lit home studio desk with microphone, camera, and framed photos of two daughters with laptop and math books in background.',
+          vo: 'VO: "This isn\'t wishful thinking. As a father of two daughters, I have a personal stake in what the world will look like when they graduate."',
+          layman: 'Ground the video in real emotional stakes: this isn\'t just theory, it\'s about our children\'s real futures.',
+          prompt: 'Warm home studio interior, desk with Shure SM7B microphone, Sony FX3 camera on tripod, warm amber ambient lighting, desk photo frame of two daughters learning math, cinematic shallow depth of field.'
+        },
+        {
+          n: 3,
+          title: 'Historical Anchor 1: Stone Age to Farm Revolution',
+          section: 'Act 2 · Historical Argument',
+          tc: '1:15–2:00',
+          tag: 'Historical Split · Warm',
+          mood: 'warm',
+          img: '../images/panel_3.jpg',
+          downloadName: 'panel_3_stone_age_agriculture.jpg',
+          desc: 'Historical transition visual: Stone age flint tools on left morphing into agricultural plow and golden wheat field on right.',
+          vo: 'VO: "When agriculture freed humans from hunting, we didn\'t run out of work — we created trade, cities, science, and the entire modern world."',
+          layman: 'When farming automated food gathering, 90% of farmers shifted into building civilization.',
+          prompt: 'Panoramic split screen historical concept art, prehistoric caveman crafting stone spear on left transitioning seamlessly into golden wheat harvest with ancient stone architecture on right, warm sunset.'
+        },
+        {
+          n: 4,
+          title: 'Historical Anchor 2: Calculators & Office Shift',
+          section: 'Act 2 · Automation Creates Depth',
+          tc: '2:00–2:45',
+          tag: 'Tech Evolution · Warm',
+          mood: 'warm',
+          img: '../images/panel_4.jpg',
+          downloadName: 'panel_4_mainframe_pc.jpg',
+          desc: '1960s human "computer" room full of clerks with paper ledgers cross-fading into modern open office with dual monitors and data streams.',
+          vo: 'VO: "When digital computers replaced human calculators, they didn\'t destroy finance — they expanded it a thousandfold."',
+          layman: 'Spreadsheets automated arithmetic, and finance created 10x more accounting & analysis jobs.',
+          prompt: '1960s NASA computation room with rows of women calculating tables cross-fading into sleek 2020s creative tech workstation with multiple curved monitors and financial graphs.'
+        },
+        {
+          n: 5,
+          title: 'Core Thesis: Tree of Infinite Permutations',
+          section: 'Act 3 · The Permutation Thesis',
+          tc: '2:45–3:30',
+          tag: 'Branching Infographic · Warm',
+          mood: 'warm',
+          img: '../images/panel_5.jpg',
+          downloadName: 'panel_5_job_tree_branching_diagram.jpg',
+          desc: 'Glowing fractal tree diagram showing base job trunk branching into hundreds of new specialized AI-collaborative roles.',
+          vo: 'VO: "Every tool creates an infinite number of permutations. AI doesn\'t subtract jobs — it multiplies the combinatorial possibilities of what humans can build."',
+          layman: 'New tools don\'t shrink the pie; they generate infinite new job branches.',
+          prompt: 'Glowing luminous golden fractal tree on dark tech background, trunk labeled "Base Tools", branches multiplying into thousands of glowing nodes representing new industries and occupations.'
+        },
+        {
+          n: 6,
+          title: 'The Math Literacy Pillar: Daughters & AI',
+          section: 'Act 3 · Math & Reasoning',
+          tc: '3:30–4:15',
+          tag: 'Math Visualization · Warm',
+          mood: 'warm',
+          img: '../images/panel_6.jpg',
+          downloadName: 'panel_6_daughter_holo_tablet.jpg',
+          desc: 'Young girl working with tablet showing glowing geometric shapes, neural network nodes, and math equations.',
+          vo: 'VO: "My daughters will use math and quantitative thinking more than any generation before them — not to calculate, but to orchestrate."',
+          layman: 'Math in the AI age isn\'t doing long division — it\'s knowing how models reason.',
+          prompt: 'Teenage girl sitting at desk interacting with an intuitive glowing 3D holographic math matrix, complex geometry rotating in mid-air, inspiring warm amber lighting, confident focus.'
+        },
+        {
+          n: 7,
+          title: 'Moravec\'s Paradox & Collaborative Desk',
+          section: 'Act 4 · Human-AI Synthesis',
+          tc: '4:15–4:45',
+          tag: 'Father & Daughter · Warm',
+          mood: 'warm',
+          img: '../images/panel_7.jpg',
+          downloadName: 'panel_7_host_daughter_holo_device.jpg',
+          desc: 'Father and daughter at workstation exploring complex interactive simulation together, smiling.',
+          vo: 'VO: "AI handles the computation; humans provide intent, taste, empathy, and judgment. That partnership is where value lives."',
+          layman: 'Computers do hard math easily, but struggle with human intuition and common sense.',
+          prompt: 'Father and daughter collaborating together at a modern wooden studio desk, looking at glowing digital interface, shared eureka moment, cinematic portrait lighting.'
+        },
+        {
+          n: 8,
+          title: 'Global Evidence: Velocity & Leapfrogging',
+          section: 'Act 4 · Macro Economy',
+          tc: '4:45–5:15',
+          tag: 'Global Grid · Cold/Warm',
+          mood: 'cold',
+          img: '../images/panel_8.jpg',
+          downloadName: 'panel_8_collaboration_split_frame.jpg',
+          desc: 'Split screen: AI coding copilot generating software on left; human creative director crafting narrative on right.',
+          vo: 'VO: "Just like mobile banking leapfrogged landlines across Africa, AI will unlock hyper-velocity productivity across the entire globe."',
+          layman: 'Global transaction velocity multiplies wealth when digital friction drops to zero.',
+          prompt: 'High-tech split view: dark mode software terminal code on left, human artist sketching architectural concept on digital canvas on right, connecting fiber optic lines.'
+        },
+        {
+          n: 9,
+          title: 'Closing Call: The Future is Bright',
+          section: 'Act 5 · Conclusion & CTA',
+          tc: '5:15–5:45',
+          tag: 'Host Direct Address · Warm',
+          mood: 'warm',
+          img: '../images/panel_9.jpg',
+          downloadName: 'panel_9_host_direct_address_skool_cta.jpg',
+          desc: 'Direct address to camera, confident warm smile, lower third displaying community link.',
+          vo: 'VO: "The future is bright. The job apocalypse isn\'t coming — the era of human magnification has just begun. What role are you preparing for?"',
+          layman: 'End on an empowering note, inviting the viewer to join the discussion and upskill.',
+          prompt: 'YouTube host speaking directly into camera, confident engaging smile, high-end studio lighting with subtle blue and warm gold accents, professional clean broadcast look.'
+        }
+      ];
+
+      var curIdx = 0;
+      var isPlaying = false;
+      var autoTimer = null;
+      var autoDuration = 5000;
+
+      var mainImg = document.getElementById('previzMainImg');
+      var prevBtn = document.getElementById('previzPrevBtn');
+      var nextBtn = document.getElementById('previzNextBtn');
+      var playBtn = document.getElementById('previzPlayBtn');
+      var promptBtn = document.getElementById('previzPromptBtn');
+      var downloadBtn = document.getElementById('previzDownloadBtn');
+      var counterEl = document.getElementById('previzCounter');
+      var tagNumEl = document.getElementById('previzTagNum');
+      var tagTcEl = document.getElementById('previzTagTc');
+      var tagSecEl = document.getElementById('previzTagSection');
+      var titleEl = document.getElementById('previzCaptionTitle');
+      var descEl = document.getElementById('previzCaptionDesc');
+      var voEl = document.getElementById('previzCaptionVo');
+      var laymanEl = document.getElementById('previzCaptionLayman');
+      var filmstrip = document.getElementById('previzFilmstrip');
+      var progressBar = document.getElementById('previzProgressBar');
+
+      function updateSlide(idx, anim){
+        if(idx < 0) idx = panels.length - 1;
+        if(idx >= panels.length) idx = 0;
+        curIdx = idx;
+        var p = panels[curIdx];
+
+        if(anim !== false){
+          mainImg.style.opacity = '0';
+          setTimeout(function(){
+            mainImg.src = p.img;
+            mainImg.alt = p.title;
+            mainImg.style.opacity = '1';
+          }, 100);
+        } else {
+          mainImg.src = p.img;
+          mainImg.alt = p.title;
+        }
+
+        tagNumEl.textContent = 'Panel ' + p.n + ' of ' + panels.length;
+        tagTcEl.textContent = p.tc;
+        tagSecEl.textContent = p.section;
+        titleEl.textContent = p.title;
+        descEl.textContent = p.desc;
+        voEl.textContent = p.vo;
+        laymanEl.innerHTML = '<b>In plain English:</b> ' + p.layman;
+
+        counterEl.innerHTML = 'Panel <b>' + (curIdx + 1) + '</b> / ' + panels.length;
+        downloadBtn.href = p.img;
+        downloadBtn.download = p.downloadName;
+
+        var thumbs = filmstrip.querySelectorAll('.carousel-thumb');
+        thumbs.forEach(function(th, tIdx){
+          if(tIdx === curIdx){
+            th.classList.add('active');
+            th.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          } else {
+            th.classList.remove('active');
+          }
+        });
+
+        if(isPlaying){
+          resetProgress();
+        }
+      }
+
+      function renderThumbs(){
+        filmstrip.innerHTML = '';
+        panels.forEach(function(p, idx){
+          var th = document.createElement('div');
+          th.className = 'carousel-thumb' + (idx === curIdx ? ' active' : '');
+          th.title = 'Panel ' + p.n + ': ' + p.title;
+          th.innerHTML = '<img src="' + p.img + '" alt="Panel ' + p.n + '">' +
+            '<span class="carousel-thumb-num">' + p.n + '</span>';
+          th.addEventListener('click', function(){
+            updateSlide(idx);
+            if(isPlaying) stopPlay();
+          });
+          filmstrip.appendChild(th);
+        });
+      }
+
+      function resetProgress(){
+        progressBar.style.transition = 'none';
+        progressBar.style.width = '0%';
+        setTimeout(function(){
+          progressBar.style.transition = 'width ' + autoDuration + 'ms linear';
+          progressBar.style.width = '100%';
+        }, 30);
+      }
+
+      function startPlay(){
+        isPlaying = true;
+        playBtn.textContent = '⏸️ Pause Slideshow';
+        playBtn.classList.add('active');
+        resetProgress();
+        autoTimer = setInterval(function(){
+          updateSlide(curIdx + 1);
+        }, autoDuration);
+      }
+
+      function stopPlay(){
+        isPlaying = false;
+        playBtn.textContent = '▶️ Auto-Play Slideshow';
+        playBtn.classList.remove('active');
+        clearInterval(autoTimer);
+        progressBar.style.transition = 'none';
+        progressBar.style.width = '0%';
+      }
+
+      prevBtn.addEventListener('click', function(){
+        updateSlide(curIdx - 1);
+        if(isPlaying) stopPlay();
+      });
+      nextBtn.addEventListener('click', function(){
+        updateSlide(curIdx + 1);
+        if(isPlaying) stopPlay();
+      });
+      playBtn.addEventListener('click', function(){
+        if(isPlaying) stopPlay();
+        else startPlay();
+      });
+
+      promptBtn.addEventListener('click', function(){
+        var p = panels[curIdx];
+        if(p && window.openModal){
+          window.openModal('Panel ' + p.n + ' — ' + p.title, p.prompt);
+        }
+      });
+
+      // Keyboard navigation
+      document.addEventListener('keydown', function(e){
+        if(document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) return;
+        if(e.key === 'ArrowLeft') updateSlide(curIdx - 1);
+        else if(e.key === 'ArrowRight') updateSlide(curIdx + 1);
+      });
+
+      renderThumbs();
+      updateSlide(0, false);
+    })();
+  })();
+</script>
+</body>
+</html>
