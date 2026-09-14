@@ -1,0 +1,24 @@
+{
+  "name": "sep-3-agentic-coding",
+  "version": "1.0.0",
+  "description": "Task Decomposition and Multi-Step Reasoning Strategies — course module pre-production",
+  "main": "js/nav.js",
+  "scripts": {
+    "test": "node scripts/check-links.js",
+    "test:links": "node scripts/check-links.js",
+    "fix:links": "node scripts/fix-links.js",
+    "serve": "python3 -m http.server 30080"
+  },
+  "keywords": [
+    "task-decomposition",
+    "multi-step-reasoning",
+    "previsualisation",
+    "production-pipeline"
+  ],
+  "author": "Rifat Erdem Sahin",
+  "license": "MIT",
+  "dependencies": {
+    "pg": "^8.23.0",
+    "puppeteer": "^25.10.0"
+  }
+}
