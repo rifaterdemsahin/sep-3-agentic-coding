@@ -7,8 +7,10 @@
   
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/video-config.js"></script>
   <script src="../js/supabase-client.js"></script>
-  
+  <script src="../js/content-db.js"></script>
+
   <link rel="stylesheet" href="../css/shared.css">
   
   <script>
@@ -87,7 +89,12 @@
 
   <main>
     <h1>🩺 Project Sanity Check Report</h1>
-    <p>Automated verification of project links, assets, tasks, and data integrity.</p>
+    <p>Automated verification of project links, tasks, data integrity, and script length/version — the one report to re-run on every version.</p>
+
+    <div class="report-card" id="script-length-report">
+      <h2>📏 Script Length & Version Audit</h2>
+      <div id="script-length-stats">⏳ Loading script beats...</div>
+    </div>
 
     <div class="report-card" id="links-report">
       <h2>🔗 Link & Routing Integrity</h2>
@@ -124,6 +131,53 @@
   </main>
 
   <script>
+    // Script length/version audit — strips HTML tags from each beat's VO
+    // paragraphs, word-counts them, and estimates spoken time at ~150
+    // words/minute against the project's 3:00 hard cap (see CLAUDE.md).
+    var WPM = 150;
+    var HARD_CAP_SECONDS = 180;
+
+    function stripTags(s){ return String(s == null ? '' : s).replace(/<[^>]*>/g, ' '); }
+    function wordCount(s){ var t = stripTags(s).trim(); return t ? t.split(/\s+/).length : 0; }
+    function fmtTime(totalSeconds){
+      var m = Math.floor(totalSeconds / 60);
+      var s = Math.round(totalSeconds % 60);
+      return m + ':' + (s < 10 ? '0' : '') + s;
+    }
+
+    function renderScriptLengthAudit(){
+      var el = document.getElementById('script-length-stats');
+      if(!window.ContentDB){
+        el.innerHTML = '<span class="status-fail">❌ ContentDB not loaded</span>';
+        return;
+      }
+      ContentDB.ready.then(function(){
+        var beats = ContentDB.getBlocks('script.html', 'beats');
+        if(!beats.length){
+          el.innerHTML = '<span class="status-warn">⚠️ No script beats found — nothing to audit yet.</span>';
+          return;
+        }
+        var totalWords = 0;
+        var rows = beats.map(function(b){
+          var d = b.data;
+          var words = (d.vo || []).reduce(function(sum, p){ return sum + wordCount(p); }, 0);
+          totalWords += words;
+          var seconds = (words / WPM) * 60;
+          return '<div class="status-item"><span>' + d.title + ' <span style="color:#888;">(' + d.tc + ')</span></span>' +
+            '<span>' + words + ' words · ~' + fmtTime(seconds) + '</span></div>';
+        }).join('');
+        var totalSeconds = (totalWords / WPM) * 60;
+        var overCap = totalSeconds > HARD_CAP_SECONDS;
+        el.innerHTML = rows +
+          '<div class="status-item" style="border-top:1px solid var(--border-color);margin-top:8px;padding-top:12px;">' +
+            '<span><b>Total</b></span>' +
+            '<span class="' + (overCap ? 'status-fail' : 'status-pass') + '">' +
+              (overCap ? '❌' : '✅') + ' ' + totalWords + ' words · ~' + fmtTime(totalSeconds) + ' / 3:00 cap' +
+            '</span>' +
+          '</div>';
+      });
+    }
+
     // Load Task stats
     function renderTaskStats() {
       if(!window.Nav) return;
@@ -191,6 +245,7 @@
       renderTaskStats();
       checkSupabase();
       scanContentBlocks();
+      renderScriptLengthAudit();
     });
   </script>
 </body>

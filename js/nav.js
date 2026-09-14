@@ -392,32 +392,28 @@
               '<div class="menu-panel tools-menu" id="nav-understand-menu" hidden>' + understandItems + '</div>' +
             '</div>' +
             '<div class="menu-wrap" id="nav-analysis-wrap">' +
-              '<button type="button" class="menu-toggle' + ((currentId === 'sanity-check' || currentId === 'about' || currentId === 'task-report' || currentId === 'script-v2-report') ? ' active' : '') + '" id="nav-analysis-toggle" style="--nav-color:' + MENU_COLORS.analysis + ';">📊 Analysis <span class="menu-caret">▾</span></button>' +
+              '<button type="button" class="menu-toggle' + ((currentId === 'about' || currentId === 'task-report') ? ' active' : '') + '" id="nav-analysis-toggle" style="--nav-color:' + MENU_COLORS.analysis + ';">📊 Analysis <span class="menu-caret">▾</span></button>' +
               '<div class="menu-panel tools-menu" id="nav-analysis-menu" hidden>' +
                 '<a class="tools-item' + (currentId === 'about' ? ' active' : '') + '" href="about.html">' +
                   '<span class="ti-label">🎬 About this video</span>' +
                   '<span class="ti-desc">The 5W1H behind the video</span>' +
                 '</a>' +
-                '<a class="tools-item' + (currentId === 'sanity-check' ? ' active' : '') + '" href="sanity-check.html">' +
-                  '<span class="ti-label">🩺 Sanity Check Report</span>' +
-                  '<span class="ti-desc">Project health & logic checks</span>' +
-                '</a>' +
                 '<a class="tools-item' + (currentId === 'task-report' ? ' active' : '') + '" href="task-report.html">' +
                   '<span class="ti-label">📊 Task Report</span>' +
                   '<span class="ti-desc">Progress by stage & recommended focus</span>' +
                 '</a>' +
-                '<a class="tools-item' + (currentId === 'script-v2-report' ? ' active' : '') + '" href="script-v2-report.html">' +
-                  '<span class="ti-label">📏 Script v2 Sanity Check</span>' +
-                  '<span class="ti-desc">Length audit & trim recommendations</span>' +
-                '</a>' +
               '</div>' +
             '</div>' +
             '<div class="menu-wrap" id="nav-evaluate-wrap">' +
-              '<button type="button" class="menu-toggle' + ((currentId === 'confidence_check' || currentId === 'plain-english' || currentId === 'script-review') ? ' active' : '') + '" id="nav-evaluate-toggle" style="--nav-color:' + MENU_COLORS.evaluate + ';">⚖️ Evaluate <span class="menu-caret">▾</span></button>' +
+              '<button type="button" class="menu-toggle' + ((currentId === 'confidence_check' || currentId === 'plain-english' || currentId === 'script-review' || currentId === 'sanity-check') ? ' active' : '') + '" id="nav-evaluate-toggle" style="--nav-color:' + MENU_COLORS.evaluate + ';">⚖️ Evaluate <span class="menu-caret">▾</span></button>' +
               '<div class="menu-panel tools-menu" id="nav-evaluate-menu" hidden>' +
                 '<a class="tools-item' + (currentId === 'confidence_check' ? ' active' : '') + '" href="confidence_check.html">' +
                   '<span class="ti-label">📈 Confidence Check</span>' +
                   '<span class="ti-desc">Live confidence score for the project — updates as you work</span>' +
+                '</a>' +
+                '<a class="tools-item' + (currentId === 'sanity-check' ? ' active' : '') + '" href="sanity-check.html">' +
+                  '<span class="ti-label">🩺 Sanity Check Report</span>' +
+                  '<span class="ti-desc">Project health, logic & script-length checks — every version</span>' +
                 '</a>' +
                 '<a class="tools-item' + (currentId === 'plain-english' ? ' active' : '') + '" href="plain-english.html">' +
                   '<span class="ti-label">🗣️ Plain English Review</span>' +

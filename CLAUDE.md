@@ -1,12 +1,35 @@
 # Project workflow
 
-This is a static HTML site (9 pipeline pages under `html/` — Unknowns,
-Research (`index.html`), Arguments, Script, Design, Previsualisation,
-Production Plan (`todo.html`), Journal, Retro — plus a set of secondary
-Analysis/Evaluate/Create pages; JS in `js/`, shared CSS in
-`css/shared.css`) for pre-production notes on the **"Task Decomposition"**
-course module (3-minute hard cap). No build step. Root `index.html` is
-just a redirect stub into `html/unknowns.html`/`html/index.html`.
+## Project specs
+
+- **Title:** "Task Decomposition" — a course module (not a weekly channel
+  video), built on the same repo template as the channel's regular videos.
+- **Premise:** opens from *understand Task Decomposition* and *learn
+  Multi-Step Reasoning Strategies*, builds toward "use in real life in a
+  meaningful manner." (The core message/argument cards themselves are
+  authored in Supabase, not this repo — see `supabase/seed-content.js`.)
+- **Format cap:** 3-minute hard cap, ≈450 words of voiceover script.
+- **Repo:** https://github.com/rifaterdemsahin/sep-3-agentic-coding
+- **`video_id` (shared DB row key):** `38080b26`
+- **Live site (canonical, Cloudflare Workers):**
+  https://sep-3-agentic-coding.polished-boat-17b2.workers.dev/html/index.html
+  — redeploy after any change with `npx wrangler deploy`.
+- **GitHub Pages:** still builds, but every page redirects to the
+  Cloudflare Workers URL above.
+- **Stack:** static HTML/CSS/JS, no build step, no framework — one shared
+  Supabase Postgres project (reused across every video on the channel,
+  not one project per video) for all per-page content, notes, ratings,
+  links, journal/retro rows. Kokoro TTS + Azure Blob Storage for
+  voiceover audio.
+- **Pipeline model:** pre-production is nine linked stages (Unknowns →
+  Research → Arguments → Script → Design → Previsualisation → Production
+  Plan → Journal → Retro), each feeding the next; `js/pipeline.js` renders
+  the stage stepper on every page. See "Pages" below for what belongs on
+  each one.
+
+This is a static HTML site (JS in `js/`, shared CSS in `css/shared.css`).
+No build step. Root `index.html` is just a redirect stub into
+`html/unknowns.html`/`html/index.html`.
 
 Per-page content (source links, arguments, script beats, design specs,
 shot panels, Stage 0 questions) is stored in Supabase's `content_blocks`
@@ -42,12 +65,11 @@ every page) groups pages into five menus. Each page below lives at
 
 ### 📊 Analysis (static — snapshots of the video's own content, don't change per iteration)
 - **About this video** (`about.html`) — the 5W1H (why/what/how/when/where) behind the video. Currently placeholder text — fill in once the real argument is locked.
-- **Sanity Check Report** (`sanity-check.html`) — automated verification of project links, tasks, and data integrity.
 - **Task Report** (`task-report.html`) — production-plan progress by stage with recommended focus.
-- **Script v2 Sanity Check** (`script-v2-report.html`) — length audit & trim recommendations. *(Referenced in nav; page not yet created.)*
 
 ### ⚖️ Evaluate (updates every version/iteration — re-run these each time you revise the content)
 - **Confidence Check** (`confidence_check.html`) — one live score for the whole project, computed from Production Plan task completion via `Nav.getGamifiedStats()`. Check this every time you're working on the project.
+- **Sanity Check Report** (`sanity-check.html`) — project health/logic/data-integrity checks, plus the script length & version audit (word count and estimated runtime per beat vs. the 3:00 hard cap — formerly a separate "Script v2 Sanity Check" page, now merged in here).
 - **Plain English Review** (`plain-english.html`) — before/after: script jargon vs. layman's terms.
 - **Script Review** (`script-review.html`) — full-argument rewrite pass, all 22 arguments cherry-picked. *(Referenced in nav; page not yet created.)*
 
