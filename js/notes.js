@@ -299,7 +299,6 @@
             '<table>' +
               '<tr><th>Table</th><th>What it holds on this page</th></tr>' +
               '<tr><td><code>content_blocks</code></td><td>The cards/rows/panels you see (filtered to <code>page = \'' + page + '\'</code>) — source links, arguments, script beats, design specs, or shot panels.</td></tr>' +
-              '<tr><td><code>assets</code></td><td>Items saved via any "➕ Add to Assets" button, shown on the Assets page.</td></tr>' +
               '<tr><td><code>ratings</code></td><td>⭐ star ratings attached to an item id.</td></tr>' +
               '<tr><td><code>notes</code> / <code>item_notes</code></td><td>This notes bar, plus the 💬 per-item note boxes.</td></tr>' +
               '<tr><td><code>links</code></td><td>The "🔗 Linked to…" cross-stage pickers.</td></tr>' +

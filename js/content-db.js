@@ -20,5 +20,15 @@
     return cache.filter(function(b){ return b.id === id; })[0] || null;
   }
 
-  window.ContentDB = { ready: ready, getBlocks: getBlocks, getBlockById: getBlockById };
+  // Merges `patch` into a block's `data` jsonb, updates the in-memory
+  // cache immediately, and persists in the background.
+  function updateData(id, patch){
+    var block = getBlockById(id);
+    if(!block) return;
+    Object.assign(block.data, patch);
+    window.sb.from('content_blocks').update({ data: block.data, updated_at: new Date().toISOString() }).eq('id', id)
+      .then(function(res){ if(res.error) console.error('ContentDB updateData failed', res.error); });
+  }
+
+  window.ContentDB = { ready: ready, getBlocks: getBlocks, getBlockById: getBlockById, updateData: updateData };
 })();

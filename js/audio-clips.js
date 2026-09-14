@@ -1,7 +1,7 @@
 // Manifest of Kokoro voice-over clips saved to Azure Blob Storage, kept in
 // public.audio_clips so the app knows what's already backed up without
 // relying solely on per-browser IndexedDB (same ready-promise pattern as
-// assets.js/notes.js/ratings.js/links.js).
+// notes.js/ratings.js/links.js).
 (function(){
   var cache = [];
   var ready = window.sb.from('audio_clips').select('*').eq('video_id', window.VIDEO_ID)

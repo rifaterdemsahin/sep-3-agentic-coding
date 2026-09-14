@@ -27,9 +27,9 @@
   }
 
   // Cross-stage catalogs are read live from the previous stage's own
-  // content_blocks rows (the same content its "Add to Assets" buttons
-  // render from), so linking options always match its real content
-  // instead of a hand-maintained duplicate list.
+  // content_blocks rows (the same content each card renders from), so
+  // linking options always match its real content instead of a
+  // hand-maintained duplicate list.
   function fetchCatalog(sourceFile){
     if(catalogCache[sourceFile]) return catalogCache[sourceFile];
     catalogCache[sourceFile] = ContentDB.ready.then(function(){
@@ -165,7 +165,7 @@
       injectStyles();
       Promise.all([ready, fetchCatalog(opts.sourceFile)]).then(function(results){
         var catalog = results[1];
-        document.querySelectorAll('.add-asset-btn[data-id]').forEach(function(btn){
+        document.querySelectorAll('.linker-anchor[data-id]').forEach(function(btn){
           buildLinker(btn, {
             file: opts.file,
             sourceFile: opts.sourceFile,

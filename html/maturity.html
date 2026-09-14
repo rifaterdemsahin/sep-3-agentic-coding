@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  // Canonical host is Cloudflare Workers; GitHub Pages forwards visitors with repo subpath cleaned.
+  if(location.hostname.endsWith('github.io')){
+    var cleanPath = location.pathname.replace(/^\/sep-3-agentic-coding/, '').replace(/^\/[^/]+(?=\/html\/)/, '');
+    if(!cleanPath.startsWith('/')) cleanPath = '/' + cleanPath;
+    location.replace('https://sep-3-agentic-coding.polished-boat-17b2.workers.dev' + cleanPath + location.search + location.hash);
+  }
+</script>
+<title>🌱 Maturity — Task Decomposition</title>
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+  header{ padding:48px 24px 24px; max-width:800px; margin:0 auto; text-align:center; }
+  header .eyebrow{ color:var(--accent); letter-spacing:.14em; text-transform:uppercase; font-size:12px; font-weight:600; }
+  header h1{ font-size:clamp(24px,4vw,38px); margin:10px 0 12px; font-weight:700; }
+  header p.sub{ color:var(--text-dim); max-width:640px; margin:0 auto; font-size:15px; line-height:1.6; }
+
+  main{ max-width:800px; margin:0 auto; padding:0 24px 90px; }
+
+  .maturity-note{
+    margin:0 0 28px;
+    padding:16px 20px;
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-left:4px solid var(--accent-2);
+    border-radius:12px;
+    font-size:13px;
+    color:var(--text-dim);
+    line-height:1.6;
+  }
+
+  .lesson-grid{ display:grid; grid-template-columns:1fr; gap:16px; }
+  @media (min-width:640px){ .lesson-grid{ grid-template-columns:1fr 1fr; } }
+
+  .lesson-card{
+    background:var(--panel);
+    border:1px dashed var(--panel-border);
+    border-radius:12px;
+    padding:18px 20px;
+  }
+  .lesson-card h3{ margin:0 0 8px; font-size:14.5px; color:var(--text); }
+  .lesson-card p{ margin:0; font-size:13px; color:var(--text-dim); line-height:1.55; font-style:italic; }
+
+  footer{ text-align:center; padding:28px 24px 60px; font-size:12px; color:var(--text-dim); }
+  footer a{color:var(--accent-2);text-decoration:none;}
+  footer a:hover{text-decoration:underline;}
+</style>
+<script src="../js/video-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="../js/nav.js"></script>
+<script src="../js/theme.js"></script>
+</head>
+<body>
+
+<div id="nav-mount"></div>
+<script>Nav.render('maturity');</script>
+
+<header>
+  <div class="eyebrow">✨ Create · Institutional Learning</div>
+  <h1>Maturity</h1>
+  <p class="sub">What we've learned from OLD projects — carried forward into this one and every one after it.</p>
+</header>
+
+<main>
+  <div class="maturity-note">
+    This page is <b>not</b> this video's own retro (see <a href="retro.html">🔁 Retro</a> for that — this project's own hypothesis verdict and what to change next time). Maturity is cross-project: a running list of lessons pulled from past projects on this channel, so the same mistakes don't get repeated and the same wins get reused.
+  </div>
+
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <h3>Lesson: [placeholder]</h3>
+      <p>Add a real lesson from a past project here — what happened, and what to do differently next time.</p>
+    </div>
+    <div class="lesson-card">
+      <h3>Lesson: [placeholder]</h3>
+      <p>Add a real lesson from a past project here — what happened, and what to do differently next time.</p>
+    </div>
+    <div class="lesson-card">
+      <h3>Lesson: [placeholder]</h3>
+      <p>Add a real lesson from a past project here — what happened, and what to do differently next time.</p>
+    </div>
+    <div class="lesson-card">
+      <h3>Lesson: [placeholder]</h3>
+      <p>Add a real lesson from a past project here — what happened, and what to do differently next time.</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  See this project's own retro at <a href="retro.html">🔁 Retro</a>, or the decision log at <a href="journal.html">📓 Journal</a>.
+</footer>
+
+</body>
+</html>

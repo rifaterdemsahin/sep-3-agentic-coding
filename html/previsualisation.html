@@ -242,21 +242,21 @@
     font-style:italic;
   }
 
-  .add-asset-btn{
-    align-self:flex-start;
-    margin-top:2px;
-    font-size:11px;
-    padding:4px 10px;
-    border-radius:20px;
-    border:1px solid var(--panel-border);
-    background:transparent;
+  .shot-placeholder{
+    border:1px dashed var(--panel-border);
+    border-radius:10px;
+    padding:28px 16px;
+    text-align:center;
     color:var(--text-dim);
-    cursor:pointer;
-    transition:border-color .15s ease,color .15s ease,background .15s ease;
-    white-space:nowrap;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    background:transparent;
   }
-  .add-asset-btn:hover{border-color:var(--accent-2);color:var(--text);}
-  .add-asset-btn.added{border-color:var(--warm);color:var(--warm);background:rgba(232,185,74,.08);}
+  .shot-placeholder .sp-icon{font-size:22px;opacity:.6;}
+  .shot-placeholder .sp-text{font-size:12.5px;font-style:italic;}
+  .shot-placeholder.sp-skeleton{opacity:.55;padding:36px 16px;}
 
   .body .actions{
     display:flex;
@@ -752,11 +752,10 @@
 </div>
 
 <footer>
-  🎞️ Previsualization board for <a href="https://github.com/rifaterdemsahin/sep-3-agentic-coding" target="_blank" rel="noopener">rifaterdemsahin/sep-3-agentic-coding</a> — built for pre-production planning before shoot/edit. See everything you've saved in 🗂️ <a href="assets.html">Assets</a>.
+  🎞️ Previsualization board for <a href="https://github.com/rifaterdemsahin/sep-3-agentic-coding" target="_blank" rel="noopener">rifaterdemsahin/sep-3-agentic-coding</a> — built for pre-production planning before shoot/edit.
 </footer>
 
 <script src="../js/pipeline.js"></script>
-<script src="../js/assets.js"></script>
 <script src="../js/links.js"></script>
 <script>
   Pipeline.render('previsualisation');
@@ -772,6 +771,16 @@
     }
 
     var shots = ContentDB.getBlocks('previsualisation.html', 'shot-board');
+    if(!shots.length){
+      document.getElementById('shots-grid').innerHTML =
+        '<div class="shot-placeholder">' +
+          '<span class="sp-icon">🎞️</span>' +
+          '<span class="sp-text">No shots boarded yet — panels will appear here once added.</span>' +
+        '</div>' +
+        '<div class="shot-placeholder sp-skeleton"></div>' +
+        '<div class="shot-placeholder sp-skeleton"></div>';
+      return;
+    }
     document.getElementById('shots-grid').innerHTML = shots.map(function(b){
       var d = b.data;
       return '<div class="card ' + d.mood + '">' +
@@ -787,8 +796,8 @@
           '<p>' + d.desc + '</p>' +
           '<p class="vo">' + d.vo + '</p>' +
           '<div class="layman-line"><b>In plain English:</b> ' + d.layman + '</div>' +
+          '<span class="linker-anchor" data-id="' + b.id + '" hidden></span>' +
           '<div class="actions">' +
-            '<button class="add-asset-btn" data-id="' + b.id + '" data-type="shot" data-source="Previsualisation" data-title="Panel ' + d.n + ' — ' + escAttr(d.title) + ' (' + d.tc + ')" data-desc="' + escAttr(d.desc) + '">➕ Add to Assets</button>' +
             '<button class="prompt-btn" data-title="Panel ' + d.n + ' — ' + escAttr(d.title) + '" data-prompt="' + escAttr(d.prompt) + '">🖼️ Prompt</button>' +
             '<a class="download-btn" href="' + d.img + '" download="' + d.downloadName + '" title="Download Panel ' + d.n + ' image">⬇️ Download</a>' +
           '</div>' +
@@ -797,9 +806,8 @@
     }).join('');
   }
 
-  Promise.all([ContentDB.ready, AssetDB.ready]).then(function(){
+  ContentDB.ready.then(function(){
     renderPrevizContent();
-    AssetDB.initAddButtons();
     if(window.wirePromptButtons) window.wirePromptButtons();
   });
 

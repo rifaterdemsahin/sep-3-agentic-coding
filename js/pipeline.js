@@ -49,15 +49,7 @@
       label: 'Previsualisation',
       file: 'previsualisation.html',
       tagline: 'Shot-by-shot board, ready for the edit',
-      feeds: 'Feeds Assets: each shot becomes a B-roll/asset item to source.'
-    },
-    {
-      id: 'assets',
-      emoji: '🗂️',
-      label: 'Assets',
-      file: 'assets.html',
-      tagline: 'B-roll catalog, audience deliverable',
-      feeds: 'Feeds the production plan: saved assets become checklist items.'
+      feeds: 'Feeds the production plan: each shot becomes a checklist item to source and finish.'
     },
     {
       id: 'todo',

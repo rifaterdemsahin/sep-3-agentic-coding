@@ -596,19 +596,6 @@
   footer a{color:var(--accent-2);text-decoration:none;}
   footer a:hover{text-decoration:underline;}
 
-  .add-asset-btn{
-    font-size:11px;
-    padding:4px 10px;
-    border-radius:20px;
-    border:1px solid var(--panel-border);
-    background:transparent;
-    color:var(--text-dim);
-    cursor:pointer;
-    transition:border-color .15s ease,color .15s ease,background .15s ease;
-    white-space:nowrap;
-  }
-  .add-asset-btn:hover{border-color:var(--accent-2);color:var(--text);}
-  .add-asset-btn.added{border-color:var(--warm);color:var(--warm);background:rgba(232,185,74,.08);}
 </style>
 <script src="../js/video-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -738,11 +725,10 @@
 </main>
 
 <footer>
-  🧩 Arguments for <a href="https://github.com/rifaterdemsahin/sep-3-agentic-coding" target="_blank" rel="noopener">rifaterdemsahin/sep-3-agentic-coding</a> — built from 🔍 <a href="index.html">Research</a>, feeds the 📝 <a href="script.html">Script</a>. See everything you've saved in 🗂️ <a href="assets.html">Assets</a>.
+  🧩 Arguments for <a href="https://github.com/rifaterdemsahin/sep-3-agentic-coding" target="_blank" rel="noopener">rifaterdemsahin/sep-3-agentic-coding</a> — built from 🔍 <a href="index.html">Research</a>, feeds the 📝 <a href="script.html">Script</a>.
 </footer>
 
 <script src="../js/pipeline.js"></script>
-<script src="../js/assets.js"></script>
 <script src="../js/links.js"></script>
 <script>
   Pipeline.render('arguments');
@@ -761,7 +747,7 @@
             '<div class="card-btn-group">' +
               '<button class="listen-btn" onclick="togglePlayCard(\'card-core-message\', \'Core Message\', this)">🔊 Listen</button>' +
               '<button class="copy-btn" onclick="copyCardText(\'card-core-message\', \'Core Message\', this)">📋 Copy</button>' +
-              '<button class="add-asset-btn" data-id="' + cm.id + '" data-type="argument" data-source="Arguments" data-title="' + esc(d.title) + '" data-desc="' + esc(d.desc) + '" data-url="arguments.html#card-core-message">➕ Add to Assets</button>' +
+              '<span class="linker-anchor" data-id="' + cm.id + '" hidden></span>' +
             '</div>' +
           '</div>' +
           '<p>' + d.body + '</p>' +
@@ -779,7 +765,7 @@
             '<div class="card-btn-group">' +
               '<button class="listen-btn" onclick="togglePlayCard(\'card-premise\', \'Premise\', this)">🔊 Listen</button>' +
               '<button class="copy-btn" onclick="copyCardText(\'card-premise\', \'Premise\', this)">📋 Copy</button>' +
-              '<button class="add-asset-btn" data-id="' + pr.id + '" data-type="argument" data-source="Arguments" data-title="' + esc(dp.title) + '" data-desc="' + esc(dp.desc) + '" data-url="arguments.html#card-premise">➕ Add to Assets</button>' +
+              '<span class="linker-anchor" data-id="' + pr.id + '" hidden></span>' +
             '</div>' +
           '</div>' +
           '<p>' + dp.body + '</p>' +
@@ -796,7 +782,7 @@
             '<div class="card-btn-group">' +
               '<button class="listen-btn" onclick="togglePlayCard(\'card-audience-transformation\', \'Audience Transformation\', this)">🔊 Listen</button>' +
               '<button class="copy-btn" onclick="copyCardText(\'card-audience-transformation\', \'Audience Transformation\', this)">📋 Copy</button>' +
-              '<button class="add-asset-btn" data-id="' + at.id + '" data-type="argument" data-source="Arguments" data-title="' + esc(da.title) + '" data-desc="' + esc(da.desc) + '" data-url="arguments.html#card-audience-transformation">➕ Add to Assets</button>' +
+              '<span class="linker-anchor" data-id="' + at.id + '" hidden></span>' +
             '</div>' +
           '</div>' +
           '<h3 style="margin:0 0 14px;font-size:16px;color:var(--text);">' + da.title + '</h3>' +
@@ -823,7 +809,7 @@
           '<div class="card-btn-group">' +
             '<button class="listen-btn" onclick="togglePlayCard(\'' + d.cardId + '\', \'' + d.num + '\', this)">🔊 Listen</button>' +
             '<button class="copy-btn" onclick="copyCardText(\'' + d.cardId + '\', \'' + d.num + '\', this)">📋 Copy</button>' +
-            '<button class="add-asset-btn" data-id="' + b.id + '" data-type="argument" data-source="Arguments" data-title="' + esc(d.fullTitle) + '" data-desc="' + esc(d.desc) + '" data-url="arguments.html#' + d.cardId + '">➕ Add to Assets</button>' +
+            '<span class="linker-anchor" data-id="' + b.id + '" hidden></span>' +
           '</div>' +
         '</div>' +
         '<h3>' + d.title + '</h3>' +
@@ -843,7 +829,7 @@
             '<div class="card-btn-group">' +
               '<button class="listen-btn" onclick="togglePlayCard(\'card-conclusion\', \'Conclusion\', this)">🔊 Listen</button>' +
               '<button class="copy-btn" onclick="copyCardText(\'card-conclusion\', \'Conclusion\', this)">📋 Copy</button>' +
-              '<button class="add-asset-btn" data-id="' + conc.id + '" data-type="argument" data-source="Arguments" data-title="' + esc(dc.title) + '" data-desc="' + esc(dc.desc) + '" data-url="arguments.html#card-conclusion">➕ Add to Assets</button>' +
+              '<span class="linker-anchor" data-id="' + conc.id + '" hidden></span>' +
             '</div>' +
           '</div>' +
           '<p>' + dc.body + '</p>' +
@@ -896,10 +882,9 @@
     });
   }
 
-  Promise.all([ContentDB.ready, AssetDB.ready]).then(function(){
+  ContentDB.ready.then(function(){
     renderArgumentsContent();
     initSanityScoring();
-    AssetDB.initAddButtons();
   });
 
   // Clipboard Copy Utilities
@@ -1205,8 +1190,8 @@
 
   // ==========================================
   // Azure Blob Storage Audio Engine
-  // (Same SAS URL / container used by the image uploader in assets.html and
-  // the script.html voice-over bar — shared via localStorage, same origin.)
+  // (Same SAS URL / container used by the script.html voice-over bar —
+  // shared via localStorage, same origin.)
   // ==========================================
   var AzureStorageAudio = (function(){
     var SAS_KEY = 'taskDecomposition_azureContainerSasUrl';

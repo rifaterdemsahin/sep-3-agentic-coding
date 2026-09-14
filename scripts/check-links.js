@@ -24,7 +24,6 @@ const EXPECTED_PAGES = [
   'script.html',
   'design.html',
   'previsualisation.html',
-  'assets.html',
   'todo.html'
 ];
 

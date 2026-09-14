@@ -17,8 +17,7 @@
     search:     '#e8b94a',
     analysis:   '#b388ff',
     evaluate:   '#ffab40',
-    create:     '#ff5252',
-    loop:       '#7be0b0'
+    create:     '#ff5252'
   };
 
   // Single-hue ramp (light -> dark) across the menu in this order, so each
@@ -31,7 +30,6 @@
     { id: 'script',           emoji: '📝', label: 'Script',           file: 'script.html',           color: '#5ab0ff' },
     { id: 'design',           emoji: '🎨', label: 'Design',           file: 'design.html',           color: '#3f8fe0' },
     { id: 'previsualisation', emoji: '🎞️', label: 'Previsualisation', file: 'previsualisation.html', color: '#2c6bb0' },
-    { id: 'assets',           emoji: '🗂️', label: 'Assets',           file: 'assets.html',           color: '#1c4a80' },
     { id: 'todo',             emoji: '✅', label: 'Production Plan',  file: 'todo.html',             color: '#7be08a' },
     { id: 'journal',          emoji: '📓', label: 'Journal',          file: 'journal.html',          color: '#c9f2a0' },
     { id: 'retro',            emoji: '🔁', label: 'Retro',            file: 'retro.html',            color: '#a0f2d0' }
@@ -40,7 +38,6 @@
   var REMEMBER_PAGES = PAGES.filter(function(p){ return p.id === 'unknowns' || p.id === 'arguments' || p.id === 'research'; });
   var UNDERSTAND_PAGES = PAGES.filter(function(p){ return p.id === 'script' || p.id === 'design' || p.id === 'previsualisation'; });
   var TASKS_PAGE = PAGES.filter(function(p){ return p.id === 'todo'; })[0];
-  var LOOP_PAGES = PAGES.filter(function(p){ return p.id === 'journal' || p.id === 'retro'; });
 
   // Tools the production pipeline actually depends on — surfaced inside the
   // "🧰 Tools" dropdown as collapsible <details> groups so a long list stays
@@ -49,11 +46,11 @@
   var TOOL_GROUPS = [
     ['🚀', 'Deployment', [
       { emoji: '⚡', label: 'Cloudflare Worker Live', url: 'https://sep-3-agentic-coding.polished-boat-17b2.workers.dev/html/', desc: 'Edge production deployment' },
-      { emoji: '📄', label: 'GitHub Pages', url: 'https://rifaterdemsahin.github.io/sep-3-agentic-coding/html/assets.html', desc: 'Legacy static hosting (forwards to Cloudflare)' },
+      { emoji: '📄', label: 'GitHub Pages', url: 'https://rifaterdemsahin.github.io/sep-3-agentic-coding/html/index.html', desc: 'Legacy static hosting (forwards to Cloudflare)' },
       { emoji: '🐙', label: 'GitHub Repo', url: 'https://github.com/rifaterdemsahin/sep-3-agentic-coding', desc: 'Source code' }
     ]],
     ['🗄️', 'Data & Storage', [
-      { emoji: '🗄️', label: 'Supabase Dashboard', url: 'https://supabase.com/dashboard/project/mdsykpdkdprtmkccukle', desc: 'content_blocks, assets, notes, ratings, audio_clips' },
+      { emoji: '🗄️', label: 'Supabase Dashboard', url: 'https://supabase.com/dashboard/project/mdsykpdkdprtmkccukle', desc: 'content_blocks, notes, ratings, audio_clips' },
       { emoji: '📋', label: 'Supabase Table Editor', url: 'https://supabase.com/dashboard/project/mdsykpdkdprtmkccukle/editor/17522', desc: 'Direct database table editor' },
       { emoji: '☁️', label: 'Azure Portal', url: 'https://portal.azure.com/auth/login/', desc: 'Azure Blob Storage — asset backup sync' },
       { emoji: '🖼️', label: 'Azure Container (sep-3-agentic-coding)', url: 'https://portal.azure.com/#view/Microsoft_Azure_Storage/ContainerMenuBlade/~/overview/storageAccountId/%2Fsubscriptions%2Fb85b029d-9f7c-4c5a-8939-819480780c5d%2FresourceGroups%2Fdeliverypilot-rg%2Fproviders%2FMicrosoft.Storage%2FstorageAccounts%2Fdpprojects/path/sep-3-agentic-coding/etag/%220x8DF0E4F96506ADE%22/defaultId//publicAccessVal/Blob', desc: 'Direct container view & image carousel assets' },
@@ -342,15 +339,6 @@
       '</a>';
     }).join('');
 
-    var loopActive = LOOP_PAGES.some(function(p){ return p.id === currentId; });
-    var loopItems = LOOP_PAGES.map(function(p){
-      var cls = p.id === currentId ? ' class="tools-item active"' : ' class="tools-item"';
-      var style = ' style="--nav-color:' + p.color + ';"';
-      return '<a href="' + p.file + '"' + cls + style + '>' +
-        '<span class="ti-label">' + p.emoji + ' ' + p.label + '</span>' +
-      '</a>';
-    }).join('');
-
     var liveHref = LIVE_BASE + (PAGES.filter(function(p){ return p.id === currentId; })[0] || PAGES[0]).file;
 
     // Each tool group is its own native <details> accordion — collapsible
@@ -370,6 +358,7 @@
     }).join('');
 
     var tasksActive = currentId === 'todo';
+    var createActive = currentId === 'todo' || currentId === 'journal' || currentId === 'retro' || currentId === 'maturity';
     var tasksGroup =
       '<details class="tools-group" open>' +
         '<summary class="tools-group-label">✅ Tasks</summary>' +
@@ -402,10 +391,6 @@
               '<button type="button" class="menu-toggle' + (understandActive ? ' active' : '') + '" id="nav-understand-toggle" style="--nav-color:' + MENU_COLORS.understand + ';">💡 Understand <span class="menu-caret">▾</span></button>' +
               '<div class="menu-panel tools-menu" id="nav-understand-menu" hidden>' + understandItems + '</div>' +
             '</div>' +
-            '<div class="menu-wrap" id="nav-loop-wrap">' +
-              '<button type="button" class="menu-toggle' + (loopActive ? ' active' : '') + '" id="nav-loop-toggle" style="--nav-color:' + MENU_COLORS.loop + ';">🔁 Loop <span class="menu-caret">▾</span></button>' +
-              '<div class="menu-panel tools-menu" id="nav-loop-menu" hidden>' + loopItems + '</div>' +
-            '</div>' +
             '<div class="menu-wrap" id="nav-analysis-wrap">' +
               '<button type="button" class="menu-toggle' + ((currentId === 'sanity-check' || currentId === 'about' || currentId === 'task-report' || currentId === 'script-v2-report') ? ' active' : '') + '" id="nav-analysis-toggle" style="--nav-color:' + MENU_COLORS.analysis + ';">📊 Analysis <span class="menu-caret">▾</span></button>' +
               '<div class="menu-panel tools-menu" id="nav-analysis-menu" hidden>' +
@@ -428,25 +413,35 @@
               '</div>' +
             '</div>' +
             '<div class="menu-wrap" id="nav-evaluate-wrap">' +
-              '<button type="button" class="menu-toggle' + ((currentId === 'assets' || currentId === 'plain-english' || currentId === 'script-v2') ? ' active' : '') + '" id="nav-evaluate-toggle" style="--nav-color:' + MENU_COLORS.evaluate + ';">⚖️ Evaluate <span class="menu-caret">▾</span></button>' +
+              '<button type="button" class="menu-toggle' + ((currentId === 'confidence_check' || currentId === 'plain-english' || currentId === 'script-review') ? ' active' : '') + '" id="nav-evaluate-toggle" style="--nav-color:' + MENU_COLORS.evaluate + ';">⚖️ Evaluate <span class="menu-caret">▾</span></button>' +
               '<div class="menu-panel tools-menu" id="nav-evaluate-menu" hidden>' +
-                '<a class="tools-item' + (currentId === 'assets' ? ' active' : '') + '" href="assets.html">' +
-                  '<span class="ti-label">🗂️ Assets</span>' +
-                  '<span class="ti-desc">Review & evaluate production assets</span>' +
+                '<a class="tools-item' + (currentId === 'confidence_check' ? ' active' : '') + '" href="confidence_check.html">' +
+                  '<span class="ti-label">📈 Confidence Check</span>' +
+                  '<span class="ti-desc">Live confidence score for the project — updates as you work</span>' +
                 '</a>' +
                 '<a class="tools-item' + (currentId === 'plain-english' ? ' active' : '') + '" href="plain-english.html">' +
                   '<span class="ti-label">🗣️ Plain English Review</span>' +
                   '<span class="ti-desc">Before/after: script jargon vs. layman\'s terms</span>' +
                 '</a>' +
-                '<a class="tools-item' + (currentId === 'script-v2' ? ' active' : '') + '" href="script-v2.html">' +
-                  '<span class="ti-label">📝 Script v2</span>' +
+                '<a class="tools-item' + (currentId === 'script-review' ? ' active' : '') + '" href="script-review.html">' +
+                  '<span class="ti-label">📝 Script Review</span>' +
                   '<span class="ti-desc">Full-argument rewrite: all 22 arguments, cherry-picked</span>' +
                 '</a>' +
               '</div>' +
             '</div>' +
             '<div class="menu-wrap" id="nav-create-wrap">' +
-              '<button type="button" class="menu-toggle' + (tasksActive ? ' active' : '') + '" id="nav-create-toggle" style="--nav-color:' + MENU_COLORS.create + ';">✨ Create <span class="menu-caret">▾</span></button>' +
+              '<button type="button" class="menu-toggle' + (createActive ? ' active' : '') + '" id="nav-create-toggle" style="--nav-color:' + MENU_COLORS.create + ';">✨ Create <span class="menu-caret">▾</span></button>' +
               '<div class="menu-panel tools-menu" id="nav-create-menu" hidden>' +
+                '<a class="tools-item' + (currentId === 'journal' ? ' active' : '') + '" href="journal.html">' +
+                  '<span class="ti-label">📓 Journal</span>' +
+                '</a>' +
+                '<a class="tools-item' + (currentId === 'retro' ? ' active' : '') + '" href="retro.html">' +
+                  '<span class="ti-label">🔁 Retro</span>' +
+                '</a>' +
+                '<a class="tools-item' + (currentId === 'maturity' ? ' active' : '') + '" href="maturity.html">' +
+                  '<span class="ti-label">🌱 Maturity</span>' +
+                  '<span class="ti-desc">What we\'ve learned from old projects</span>' +
+                '</a>' +
                 '<a class="tools-item" href="todo.html?newTask=1">' +
                   '<span class="ti-label">➕ Create Task</span>' +
                   '<span class="ti-desc">Quick-add a task to the Production Plan</span>' +
@@ -491,7 +486,6 @@
 
     wireDropdown('nav-remember-toggle', 'nav-remember-menu', 'nav-remember-wrap');
     wireDropdown('nav-understand-toggle', 'nav-understand-menu', 'nav-understand-wrap');
-    wireDropdown('nav-loop-toggle', 'nav-loop-menu', 'nav-loop-wrap');
     wireDropdown('nav-analysis-toggle', 'nav-analysis-menu', 'nav-analysis-wrap');
     wireDropdown('nav-evaluate-toggle', 'nav-evaluate-menu', 'nav-evaluate-wrap');
     wireDropdown('nav-create-toggle', 'nav-create-menu', 'nav-create-wrap');
@@ -505,7 +499,6 @@
     { id: 'script', count: 7, done: 5, prog: 1 },
     { id: 'design', count: 6, done: 6, prog: 0 },
     { id: 'previsualisation', count: 5, done: 5, prog: 0 },
-    { id: 'assets', count: 7, done: 3, prog: 1 },
     { id: 'voice', count: 5, done: 0, prog: 0 },
     { id: 'footage', count: 4, done: 0, prog: 0 },
     { id: 'edit', count: 5, done: 0, prog: 0 },
@@ -575,18 +568,6 @@
         { title: 'Image-gen prompts written', status: 'done' },
         { title: '"Plain English" explainer per panel', status: 'done' },
         { title: 'VO line paired to each panel', status: 'done' }
-      ]
-    },
-    {
-      id: 'assets', emoji: '🗂️', name: 'Assets', status: 'progress', wipLimit: 1,
-      tasks: [
-        { title: 'B-roll categories mapped', status: 'done' },
-        { title: 'YouTube search terms', status: 'done' },
-        { title: 'Save-to-assets + Azure upload', status: 'done' },
-        { title: 'Generate visual assets with Google Flow', status: 'todo' },
-        { title: 'Generate asset creation tasks with order sorting', status: 'todo' },
-        { title: 'Source/license actual footage', status: 'todo' },
-        { title: 'Sort & finalize by expected time-code', status: 'progress' }
       ]
     },
     {

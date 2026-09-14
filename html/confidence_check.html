@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  // Canonical host is Cloudflare Workers; GitHub Pages forwards visitors with repo subpath cleaned.
+  if(location.hostname.endsWith('github.io')){
+    var cleanPath = location.pathname.replace(/^\/sep-3-agentic-coding/, '').replace(/^\/[^/]+(?=\/html\/)/, '');
+    if(!cleanPath.startsWith('/')) cleanPath = '/' + cleanPath;
+    location.replace('https://sep-3-agentic-coding.polished-boat-17b2.workers.dev' + cleanPath + location.search + location.hash);
+  }
+</script>
+<title>📈 Confidence Check — Task Decomposition</title>
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+  header{ padding:48px 24px 24px; max-width:800px; margin:0 auto; text-align:center; }
+  header .eyebrow{ color:var(--accent); letter-spacing:.14em; text-transform:uppercase; font-size:12px; font-weight:600; }
+  header h1{ font-size:clamp(24px,4vw,38px); margin:10px 0 12px; font-weight:700; }
+  header p.sub{ color:var(--text-dim); max-width:640px; margin:0 auto; font-size:15px; line-height:1.6; }
+
+  main{ max-width:700px; margin:0 auto; padding:0 24px 90px; }
+
+  .cc-card{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:14px;
+    padding:32px 28px;
+    text-align:center;
+    margin-bottom:24px;
+  }
+  .cc-score{
+    font-size:clamp(48px,10vw,84px);
+    font-weight:800;
+    line-height:1;
+    background:linear-gradient(90deg, #5ab0ff, #7be08a);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .cc-rank{
+    margin-top:6px;
+    font-size:15px;
+    font-weight:700;
+    color:var(--accent);
+  }
+  .cc-counts{
+    margin-top:14px;
+    font-size:13px;
+    color:var(--text-dim);
+  }
+  .cc-counts b{ color:var(--text); }
+
+  .cc-bar-track{
+    margin-top:22px;
+    height:12px;
+    border-radius:20px;
+    background:#171a24;
+    border:1px solid rgba(255,255,255,.1);
+    overflow:hidden;
+    display:flex;
+  }
+  .cc-bar-done{
+    height:100%;
+    background:linear-gradient(90deg, #5ab0ff 0%, #7be08a 100%);
+    box-shadow:0 0 10px rgba(123,224,138,.5);
+    transition:width .4s ease;
+  }
+  .cc-bar-prog{
+    height:100%;
+    background:var(--accent);
+    box-shadow:0 0 10px rgba(232,185,74,.5);
+    transition:width .4s ease;
+  }
+
+  .cc-section{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:14px;
+    padding:22px 24px;
+  }
+  .cc-section h2{ margin:0 0 4px; font-size:15px; }
+  .cc-section .cc-section-sub{ color:var(--text-dim); font-size:12.5px; margin:0 0 14px; }
+
+  .cc-progress-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+  .cc-progress-list li{
+    background:rgba(232,185,74,.08);
+    border:1px solid rgba(232,185,74,.25);
+    border-radius:10px;
+    padding:10px 14px;
+    font-size:13px;
+    color:var(--text);
+  }
+  .cc-empty{ color:var(--text-dim); font-size:13px; font-style:italic; }
+
+  .cc-cta{
+    display:inline-block;
+    margin-top:18px;
+    font-size:13px;
+    color:var(--accent-2);
+    text-decoration:none;
+    font-weight:600;
+  }
+  .cc-cta:hover{ text-decoration:underline; }
+
+  footer{ text-align:center; padding:28px 24px 60px; font-size:12px; color:var(--text-dim); }
+  footer a{color:var(--accent-2);text-decoration:none;}
+  footer a:hover{text-decoration:underline;}
+</style>
+<script src="../js/video-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="../js/nav.js"></script>
+<script src="../js/theme.js"></script>
+</head>
+<body>
+
+<div id="nav-mount"></div>
+<script>Nav.render('confidence_check');</script>
+
+<header>
+  <div class="eyebrow">⚖️ Evaluate · Project Confidence</div>
+  <h1>Confidence Check</h1>
+  <p class="sub">One score for the whole project, computed from Production Plan task completion. Check this page every time you're working on the project — everything leads to this score.</p>
+</header>
+
+<main>
+  <div class="cc-card" id="cc-score-mount"></div>
+
+  <div class="cc-section">
+    <h2>⚡ In progress right now</h2>
+    <p class="cc-section-sub">A short reminder of what's actively being worked on.</p>
+    <div id="cc-inprogress-mount"></div>
+    <a class="cc-cta" href="todo.html">Update tasks →</a>
+  </div>
+</main>
+
+<footer>
+  Score is computed live from <a href="todo.html">Production Plan</a> task status — nothing here is hand-edited.
+</footer>
+
+<script>
+  function esc(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;'); }
+
+  function render(){
+    var stats = Nav.getGamifiedStats();
+
+    document.getElementById('cc-score-mount').innerHTML =
+      '<div class="cc-score">' + stats.percent + '%</div>' +
+      '<div class="cc-rank">⭐ Lvl ' + stats.level + ' · ' + stats.rank + '</div>' +
+      '<div class="cc-counts"><b>' + stats.done + '</b> done · <b>' + stats.prog + '</b> in progress · <b>' + stats.todo + '</b> to do (' + stats.total + ' total)</div>' +
+      '<div class="cc-bar-track" title="' + stats.xp + ' / ' + stats.maxXP + ' XP">' +
+        '<div class="cc-bar-done" style="width:' + stats.donePct + '%;"></div>' +
+        '<div class="cc-bar-prog" style="width:' + stats.progPct + '%;"></div>' +
+      '</div>';
+
+    var mount = document.getElementById('cc-inprogress-mount');
+    if(!stats.inProgressTasks.length){
+      mount.innerHTML = '<p class="cc-empty">Nothing marked in progress right now.</p>';
+    } else {
+      mount.innerHTML = '<ul class="cc-progress-list">' +
+        stats.inProgressTasks.map(function(t){ return '<li>' + esc(t.title) + '</li>'; }).join('') +
+      '</ul>';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', render);
+</script>
+
+</body>
+</html>

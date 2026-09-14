@@ -284,19 +284,6 @@
   footer a{color:var(--accent-2);text-decoration:none;}
   footer a:hover{text-decoration:underline;}
 
-  .add-asset-btn{
-    font-size:11px;
-    padding:4px 10px;
-    border-radius:20px;
-    border:1px solid var(--panel-border);
-    background:transparent;
-    color:var(--text-dim);
-    cursor:pointer;
-    transition:border-color .15s ease,color .15s ease,background .15s ease;
-    white-space:nowrap;
-  }
-  .add-asset-btn:hover{border-color:var(--accent-2);color:var(--text);}
-  .add-asset-btn.added{border-color:var(--warm);color:var(--warm);background:rgba(232,185,74,.08);}
 </style>
 <script src="../js/video-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -324,6 +311,7 @@
   <section class="block">
     <h2>🎬 Three-Act Structure</h2>
     <p class="sub" style="margin:-10px 0 16px;text-align:left;max-width:none;">The script's five beats collapse into a classic three-act shape — this is the structure design and pacing decisions should key off, not the individual sections.</p>
+    <p class="sub" style="margin:0 0 16px;text-align:left;max-width:none;font-size:13px;">📚 A quick note on why: YouTube videos like this one follow a three-act structure — setup, confrontation, resolution — which is what the breakdown below shows. Course videos, by contrast, follow a "Tell → Show → Do → Apply" structure instead: tell the concept, show an example, have the learner do it, then apply it to their own work. Different content types call for different structures, and since this project's deliverable is a YouTube video, it gets the three-act breakdown.</p>
     <div class="acts" id="acts-mount"></div>
   </section>
 
@@ -352,7 +340,7 @@
   <section class="block">
     <h2>✨ Motion Graphic Specs</h2>
     <table class="spec-table">
-      <tr><th>Graphic</th><th>Style</th><th>Section</th><th></th></tr>
+      <tr><th>Graphic</th><th>Style</th><th>Section</th></tr>
       <tbody id="motion-specs-mount"></tbody>
     </table>
   </section>
@@ -370,11 +358,10 @@
 </main>
 
 <footer>
-  🎨 Design guide for <a href="https://github.com/rifaterdemsahin/sep-3-agentic-coding" target="_blank" rel="noopener">rifaterdemsahin/sep-3-agentic-coding</a> — see the <a href="previsualisation.html">previsualisation</a> for how this applies shot-by-shot. See everything you've saved in 🗂️ <a href="assets.html">Assets</a>.
+  🎨 Design guide for <a href="https://github.com/rifaterdemsahin/sep-3-agentic-coding" target="_blank" rel="noopener">rifaterdemsahin/sep-3-agentic-coding</a> — see the <a href="previsualisation.html">previsualisation</a> for how this applies shot-by-shot.
 </footer>
 
 <script src="../js/pipeline.js"></script>
-<script src="../js/assets.js"></script>
 <script src="../js/links.js"></script>
 <script>
   Pipeline.render('design');
@@ -422,10 +409,9 @@
     document.getElementById('motion-specs-mount').innerHTML = specs.map(function(b){
       var d = b.data;
       return '<tr>' +
-        '<td>' + d.graphic + '</td>' +
+        '<td>' + d.graphic + '<span class="linker-anchor" data-id="' + b.id + '" hidden></span></td>' +
         '<td class="dim">' + d.style + '</td>' +
         '<td class="dim">' + d.section + '</td>' +
-        '<td><button class="add-asset-btn" data-id="' + b.id + '" data-type="spec" data-source="Design" data-title="' + escAttr(d.addTitle) + '" data-desc="' + escAttr(d.addDesc) + '">➕ Add to Assets</button></td>' +
       '</tr>';
     }).join('');
 
@@ -439,9 +425,8 @@
     }
   }
 
-  Promise.all([ContentDB.ready, AssetDB.ready]).then(function(){
+  ContentDB.ready.then(function(){
     renderDesignContent();
-    AssetDB.initAddButtons();
   });
 
   (function(){

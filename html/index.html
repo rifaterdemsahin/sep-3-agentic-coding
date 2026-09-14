@@ -88,21 +88,18 @@
   .link-card .title:hover{text-decoration:underline;}
   .link-card .url{font-size:11.5px;color:var(--text-dim);word-break:break-all;}
 
-  .add-asset-btn{
-    align-self:flex-start;
-    margin-top:6px;
+  .read-toggle{
+    display:flex;
+    align-items:center;
+    gap:6px;
     font-size:11px;
-    padding:4px 10px;
-    border-radius:20px;
-    border:1px solid var(--panel-border);
-    background:transparent;
     color:var(--text-dim);
     cursor:pointer;
-    transition:border-color .15s ease,color .15s ease,background .15s ease;
-    white-space:nowrap;
+    user-select:none;
+    margin-top:2px;
   }
-  .add-asset-btn:hover{border-color:var(--accent-2);color:var(--text);}
-  .add-asset-btn.added{border-color:var(--warm);color:var(--warm);background:rgba(232,185,74,.08);}
+  .read-toggle input{cursor:pointer;}
+  .read-toggle.is-read{color:var(--accent-2);}
 
   .star-rating{display:flex;gap:2px;}
   .star-rating .star{
@@ -290,11 +287,10 @@
 </main>
 
 <footer>
-  🔍 Research notes for <a href="https://github.com/rifaterdemsahin/sep-3-agentic-coding" target="_blank" rel="noopener">rifaterdemsahin/sep-3-agentic-coding</a> — continues into the <a href="script.html">script</a>. See everything you've saved in 🗂️ <a href="assets.html">Assets</a>.
+  🔍 Research notes for <a href="https://github.com/rifaterdemsahin/sep-3-agentic-coding" target="_blank" rel="noopener">rifaterdemsahin/sep-3-agentic-coding</a> — continues into the <a href="script.html">script</a>.
 </footer>
 
 <script src="../js/pipeline.js"></script>
-<script src="../js/assets.js"></script>
 <script src="../js/ratings.js"></script>
 <script src="../js/links.js"></script>
 <script>
@@ -314,7 +310,8 @@
         '<span class="tag">' + d.tag + '</span>' +
         '<a class="title" href="' + esc(d.url) + '" target="_blank" rel="noopener">' + d.title + '</a>' +
         '<span class="url">' + d.urlDisplay + '</span>' +
-        '<button class="add-asset-btn" data-id="' + b.id + '" data-type="link" data-source="Research" data-title="' + esc(d.title) + '" data-desc="' + esc(d.desc) + '" data-url="' + esc(d.url) + '">➕ Add to Assets</button>' +
+        '<label class="read-toggle' + (d.read ? ' is-read' : '') + '"><input type="checkbox" class="read-cb" data-id="' + b.id + '"' + (d.read ? ' checked' : '') + '> ' + (d.read ? '✅ Read' : '☐ Mark as read') + '</label>' +
+        '<span class="linker-anchor" data-id="' + b.id + '" hidden></span>' +
       '</div>';
     }).join('');
 
@@ -355,7 +352,7 @@
         '</div>' +
         '<p class="intro">' + d.intro + '</p>' +
         '<div style="background:var(--panel);border:1px solid var(--panel-border);border-radius:10px;padding:20px 22px;margin-bottom:18px;">' + d.html + '</div>' +
-        '<button class="add-asset-btn" data-id="link-economist-jobs-charts" data-type="link" data-source="Research" data-title="The Economist — Hard-hat labour &amp; STEM with the flow charts" data-desc="Net AI jobs impact 2023-2026" data-url="https://www.economist.com/">➕ Add to Assets</button>';
+        '<span class="linker-anchor" data-id="link-economist-jobs-charts" hidden></span>';
     }
 
     var culture = ContentDB.getBlocks('index.html', 'culture-series-report')[0];
@@ -368,7 +365,7 @@
         '</div>' +
         '<p class="intro">' + dc.intro + '</p>' +
         '<div style="background:var(--panel);border:1px solid var(--panel-border);border-radius:10px;padding:20px 22px;margin-bottom:18px;">' + dc.html + '</div>' +
-        '<button class="add-asset-btn" data-id="link-culture-series" data-type="link" data-source="Research" data-title="Iain M. Banks — The Culture series (Musk\'s AI inspiration)" data-desc="Background on the Minds, neural lace, and autonomous ships Musk references" data-url="https://en.wikipedia.org/wiki/Culture_series">➕ Add to Assets</button>';
+        '<span class="linker-anchor" data-id="link-culture-series" hidden></span>';
     }
 
     var shotRows = ContentDB.getBlocks('index.html', 'footage-shot-list');
@@ -377,16 +374,28 @@
       return '<div class="shot-row' + (d.warm ? ' warm' : '') + '">' +
         '<div class="row-head">' +
           '<div class="sec">' + d.sec + '</div>' +
-          '<button class="add-asset-btn" data-id="' + b.id + '" data-type="footage" data-source="Research" data-title="' + esc(d.title) + '" data-desc="' + esc(d.desc) + '">➕ Add to Assets</button>' +
+          '<span class="linker-anchor" data-id="' + b.id + '" hidden></span>' +
         '</div>' +
         '<div class="items">' + d.items + '</div>' +
       '</div>';
     }).join('');
   }
 
-  Promise.all([ContentDB.ready, AssetDB.ready]).then(function(){
+  function wireReadCheckboxes(){
+    Array.prototype.forEach.call(document.querySelectorAll('.read-cb'), function(cb){
+      cb.addEventListener('change', function(){
+        var id = cb.getAttribute('data-id');
+        var label = cb.closest('.read-toggle');
+        ContentDB.updateData(id, { read: cb.checked });
+        label.classList.toggle('is-read', cb.checked);
+        label.lastChild.textContent = ' ' + (cb.checked ? '✅ Read' : '☐ Mark as read');
+      });
+    });
+  }
+
+  ContentDB.ready.then(function(){
     renderContent();
-    AssetDB.initAddButtons();
+    wireReadCheckboxes();
   }).then(function(){ return Ratings.ready; }).then(function(){
 
   var sortables = {

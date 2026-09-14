@@ -103,20 +103,6 @@
   }
   .beat-head .head-actions{display:flex;align-items:center;gap:8px;}
 
-  .add-asset-btn{
-    font-size:11px;
-    padding:4px 10px;
-    border-radius:20px;
-    border:1px solid var(--panel-border);
-    background:transparent;
-    color:var(--text-dim);
-    cursor:pointer;
-    transition:border-color .15s ease,color .15s ease,background .15s ease;
-    white-space:nowrap;
-  }
-  .add-asset-btn:hover{border-color:var(--accent-2);color:var(--text);}
-  .add-asset-btn.added{border-color:var(--warm);color:var(--warm);background:rgba(232,185,74,.08);}
-
   .visual-note{
     font-size:12.5px;
     color:var(--accent-2);
@@ -780,11 +766,10 @@
 </main>
 
 <footer>
-  📝 Script for <a href="https://github.com/rifaterdemsahin/sep-3-agentic-coding" target="_blank" rel="noopener">rifaterdemsahin/sep-3-agentic-coding</a> — see the <a href="design.html">design</a>. See everything you've saved in 🗂️ <a href="assets.html">Assets</a>.
+  📝 Script for <a href="https://github.com/rifaterdemsahin/sep-3-agentic-coding" target="_blank" rel="noopener">rifaterdemsahin/sep-3-agentic-coding</a> — see the <a href="design.html">design</a>.
 </footer>
 
 <script src="../js/pipeline.js"></script>
-<script src="../js/assets.js"></script>
 <script src="../js/links.js"></script>
 <script>
   Pipeline.render('script');
@@ -814,7 +799,7 @@
             '<button class="audio-delete-btn" onclick="deleteBeatAudio(\'' + d.sectionId + '\', \'' + escAttr(d.title.replace(/<[^>]+>/g,'')) + '\', this)" title="Delete audio from Azure &amp; local storage">🗑️</button>' +
             '<button class="copy-beat-btn" onclick="copyBeatScript(\'' + d.sectionId + '\', this)" title="Copy this section\'s script to clipboard">📋 Copy</button>' +
             '<button class="audio-download-btn" onclick="downloadBeatAudio(\'' + d.sectionId + '\', \'' + escAttr(d.title.replace(/<[^>]+>/g,'')) + '\', this)" title="Download this section\'s audio as MP3">⬇️ Audio</button>' +
-            '<button class="add-asset-btn" data-id="' + b.id + '" data-type="beat" data-source="Script" data-title="' + escAttr(d.addTitle) + '" data-desc="' + escAttr(d.addDesc) + '" data-url="script.html#' + d.sectionId + '">➕ Add to Assets</button>' +
+            '<span class="linker-anchor" data-id="' + b.id + '" hidden></span>' +
           '</div>' +
         '</div>' +
         '<div class="visual-note">🎥 Visual</div>' +
@@ -922,9 +907,8 @@
     }
   };
 
-  Promise.all([ContentDB.ready, AssetDB.ready]).then(function(){
+  ContentDB.ready.then(function(){
     renderBeats();
-    AssetDB.initAddButtons();
     ScriptReviewChecklist.init();
   });
 
