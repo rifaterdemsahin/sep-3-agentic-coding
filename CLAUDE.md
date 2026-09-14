@@ -2,6 +2,9 @@
 
 ## Project specs
 
+Goal: To do preproduction for video production to have the confidence to
+move into the video production to generate assets.
+
 - **Title:** "Task Decomposition" — a course module (not a weekly channel
   video), built on the same repo template as the channel's regular videos.
 - **Premise:** opens from *understand Task Decomposition* and *learn
@@ -22,10 +25,10 @@
   links, journal/retro rows. Kokoro TTS + Azure Blob Storage for
   voiceover audio.
 - **Pipeline model:** pre-production is nine linked stages (Unknowns →
-  Research → Arguments → Script → Design → Previsualisation → Production
-  Plan → Journal → Retro), each feeding the next; `js/pipeline.js` renders
-  the stage stepper on every page. See "Pages" below for what belongs on
-  each one.
+  Research → Arguments → Script → Design → Previsualisation → Pre
+  Production Plan → Journal → Retro), each feeding the next;
+  `js/pipeline.js` renders the stage stepper on every page. See "Pages"
+  below for what belongs on each one.
 
 This is a static HTML site (JS in `js/`, shared CSS in `css/shared.css`).
 No build step. Root `index.html` is just a redirect stub into
@@ -68,23 +71,26 @@ every page) groups pages into five menus. Each page below lives at
 - **Task Report** (`task-report.html`) — production-plan progress by stage with recommended focus.
 
 ### ⚖️ Evaluate (updates every version/iteration — re-run these each time you revise the content)
-- **Confidence Check** (`confidence_check.html`) — one live score for the whole project, computed from Production Plan task completion via `Nav.getGamifiedStats()`. Check this every time you're working on the project.
-- **Sanity Check Report** (`sanity-check.html`) — project health/logic/data-integrity checks, plus the script length & version audit (word count and estimated runtime per beat vs. the 3:00 hard cap — formerly a separate "Script v2 Sanity Check" page, now merged in here).
-- **Plain English Review** (`plain-english.html`) — before/after: script jargon vs. layman's terms.
-- **Script Review** (`script-review.html`) — full-argument rewrite pass, all 22 arguments cherry-picked. *(Referenced in nav; page not yet created.)*
+- **Confidence Check** (`confidence_check.html`) — one live score for the whole project, computed from Pre Production Plan task completion via `Nav.getGamifiedStats()`. Check this every time you're working on the project. With changes, open this page after updating it.
+- **Sanity Check Report** (`sanity-check.html`) — project health/logic/data-integrity checks, plus the script length & version audit (word count and estimated runtime per beat vs. the 3:00 hard cap — formerly a separate "Script v2 Sanity Check" page, now merged in here). With changes, open this page after updating it.
+- **Plain English Review** (`plain-english.html`) — before/after: script jargon vs. layman's terms, for the script — mention issues and fixes.
+- **Script Review** (`script-review.html`) — full-argument rewrite pass, all arguments cherry-picked. *(Referenced in nav; page not yet created.)* Make sure the objectives and results are reached and there is value for the audience.
 
 ### ✨ Create
 - **Journal** (`journal.html`) — dated decision log for this project.
-- **Retro** (`retro.html`) — this project's own retrospective: hypothesis verdict and what to change next time.
+- **Retro** (`retro.html`) — this project's — or a previous project's — own retrospective: hypothesis verdict and what to change next time.
 - **Maturity** (`maturity.html`) — cross-project institutional learning: lessons pulled from *past* projects on this channel (distinct from Retro, which is this project's own). Currently placeholder lesson cards.
-- **Production Plan** (`todo.html`) — the full task board (also surfaced as "✅ Tasks"), source of the XP/level numbers shown in the nav bar.
+- **Pre Production Plan** (`todo.html`) — the full task board (also surfaced as "✅ Tasks"), source of the XP/level numbers shown in the nav bar.
 - Plus quick links to Canva, YouTube Studio, and grouped external tools (deployment, data/storage, production, research, community).
 
 **Analysis vs. Evaluate:** Analysis pages are static reporting/reference —
 they describe the state of *this* video and don't need re-checking on
 every edit. Evaluate pages are the working loop — re-run them every time
 you touch the project; Confidence Check in particular is meant to be the
-single number you check on every pass.
+single number you check on every pass. When a change touches Evaluate
+data (task status, script, sanity checks), open the affected Evaluate
+page(s) in Chrome after applying the change so the updated score/report
+is visible immediately.
 
 ## Single-branch rule
 

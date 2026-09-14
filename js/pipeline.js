@@ -54,7 +54,7 @@
     {
       id: 'todo',
       emoji: '✅',
-      label: 'Production Plan',
+      label: 'Pre Production Plan',
       file: 'todo.html',
       tagline: 'Kanban board through to publish',
       feeds: 'Feeds the Journal: decisions made while executing tasks get logged.'

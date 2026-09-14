@@ -4,7 +4,7 @@
   var STAGE_LABELS = {
     'unknowns.html': '❓ Unknowns', 'index.html': '🔍 Research', 'arguments.html': '🧩 Arguments',
     'script.html': '📝 Script', 'design.html': '🎨 Design', 'previsualisation.html': '🎞️ Previsualisation',
-    'todo.html': '✅ Production Plan'
+    'todo.html': '✅ Pre Production Plan'
   };
 
   function renderDecisions(){

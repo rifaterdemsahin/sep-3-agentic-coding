@@ -21,7 +21,7 @@
   };
 
   // Single-hue ramp (light -> dark) across the menu in this order, so each
-  // stage gets a distinct but related color. 'todo' (Production Plan) is
+  // stage gets a distinct but related color. 'todo' (Pre Production Plan) is
   // surfaced separately as "✅ Tasks" inside the Tools menu, not in Pipeline.
   var PAGES = [
     { id: 'unknowns',         emoji: '❓', label: 'Unknowns',         file: 'unknowns.html',         color: '#ffd479' },
@@ -30,7 +30,7 @@
     { id: 'script',           emoji: '📝', label: 'Script',           file: 'script.html',           color: '#5ab0ff' },
     { id: 'design',           emoji: '🎨', label: 'Design',           file: 'design.html',           color: '#3f8fe0' },
     { id: 'previsualisation', emoji: '🎞️', label: 'Previsualisation', file: 'previsualisation.html', color: '#2c6bb0' },
-    { id: 'todo',             emoji: '✅', label: 'Production Plan',  file: 'todo.html',             color: '#7be08a' },
+    { id: 'todo',             emoji: '✅', label: 'Pre Production Plan',  file: 'todo.html',             color: '#7be08a' },
     { id: 'journal',          emoji: '📓', label: 'Journal',          file: 'journal.html',          color: '#c9f2a0' },
     { id: 'retro',            emoji: '🔁', label: 'Retro',            file: 'retro.html',            color: '#a0f2d0' }
   ];
@@ -440,7 +440,7 @@
                 '</a>' +
                 '<a class="tools-item" href="todo.html?newTask=1">' +
                   '<span class="ti-label">➕ Create Task</span>' +
-                  '<span class="ti-desc">Quick-add a task to the Production Plan</span>' +
+                  '<span class="ti-desc">Quick-add a task to the Pre Production Plan</span>' +
                 '</a>' +
                 '<a class="tools-item" href="https://www.canva.com/design/DAHTV1XbvSs/uyMkcD8cZwdHn03nhVnC_w/edit" target="_blank" rel="noopener">' +
                   '<span class="ti-label">🎨 Canva Workshop</span>' +
@@ -784,7 +784,7 @@
           '<div style="display:flex; flex-direction: column; gap: 8px;">' +
             '<button id="btn-done" style="background: #7be08a; color: #13161f; border:none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer;">✅ Mark as Done</button>' +
             '<button id="btn-todo" style="background: transparent; color: var(--text, #fff); border: 1px solid var(--panel-border, #232838); padding: 10px; border-radius: 6px; cursor: pointer;">↩️ Revert to To-Do</button>' +
-            '<button id="btn-go" style="background: transparent; color: var(--accent-2, #5ab0ff); border: 1px solid var(--panel-border, #232838); padding: 10px; border-radius: 6px; cursor: pointer;">📋 Open in Production Plan</button>' +
+            '<button id="btn-go" style="background: transparent; color: var(--accent-2, #5ab0ff); border: 1px solid var(--panel-border, #232838); padding: 10px; border-radius: 6px; cursor: pointer;">📋 Open in Pre Production Plan</button>' +
             '<button id="btn-cancel" style="background: transparent; color: var(--text-dim, #ccc); border: none; padding: 10px; margin-top: 8px; cursor: pointer;">Cancel</button>' +
           '</div></div>';
         
