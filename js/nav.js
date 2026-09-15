@@ -358,7 +358,7 @@
     }).join('');
 
     var tasksActive = currentId === 'todo';
-    var createActive = currentId === 'todo' || currentId === 'journal' || currentId === 'retro' || currentId === 'maturity';
+    var createActive = currentId === 'todo' || currentId === 'journal' || currentId === 'retro';
     var tasksGroup =
       '<details class="tools-group" open>' +
         '<summary class="tools-group-label">✅ Tasks</summary>' +
@@ -405,8 +405,12 @@
               '</div>' +
             '</div>' +
             '<div class="menu-wrap" id="nav-evaluate-wrap">' +
-              '<button type="button" class="menu-toggle' + ((currentId === 'confidence_check' || currentId === 'plain-english' || currentId === 'script-review' || currentId === 'sanity-check' || currentId === 'value-recognition') ? ' active' : '') + '" id="nav-evaluate-toggle" style="--nav-color:' + MENU_COLORS.evaluate + ';">⚖️ Evaluate <span class="menu-caret">▾</span></button>' +
+              '<button type="button" class="menu-toggle' + ((currentId === 'confidence_check' || currentId === 'plain-english' || currentId === 'script-review' || currentId === 'sanity-check' || currentId === 'value-recognition' || currentId === 'maturity') ? ' active' : '') + '" id="nav-evaluate-toggle" style="--nav-color:' + MENU_COLORS.evaluate + ';">⚖️ Evaluate <span class="menu-caret">▾</span></button>' +
               '<div class="menu-panel tools-menu" id="nav-evaluate-menu" hidden>' +
+                '<a class="tools-item' + (currentId === 'maturity' ? ' active' : '') + '" href="maturity.html">' +
+                  '<span class="ti-label">🌱 Maturity</span>' +
+                  '<span class="ti-desc">What we\'ve learned from old projects</span>' +
+                '</a>' +
                 '<a class="tools-item' + (currentId === 'confidence_check' ? ' active' : '') + '" href="confidence_check.html">' +
                   '<span class="ti-label">📈 Confidence Check</span>' +
                   '<span class="ti-desc">Live confidence score for the project — updates as you work</span>' +
@@ -437,10 +441,6 @@
                 '</a>' +
                 '<a class="tools-item' + (currentId === 'retro' ? ' active' : '') + '" href="retro.html">' +
                   '<span class="ti-label">🔁 Retro</span>' +
-                '</a>' +
-                '<a class="tools-item' + (currentId === 'maturity' ? ' active' : '') + '" href="maturity.html">' +
-                  '<span class="ti-label">🌱 Maturity</span>' +
-                  '<span class="ti-desc">What we\'ve learned from old projects</span>' +
                 '</a>' +
                 '<a class="tools-item" href="todo.html?newTask=1">' +
                   '<span class="ti-label">➕ Create Task</span>' +

@@ -690,82 +690,79 @@
 // ---------------------------------------------------------------------
 var PRODUCTION_PLAN = [
   {
-    id: 'research', emoji: '🔍', name: 'Research', status: 'done',
+    id: 'unknowns', emoji: '❓', name: 'Unknowns', status: 'progress', wipLimit: 1,
     tasks: [
-      { title: 'Collect source links (pro/con)', status: 'done' },
-      { title: 'Pro/con video comparison table', status: 'done' },
-      { title: 'Perspective comparison (Apocalypse vs. Permutation vs. Skeptic)', status: 'done' },
-      { title: 'Economist AI jobs-impact charts (hard-hat labour & STEM)', status: 'done' },
-      { title: 'Transcript pulled for key counter-source ("The REAL Reason…")', status: 'done' },
-      { title: 'Mark research-verified findings on premise-supporting sources', status: 'done', note: 'Latest pass tags cmp-real-reason and the Economist report as "Research Verified".' }
+      { title: 'Answer Q1: current belief about task decomposition', status: 'todo', note: 'Placeholder question-card seeded — needs a real prior belief + falsifier.' },
+      { title: 'Answer Q2: open uncertainty about multi-step reasoning strategies', status: 'todo' },
+      { title: 'Answer Q3: how the hypothesis could be wrong', status: 'todo' },
+      { title: 'Lock snapshot once all three are answered', status: 'todo', note: 'Unlocks the pipeline to move into Research with a settled starting position.' }
     ]
   },
   {
-    id: 'arguments', emoji: '🧩', name: 'Arguments', status: 'progress', wipLimit: 1,
+    id: 'research', emoji: '🔍', name: 'Research', status: 'todo',
     tasks: [
-      { title: 'Core message', status: 'done' },
-      { title: 'Premise', status: 'done', note: 'Reworded to "Key Premise Locked" in the pending diff.' },
-      { title: 'Audience transformation (before/after)', status: 'done', note: 'New section added in the uncommitted diff — not yet pushed.' },
-      { title: '20 argument cards (including Moravec\'s Paradox, Money Velocity, Stripe Indicator, Africa Leapfrog, and Steelman Rebuttal)', status: 'done', note: 'Expanded to 20 comprehensive argument cards spanning historical proof, micro-business velocity, sensorimotor moats, and global TAM expansion.' },
-      { title: 'Argument 16 added: Moravec\'s Paradox & physical dexterity moat', status: 'done', note: 'Added Argument 16: Abstract cognition is easy for AI, but messy physical dexterity is hard for robotics.' },
-      { title: 'Argument 17 added: Velocity of money (M × V = P × Y) & micro-business boom', status: 'done', note: 'Added Argument 17 showing how zero startup friction turns workers into micro-business units, accelerating money circulation.' },
-      { title: 'Argument 18 added: The Stripe Indicator ($1.9T payment proof)', status: 'done', note: 'Added Argument 18 using Stripe\'s $1.9T volume and 57% non-US cohort growth to prove micro-commerce explosion.' },
-      { title: 'Argument 19 added: Digital Leapfrog in emerging markets (satellite + mobile AI)', status: 'done', note: 'Added Argument 19 showing how Africa and emerging regions skip 30 years of IT friction to unlock 2B+ new economic actors.' },
-      { title: 'Argument 20 added: Steelman Rebuttal & Long-Tail Economics', status: 'done', note: 'Added Argument 20 answering speed gaps, winner-take-most, substitute labor, and capital distribution.' },
-      { title: 'Conclusion', status: 'done' },
-      { title: '7 Sanity-check cards', status: 'done', note: '7 stress-tests fully validated including Moravec\'s Paradox and Money Velocity.' },
-      { title: 'Commit + push wording refresh', status: 'progress', note: 'html/arguments.html and seed-content.js currently modified but uncommitted.' }
+      { title: 'Add reverse-engineer source (video/article this module is modeled on)', status: 'todo' },
+      { title: 'Add pro/con reference video comparison', status: 'todo' },
+      { title: 'Fill perspective comparison table', status: 'todo' },
+      { title: 'Build footage/B-roll shot-list search terms', status: 'todo' }
     ]
   },
   {
-    id: 'script', emoji: '📝', name: 'Script', status: 'progress', wipLimit: 1,
+    id: 'arguments', emoji: '🧩', name: 'Arguments', status: 'todo',
     tasks: [
-      { title: 'Hook (0:00–0:30)', status: 'done', note: 'VO tightened in the pending diff ("sharp 30s open").' },
-      { title: 'Section 1 — Productivity Fallacy & Historical Proof (0:30–1:45)', status: 'done' },
-      { title: 'Section 2 — Infinite Permutation Principle (1:45–2:45)', status: 'done' },
-      { title: 'Section 3 — Education Democratization, Math & Human Insight (2:45–3:45)', status: 'done' },
-      { title: 'Conclusion & Outro (3:45–4:30)', status: 'done' },
-      { title: 'Convert script into layman\'s terms (plain English review)', status: 'done', note: 'Every beat rewritten before/after and published to ⚖️ Evaluate → 🗣️ Plain English Review (plain-english.html). Reference: https://www.youtube.com/watch?v=zU_H8mcFqpQ ("What Does ‘Layman’s Terms’ Mean?").' },
-      { title: 'Commit + push beat-timing refresh', status: 'progress', note: 'html/script.html and seed-content.js currently modified but uncommitted.' }
+      { title: 'Write core message', status: 'todo' },
+      { title: 'Write premise', status: 'todo' },
+      { title: 'Define audience before/after transformation', status: 'todo' },
+      { title: 'Write argument card(s) supporting the core message', status: 'todo' },
+      { title: 'Write conclusion', status: 'todo' },
+      { title: 'Write sanity-check card', status: 'todo' }
     ]
   },
   {
-    id: 'design', emoji: '🎨', name: 'Design', status: 'done',
+    id: 'script', emoji: '📝', name: 'Script', status: 'todo',
     tasks: [
-      { title: 'Three-act structure', status: 'done' },
-      { title: 'Core editing rule (cold → warm contrast)', status: 'done' },
-      { title: 'Palette & theme tokens', status: 'done' },
-      { title: 'Typography samples', status: 'done' },
-      { title: 'Motion specs table', status: 'done' },
-      { title: 'Pacing bar across the timeline', status: 'done' }
+      { title: 'Hook beat VO (0:00–0:20) — opens from understand Task Decomposition + learn Multi-Step Reasoning Strategies', status: 'todo' },
+      { title: 'Core explanation beat VO (0:20–2:10)', status: 'todo' },
+      { title: 'Close/outro beat VO (2:10–3:00) — points to "use in real life in a meaningful manner"', status: 'todo' },
+      { title: 'Confirm total stays under the 3:00 hard cap (~450 words)', status: 'todo', note: 'Checked on ⚖️ Evaluate → Sanity Check Report.' },
+      { title: 'Plain-English pass on the script', status: 'todo' }
     ]
   },
   {
-    id: 'previsualisation', emoji: '🎞️', name: 'Previsualisation', status: 'done',
+    id: 'design', emoji: '🎨', name: 'Design', status: 'todo',
     tasks: [
-      { title: 'Shot board: 9 panels boarded (Hook → Outro)', status: 'done' },
-      { title: 'Panel images generated for all 9 shots', status: 'done' },
-      { title: 'Image-gen prompts written per panel', status: 'done' },
-      { title: '"Plain English" explainer per panel', status: 'done' },
-      { title: 'VO line paired to each panel', status: 'done' }
+      { title: 'Three-act structure (Setup / Confrontation / Resolution) mapped to script beats', status: 'todo' },
+      { title: 'Cold → warm editing rule pair', status: 'todo' },
+      { title: 'Typography samples', status: 'todo' },
+      { title: 'Motion-graphics spec row(s)', status: 'todo' },
+      { title: 'Pacing bar across the 3:00 timeline', status: 'todo' }
+    ]
+  },
+  {
+    id: 'previsualisation', emoji: '🎞️', name: 'Previsualisation', status: 'todo',
+    tasks: [
+      { title: 'Write plain-English shot-board intro', status: 'todo' },
+      { title: 'Board and describe all 9 shot panels (title, desc, VO line, layman gloss)', status: 'todo' },
+      { title: 'Write image-gen prompt per panel', status: 'todo' },
+      { title: 'Generate panel images for all 9 shots', status: 'todo' }
     ]
   },
   {
     id: 'voice', emoji: '🎙️', name: 'Voice Recording', status: 'todo',
     tasks: [
-      { title: 'Record/generate VO for Hook beat', status: 'todo' },
-      { title: 'Record/generate VO for Section 1–3 beats', status: 'todo' },
-      { title: 'Record/generate VO for Outro + Skool CTA', status: 'todo' },
-      { title: 'Cache generated audio (ElevenLabs)', status: 'todo', note: 'Site already has audio-caching plumbing from commit 277b93b — needs real takes.' },
+      { title: 'Generate VO for the Hook beat', status: 'todo' },
+      { title: 'Generate VO for the Core Explanation beat', status: 'todo' },
+      { title: 'Generate VO for the Close/Outro beat', status: 'todo' },
+      { title: 'Cache generated audio (Kokoro TTS → Azure Blob Storage)', status: 'todo' },
       { title: 'Time VO against each shot\'s timecode', status: 'todo' }
     ]
   },
   {
     id: 'footage', emoji: '🎥', name: 'Footage & Graphics Sourcing', status: 'todo',
     tasks: [
-      { title: 'Generate/commission motion graphics from previz prompts in Google Flow', status: 'todo', note: 'Create shot board video clips in Google Flow: https://flow.google.com/u/1/project/ec557d11-2773-4887-babb-f12b65e4b7b7/edit/88f11cfc-17da-476b-8ff3-7e8bb5790963' },
-      { title: 'Shoot or source talking-head footage (host + daughter shots)', status: 'todo' },
-      { title: 'Pull licensed news-headline montage clips', status: 'todo' },
+      { title: 'Generate motion-graphics clips from previz prompts in Google Flow', status: 'todo', note: 'Fill gaps left after the ElevenLabs/Gemini pass with Google Flow.' },
+      { title: 'Fill Canva\'s pre-built 8-second scenes with sourced footage', status: 'todo' },
+      { title: 'Source b-roll footage matching the Research shot list', status: 'todo' },
       { title: 'Verify usage rights on every sourced clip', status: 'todo' }
     ]
   },
@@ -774,8 +771,8 @@ var PRODUCTION_PLAN = [
     tasks: [
       { title: 'Assemble rough cut from the 9-panel shot board', status: 'todo' },
       { title: 'Sync VO to visuals per beat', status: 'todo' },
-      { title: 'Color grade: cold slate-blue → warm gold arc', status: 'todo' },
-      { title: 'Sound design & music bed', status: 'todo' },
+      { title: 'Color grade per the Design cold → warm arc', status: 'todo' },
+      { title: 'Sound design & music bed (Flow mix carries sound effects only)', status: 'todo' },
       { title: 'Captions/subtitles', status: 'todo' }
     ]
   },
@@ -783,9 +780,10 @@ var PRODUCTION_PLAN = [
     id: 'review', emoji: '✅', name: 'Review & QA', status: 'todo',
     tasks: [
       { title: 'Fact-check every on-screen claim against Research sources', status: 'todo' },
-      { title: 'Walk the 3 sanity-check items against the final cut', status: 'todo' },
-      { title: 'Layman\'s terms & clarity review pass (convert jargon to everyday language)', status: 'todo', note: 'Verify script and on-screen copy are easily understood by non-technical viewers using plain language. Reference: https://www.youtube.com/watch?v=zU_H8mcFqpQ' },
-      { title: 'Full watch-through pass for pacing vs. the pacing bar', status: 'todo' },
+      { title: 'Walk the sanity-check items against the final cut', status: 'todo' },
+      { title: 'Re-run Confidence Check — score reflects design + delivery competence with the preprod materials', status: 'todo' },
+      { title: 'Plain-English & clarity review pass', status: 'todo' },
+      { title: 'Full watch-through pass for pacing vs. the 3:00 cap', status: 'todo' },
       { title: 'Accessibility pass (captions, contrast)', status: 'todo' }
     ]
   },
@@ -794,13 +792,10 @@ var PRODUCTION_PLAN = [
     tasks: [
       { title: 'Final render/export', status: 'todo' },
       { title: 'Title, description, thumbnail', status: 'todo' },
-      { title: 'Upload to YouTube', status: 'todo' },
-      { title: 'Skool community CTA cross-link', status: 'todo' },
+      { title: 'Upload to platform', status: 'todo' },
       { title: 'Redeploy site (wrangler deploy) with any last content edits', status: 'todo' },
-      { title: 'Convert table structure to generic multi-video architecture (add videos table & link tables)', status: 'todo', note: 'Migrate Supabase schema to support multiple videos: add a `videos` table (id, title, description, slug, status, created_at) and link content_blocks, assets, notes, ratings, and audio_clips via video_id foreign keys. Supabase Dashboard: https://supabase.com/dashboard/project/mdsykpdkdprtmkccukle/editor/17522?schema=public' },
-      { title: 'Create project template specs to scaffold new video projects', status: 'todo', note: 'Document end-to-end project specifications, directory structure, Supabase schema blueprint, and scaffolding workflow to spin up new video production projects seamlessly. Reference: https://github.com/rifaterdemsahin/sep-3-agentic-coding/tree/main' },
-      { title: 'Post-production YouTube & multi-channel promotion (conversation trigger)', status: 'todo', note: 'Execute post-release community engagement pass on YouTube comments, pinned question prompts, and professional network threads to ignite discussion around AI job creation vs. apocalypse. Reference: https://www.linkedin.com/messaging/thread/2-ZjE5ZTE1NmItN2M4MC00ZTcxLTk5YzgtNTg1YzJjNzg4NmE5XzAxMA==/' },
-      { title: 'Review GitHub commits & extract streamlined tasks for the next video', status: 'todo', note: 'Walk the commit history since the last video shipped, pull out what actually worked vs. what caused rework, and turn that into a leaner task list for the next production cycle. Reference: https://github.com/rifaterdemsahin/sep-3-agentic-coding/commits/main' }
+      { title: 'Post-publish community engagement / promotion pass', status: 'todo' },
+      { title: 'Review commit history & extract streamlined tasks for the next module', status: 'todo' }
     ]
   }
 ];
